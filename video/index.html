@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Rumor · Servicios (vertical)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  /* Paleta oficial Rumor 2026 */
+  :root {
+    --cream: #fffcf1;
+    --blue: #003afe;
+    --blue-2: #0057ff;
+    --black: #191919;
+    --W: 1080px;
+    --H: 1920px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #000; }
+  body { display: grid; place-items: center; min-height: 100vh; overflow: hidden; }
+  body.capture { display: block; min-height: 0; }
+
+  #stage {
+    position: relative; width: var(--W); height: var(--H); overflow: hidden;
+    background: var(--black); color: var(--cream);
+    font-family: Arial, "Liberation Sans", Helvetica, sans-serif;
+    transform-origin: top left;
+  }
+  #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .layer { position: absolute; will-change: opacity, filter, transform; }
+  .glow { text-shadow: 0 0 28px rgba(255,252,241,.35), 0 2px 18px rgba(25,25,25,.25); }
+
+  /* --- Cabecera --- */
+  #logo { left: 50%; top: 250px; width: 760px; margin-left: -380px; }
+  #logo img { width: 100%; display: block; filter: drop-shadow(0 0 22px rgba(255,252,241,.35)); }
+  .tag { font-size: 30px; letter-spacing: .01em; top: 640px; }
+  #tagL { left: 90px; }
+  #tagR { right: 90px; text-align: right; }
+
+  /* --- Servicios --- */
+  #services { left: 0; right: 0; top: 760px; text-align: center; }
+  .svc { display: block; font-size: 92px; line-height: 1.12; letter-spacing: -.015em; white-space: nowrap; }
+  .svc sup { font-size: 30px; font-style: normal; font-weight: 400; vertical-align: 52px; margin-right: 10px; letter-spacing: 0; opacity: .85; }
+  .svc.it { font-style: italic; font-weight: 400; }
+  .svc.bd { font-weight: 700; letter-spacing: -.035em; }
+
+  /* --- Pie --- */
+  .foot { top: 1610px; font-size: 46px; letter-spacing: -.01em; }
+  .foot sup { font-size: 24px; vertical-align: 22px; }
+  #footL { left: 90px; }
+  #footR { right: 90px; text-align: right; }
+  #pill {
+    left: 50%; top: 1700px; transform: translateX(-50%);
+    background: var(--cream); color: var(--blue); border-radius: 40px;
+    font-size: 48px; font-weight: 700; padding: 22px 54px; letter-spacing: -.02em;
+    box-shadow: 0 10px 40px rgba(0,58,254,.35);
+  }
+
+  /* --- Cierre --- */
+  #endIso { left: 50%; top: 610px; width: 300px; margin-left: -150px; }
+  #endIso img { width: 100%; display: block; filter: drop-shadow(0 0 30px rgba(255,252,241,.45)); }
+  #endLine { left: 0; right: 0; top: 1060px; text-align: center; font-size: 76px; line-height: 1.1; letter-spacing: -.02em; }
+  #endLine i { font-weight: 400; }
+  #endLine b { display: block; font-weight: 700; }
+  #endSub { left: 0; right: 0; top: 1300px; text-align: center; font-size: 34px; opacity: .9; }
+  #endLogo { left: 50%; top: 1600px; width: 360px; margin-left: -180px; }
+  #endLogo img { width: 100%; display: block; }
+
+  #hud { position: fixed; left: 12px; bottom: 10px; color: #aaa; font: 12px monospace; }
+  body.capture #hud { display: none; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="bg" width="1080" height="1920"></canvas>
+  <canvas id="ribbon" width="1080" height="1920"></canvas>
+
+  <div id="logo" class="layer"><img src="assets/logotipo-agencia-blanco.svg" alt="rumor agencia"></div>
+  <div id="tagL" class="layer tag glow">Not just</div>
+  <div id="tagR" class="layer tag glow">an agency</div>
+
+  <div id="services" class="layer glow">
+    <span class="svc it"><sup>01</sup>Paid Media</span>
+    <span class="svc bd"><sup>02</sup>Web</span>
+    <span class="svc it"><sup>03</sup>Diseño &amp; Social Media</span>
+    <span class="svc bd"><sup>04</sup>Consultoría de negocio</span>
+    <span class="svc it"><sup>05</sup>Estrategia de marca</span>
+  </div>
+
+  <div id="footL" class="layer foot glow">From noise</div>
+  <div id="footR" class="layer foot glow">to structure</div>
+  <div id="pill" class="layer">Hablemos</div>
+
+  <div id="endIso" class="layer"><img src="assets/isotipo-blanco.svg" alt="R"></div>
+  <div id="endLine" class="layer glow"><i>No vendemos servicios sueltos.</i><b>Vendemos un sistema.</b></div>
+  <div id="endSub" class="layer glow">Cada pieza tiene un lugar.</div>
+  <div id="endLogo" class="layer"><img src="assets/logotipo-agencia-blanco.svg" alt="rumor agencia"></div>
+</div>
+<div id="hud"></div>
+
+<script>
+const DURATION = 15;            // segundos
+const W = 1080, H = 1920;
+
+/* ============ Fondo: difuminado vivo (WebGL) ============ */
+const gl = document.getElementById('bg').getContext('webgl', { preserveDrawingBuffer: true, antialias: false });
+const VS = `attribute vec2 p; void main(){ gl_Position = vec4(p,0.,1.); }`;
+const FS = `
+precision highp float;
+uniform vec2 res; uniform float t;
+vec3 hex(float r,float g,float b){ return vec3(r,g,b)/255.; }
+float h(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+float n(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
+  return mix(mix(h(i),h(i+vec2(1,0)),f.x), mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x), f.y); }
+float fbm(vec2 p){ float v=0., a=.5; mat2 m=mat2(1.6,1.2,-1.2,1.6);
+  for(int i=0;i<4;i++){ v+=a*n(p); p=m*p; a*=.5; } return v; }
+void main(){
+  vec2 uv = gl_FragCoord.xy/res;            // y=0 abajo
+  vec2 p = vec2(uv.x*res.x/res.y, uv.y)*1.7;
+  float s = t*.11;
+  vec2 q = vec2(fbm(p+vec2(0.,s)), fbm(p+vec2(5.2,1.3)-s*.7));
+  vec2 r = vec2(fbm(p+3.*q+vec2(1.7,9.2)+s*.9), fbm(p+3.*q+vec2(8.3,2.8)-s*.6));
+  float w = fbm(p+2.5*r);
+
+  // Eje vertical deformado: arriba niebla crema, centro humo negro, abajo azul Rumor
+  float y = uv.y + (w-.5)*.42 + .05*sin(t*.35+uv.x*3.);
+  vec3 cream = hex(255.,252.,241.);
+  vec3 mist  = hex(150.,152.,170.);   // crema velada con azul
+  vec3 black = hex(25.,25.,25.);
+  vec3 blue  = hex(0.,58.,254.);
+  vec3 blue2 = hex(0.,87.,255.);
+  vec3 deep  = hex(5.,30.,254.);
+
+  vec3 c = blue2;
+  c = mix(c, deep,  smoothstep(.05,.30,y));
+  c = mix(c, blue,  smoothstep(.22,.38,y));
+  c = mix(c, black, smoothstep(.36,.56,y));
+  c = mix(c, mist,  smoothstep(.58,.86,y));
+  c = mix(c, cream, smoothstep(.92,1.15,y)*.55);
+
+  // Manchas de luz que respiran
+  float g1 = smoothstep(.65,.0,length((uv-vec2(.25+.12*sin(t*.4),.22+.05*cos(t*.3)))*vec2(1.,1.6)));
+  float g2 = smoothstep(.55,.0,length((uv-vec2(.82+.08*cos(t*.33),.48+.07*sin(t*.27)))*vec2(1.,1.4)));
+  c = mix(c, blue2*1.15, g1*.45);
+  c = mix(c, mist*.9, g2*.28*(1.-smoothstep(.3,.6,uv.y-.2)));
+  c += (r.x-.5)*.06;                         // textura de humo
+
+  // Viñeta + grano
+  float v = smoothstep(1.25,.35,length((uv-.5)*vec2(1.1,.9)));
+  c *= mix(.72,1.,v);
+  float gr = h(gl_FragCoord.xy + fract(t*24.)*91.7) - .5;
+  c += gr*.075;
+  gl_FragColor = vec4(clamp(c,0.,1.),1.);
+}`;
+function sh(type, src){ const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s);
+  if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw gl.getShaderInfoLog(s); return s; }
+const prog = gl.createProgram();
+gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS));
+gl.linkProgram(prog); gl.useProgram(prog);
+gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+const loc = gl.getAttribLocation(prog,'p'); gl.enableVertexAttribArray(loc);
+gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+const uRes = gl.getUniformLocation(prog,'res'), uT = gl.getUniformLocation(prog,'t');
+gl.uniform2f(uRes, W, H);
+function drawBg(t){ gl.viewport(0,0,W,H); gl.uniform1f(uT,t); gl.drawArrays(gl.TRIANGLE_STRIP,0,4); }
+
+/* ============ Cinta de luz (el "garabato" de la referencia) ============ */
+const rc = document.getElementById('ribbon').getContext('2d');
+function ribbonPts(t){
+  const pts = [], N = 420;
+  for (let i=0;i<=N;i++){
+    const u = i/N, a = u*Math.PI*2*1.35 + t*.18;
+    // lazo tipo lissajous que gira lento y respira
+    const x = W*.5 + Math.sin(a*1.0 + .6)*W*.46 + Math.sin(a*2.3 + t*.4)*70;
+    const y = H*.46 + Math.sin(a*2.0 + t*.12)*H*.21 + Math.cos(a*.7)*H*.08;
+    pts.push([x,y]);
+  }
+  return pts;
+}
+function strokePath(pts, from, to){
+  rc.beginPath();
+  const a = Math.floor(from*(pts.length-1)), b = Math.floor(to*(pts.length-1));
+  for (let i=a;i<=b;i++){ const [x,y]=pts[i]; i===a?rc.moveTo(x,y):rc.lineTo(x,y); }
+  rc.stroke();
+}
+function drawRibbon(t, alpha){
+  rc.clearRect(0,0,W,H);
+  if (alpha<=0) return;
+  const pts = ribbonPts(t);
+  const draw = Math.min(1, ease(clamp01(t/2.6)));       // se dibuja al comienzo
+  const tail = 0;
+  rc.lineCap = 'round'; rc.lineJoin = 'round';
+  const grad = rc.createLinearGradient(0,H*.2,0,H*.75);
+  grad.addColorStop(0,'rgba(0,87,255,1)'); grad.addColorStop(.5,'rgba(255,252,241,1)'); grad.addColorStop(1,'rgba(0,87,255,1)');
+  rc.strokeStyle = grad;
+  rc.globalAlpha = .55*alpha; rc.lineWidth = 34; rc.filter = 'blur(26px)'; strokePath(pts, tail, draw);
+  rc.globalAlpha = .55*alpha; rc.lineWidth = 9;  rc.filter = 'blur(5px)';  strokePath(pts, tail, draw);
+  rc.globalAlpha = .45*alpha; rc.lineWidth = 2;  rc.filter = 'blur(.6px)'; strokePath(pts, tail, draw);
+  rc.filter = 'none'; rc.globalAlpha = 1;
+}
+
+/* ============ Línea de tiempo del texto ============ */
+const clamp01 = x => Math.max(0, Math.min(1, x));
+const ease = x => 1 - Math.pow(1 - x, 3);
+// entra en [a, a+d], sale en [b, b+d2]
+function env(t, a, d, b = Infinity, d2 = .7){
+  return ease(clamp01((t-a)/d)) * (1 - ease(clamp01((t-b)/d2)));
+}
+function apply(el, k, {dy = 40, blur = 18, base = ''} = {}){
+  el.style.opacity = k;
+  el.style.filter = k >= .999 ? 'none' : `blur(${(1-k)*blur}px)`;
+  el.style.transform = `${base} translateY(${(1-k)*dy}px)`;
+  el.style.visibility = k <= .001 ? 'hidden' : 'visible';
+}
+const $ = id => document.getElementById(id);
+const svcs = [...document.querySelectorAll('.svc')];
+const OUT = 9.6; // salida del bloque principal
+
+function render(t){
+  drawBg(t);
+  drawRibbon(t, 1 - .55*ease(clamp01((t-OUT)/1.2)));
+
+  apply($('logo'), env(t, .5, 1.3, OUT, .8), {dy: 30, blur: 26});
+  apply($('tagL'), env(t, 1.4, .9, OUT - .1, .7), {dy: 16});
+  apply($('tagR'), env(t, 1.55, .9, OUT - .1, .7), {dy: 16});
+
+  svcs.forEach((el, i) => {
+    const k = env(t, 2.1 + i*.55, 1.1, OUT - .4 + i*.08, .8);
+    apply(el, k, {dy: 50, blur: 22});
+    // respiración sutil de tracking mientras está en pantalla
+    el.style.letterSpacing = (el.classList.contains('bd') ? -.035 : -.015) + (1-k)*.08 + 'em';
+  });
+
+  apply($('footL'), env(t, 5.2, .9, OUT, .7), {dy: 20});
+  apply($('footR'), env(t, 5.35, .9, OUT, .7), {dy: 20});
+  apply($('pill'), env(t, 5.9, .9, OUT, .7), {dy: 24, base: 'translateX(-50%)'});
+
+  // Cierre
+  const iso = env(t, 10.3, 1.2);
+  apply($('endIso'), iso, {dy: 0, blur: 30});
+  $('endIso').style.transform = `scale(${1.25 - .25*iso})`;
+  apply($('endLine'), env(t, 11.0, 1.0), {dy: 30, blur: 20});
+  apply($('endSub'), env(t, 11.7, .9), {dy: 20});
+  apply($('endLogo'), env(t, 12.4, 1.0), {dy: 20, blur: 16});
+
+  $('hud').textContent = t.toFixed(2) + 's';
+}
+
+/* API para el render cuadro a cuadro */
+window.DURATION = DURATION;
+window.seek = t => { render(t); return true; };
+
+const capture = new URLSearchParams(location.search).has('capture');
+if (capture) {
+  document.body.classList.add('capture');
+  render(0);
+} else {
+  // Vista previa: escalar a la ventana y reproducir en loop
+  const fit = () => { const s = Math.min(innerWidth/W, innerHeight/H) * .96;
+    $('stage').style.transform = `scale(${s})`; $('stage').style.marginRight = `${W*(s-1)}px`;
+    $('stage').style.marginBottom = `${H*(s-1)}px`; };
+  addEventListener('resize', fit); fit();
+  const t0 = performance.now();
+  (function loop(){ render(((performance.now()-t0)/1000) % DURATION); requestAnimationFrame(loop); })();
+}
+</script>
+</body>
+</html>
