@@ -7,8 +7,8 @@ PORTADA = os.path.join(AQUI, "portada.png")
 SALIDA = os.path.join(AQUI, "historia.png")
 
 TITULO = "Experto en finanzas: vender más ya no basta"
-CANAL = "Finteem"
-DURACION = "Video • 1 h 5 min"
+CANAL = "TeamSystem España Educacional"
+DURACION = "Video • 46 min 32 s"
 
 S = 2  # supersampling para bordes suaves
 W, H = 1080 * S, 1920 * S
