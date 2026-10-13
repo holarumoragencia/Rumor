@@ -4,9 +4,10 @@ import os
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 PORTADA = os.path.join(AQUI, "portada.png")
+LOGO_CANAL = os.path.join(AQUI, "logo-canal.png")
 SALIDA = os.path.join(AQUI, "historia.png")
 
-TITULO = "Experto en finanzas: vender más ya no basta"
+TITULO = "Gestión financiera para startups: medir, analizar y accionar | con Ramiro Reinaudi | QuipuTalks #20"
 CANAL = "TeamSystem España Educacional"
 DURACION = "Video • 46 min 32 s"
 
@@ -28,12 +29,25 @@ tarjeta = tono(0.42, 0.34)
 img = Image.new("RGB", (W, H), fondo)
 d = ImageDraw.Draw(img)
 
-# Tarjeta
+# Título (todas las líneas que hagan falta) + canal
+av = 120 * S
 cw = 900 * S
 pad = 38 * S
+ft, fc = font("Inter-Bold.otf", 34), font("Inter-Medium.otf", 32)
+maxw = cw - 2 * pad - av - 28 * S
+lineas, actual = [], ""
+for p in TITULO.split():
+    prueba = (actual + " " + p).strip()
+    if d.textlength(prueba, font=ft) <= maxw: actual = prueba
+    else: lineas.append(actual); actual = p
+lineas.append(actual)
+alto_texto = len(lineas) * 44 * S + 42 * S
+alto_info = max(av, alto_texto)
+
+# Tarjeta
 tw = cw - 2 * pad
 th = int(tw * thumb.height / thumb.width)
-ch = pad + th + 40 * S + 120 * S + 64 * S + 46 * S + pad
+ch = pad + th + 40 * S + alto_info + 64 * S + 46 * S + pad
 cx, cy = (W - cw) // 2, (H - ch) // 2
 d.rounded_rectangle([cx, cy, cx + cw, cy + ch], radius=34 * S, fill=tarjeta)
 
@@ -43,34 +57,21 @@ m = Image.new("L", (tw, th), 0)
 ImageDraw.Draw(m).rounded_rectangle([0, 0, tw, th], radius=18 * S, fill=255)
 img.paste(t, (cx + pad, cy + pad), m)
 
-# Avatar del canal (recorte circular de la cara en la portada)
-av = 120 * S
-fx0, fy0 = int(thumb.width * 0.60), int(thumb.height * 0.02)
-side = int(thumb.height * 0.62)
-cara = thumb.crop((fx0, fy0, fx0 + side, fy0 + side)).resize((av, av), Image.LANCZOS)
+# Avatar del canal (logo circular)
+logo = Image.open(LOGO_CANAL).convert("RGB").crop((9, 9, 205, 205)).resize((av, av), Image.LANCZOS)
 ma = Image.new("L", (av, av), 0)
 ImageDraw.Draw(ma).ellipse([0, 0, av, av], fill=255)
 ay = cy + pad + th + 40 * S
-img.paste(cara, (cx + pad, ay), ma)
+img.paste(logo, (cx + pad, ay), ma)
 
-# Título (hasta 2 líneas) + canal
-ft, fc = font("Inter-Bold.otf", 34), font("Inter-Medium.otf", 32)
 tx = cx + pad + av + 28 * S
-maxw = cx + cw - pad - tx
-lineas, actual = [], ""
-for p in TITULO.split():
-    prueba = (actual + " " + p).strip()
-    if d.textlength(prueba, font=ft) <= maxw: actual = prueba
-    else: lineas.append(actual); actual = p
-lineas.append(actual)
-lineas = lineas[:2]
 y = ay - 4 * S
 for l in lineas:
     d.text((tx, y), l, font=ft, fill="white"); y += 44 * S
 d.text((tx, y + 2 * S), CANAL, font=fc, fill=(235, 235, 235))
 
 # Pie: logo YouTube + duración
-by = ay + av + 64 * S
+by = ay + alto_info + 64 * S
 lx = cx + pad
 lh, lw = 46 * S, 66 * S
 d.rounded_rectangle([lx, by, lx + lw, by + lh], radius=13 * S, fill=(255, 0, 0))
