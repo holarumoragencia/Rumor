@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rumor Agencia</title>
+<meta name="description" content="Estrategia, contenido, publicidad e IA en un solo lugar. No vendemos servicios sueltos: construimos sistemas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Unbounded:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ================= NAV ================= -->
+<header class="nav" id="nav">
+  <a href="#top" class="nav-logo" aria-label="Rumor agencia"><img src="assets/logotipo-blanco.svg" alt="rumor" class="nav-logo-img"></a>
+  <nav class="nav-links">
+    <a href="#nosotros">Nosotros</a>
+    <a href="#como">Cómo trabajamos</a>
+    <a href="#packs">Packs</a>
+    <a href="#servicios">Servicios</a>
+    <a href="#casos">Casos</a>
+  </nav>
+  <a href="#contacto" class="btn btn-sm btn-cream">Hablemos</a>
+</header>
+
+<main id="top">
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <canvas class="fx-bg" data-variant="hero"></canvas>
+  <canvas class="fx-ribbon"></canvas>
+  <div class="hero-shade"></div>
+
+  <!-- Mensajes flotantes: logros reales de Rumor (editar en script.js → HERO_MESSAGES) -->
+  <div class="chips" aria-hidden="true">
+    <div class="chip-slot s1"></div>
+    <div class="chip-slot s2"></div>
+    <div class="chip-slot s3"></div>
+    <div class="chip-slot s4"></div>
+  </div>
+
+  <div class="hero-inner wrap">
+    <p class="eyebrow rv"><span class="dot"></span> Not just an agency</p>
+    <h1 class="hero-title rv">
+      Estrategia, contenido,<br>
+      publicidad e IA<br>
+      <em>en un solo lugar.</em>
+    </h1>
+    <p class="hero-sub rv">Combinamos creatividad, performance y automatización para transformar cada acción en resultados para tu negocio.</p>
+    <div class="hero-cta rv">
+      <a href="#contacto" class="btn btn-cream">Agendar una reunión <span class="arr">→</span></a>
+      <a href="#como" class="btn btn-ghost">Cómo trabajamos</a>
+    </div>
+  </div>
+
+  <div class="hero-foot wrap">
+    <span>From noise <i>to structure</i></span>
+    <span class="scroll-hint">Scroll <i class="scroll-line"></i></span>
+  </div>
+</section>
+
+<!-- ================= MARCAS ================= -->
+<section class="brands">
+  <p class="brands-title">Trabajamos con más de 60 marcas</p>
+  <div class="marquee">
+    <div class="marquee-track">
+      <span>biconic</span><span>finteem</span><span>Casa Bien</span><span>Ebert Prop</span><span>umami</span><span>Laurkos</span><span>Gemini Travel</span><span>ML RepoSport</span>
+      <span>biconic</span><span>finteem</span><span>Casa Bien</span><span>Ebert Prop</span><span>umami</span><span>Laurkos</span><span>Gemini Travel</span><span>ML RepoSport</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= NOSOTROS (scroll secuencial) ================= -->
+<section class="about" id="nosotros">
+  <div class="about-sticky">
+    <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+    <div class="about-inner wrap">
+      <p class="eyebrow center">Quiénes somos</p>
+      <h2 class="about-title">No somos una agencia<br>de marketing <em>convencional.</em></h2>
+
+      <div class="glass-row">
+        <div class="glass" data-step="0">
+          <span class="glass-num">+3</span>
+          <span class="glass-label">años en el mercado</span>
+          <span class="glass-tag">Trayectoria</span>
+        </div>
+        <div class="glass" data-step="1">
+          <span class="glass-num">+60</span>
+          <span class="glass-label">clientes en Argentina y el exterior</span>
+          <span class="glass-tag">Alcance</span>
+        </div>
+        <div class="glass" data-step="2">
+          <span class="glass-num">82%</span>
+          <span class="glass-label">de nuestros nuevos clientes llegan por recomendación</span>
+          <span class="glass-tag">Confianza</span>
+        </div>
+      </div>
+
+      <p class="about-final">Por eso, antes de ejecutar, <b>diagnosticamos.</b> Antes de invertir en anuncios, nos aseguramos de que haya <b>un sistema sólido para recibirlos.</b></p>
+    </div>
+    <div class="about-progress"><i></i><i></i><i></i></div>
+  </div>
+</section>
+
+<!-- ================= REEL ================= -->
+<section class="reel">
+  <div class="reel-head wrap rv">
+    <p class="eyebrow">Reel 2026</p>
+    <h2 class="h2">Lo que hacemos,<br><em>en movimiento.</em></h2>
+  </div>
+  <div class="reel-frame" id="reelFrame">
+    <!-- Reemplazar assets/reel.mp4 por la recopilación de trabajos (ideal: 20–40 s, 1920×1080, <8 MB) -->
+    <video id="reelVideo" muted loop playsinline preload="metadata" poster="">
+      <source src="assets/reel.mp4" type="video/mp4">
+    </video>
+    <div class="reel-placeholder" id="reelPh">
+      <canvas class="fx-bg" data-variant="reel"></canvas>
+      <div class="reel-ph-inner">
+        <img src="assets/isotipo-blanco.svg" alt="" class="reel-iso">
+        <span>Reel de trabajos · próximamente</span>
+      </div>
+    </div>
+    <button class="reel-sound" id="reelSound" aria-label="Activar sonido">Sonido off</button>
+  </div>
+</section>
+
+<!-- ================= CÓMO TRABAJAMOS ================= -->
+<section class="how light" id="como">
+  <div class="wrap how-grid">
+    <div class="how-copy">
+      <p class="eyebrow rv">Cómo trabajamos con vos</p>
+      <h2 class="h2 rv">Del ruido<br>a la <em>estructura.</em></h2>
+      <p class="lead rv">No arrancamos por los anuncios. Arrancamos por entender tu negocio: qué vendés, a quién, con qué margen y qué está frenando el crecimiento.</p>
+      <p class="rv">Con ese diagnóstico diseñamos un sistema donde marca, web, contenido, pauta, CRM y automatizaciones trabajan bajo un mismo criterio. Después ejecutamos, medimos y ajustamos. Cada mes, con números sobre la mesa.</p>
+      <ul class="how-points rv">
+        <li><b>Un solo equipo.</b> Estrategia y ejecución en el mismo lugar.</li>
+        <li><b>Un solo tablero.</b> Métricas reales, no de vanidad.</li>
+        <li><b>Un solo objetivo.</b> El tuyo.</li>
+      </ul>
+    </div>
+
+    <!-- Animación de pasos hasta el resultado -->
+    <div class="flow rv" id="flow" aria-label="Proceso de trabajo de Rumor">
+      <div class="flow-top">
+        <span class="flow-dot"></span><span class="flow-dot"></span><span class="flow-dot"></span>
+        <span class="flow-title">rumor · sistema</span>
+        <span class="flow-status" id="flowStatus">En curso</span>
+      </div>
+      <ol class="flow-steps">
+        <li data-i="0"><span class="st-ico"></span><div><b>Diagnóstico</b><small>Marca, web, pauta, ventas y procesos</small></div><em>Semana 1</em></li>
+        <li data-i="1"><span class="st-ico"></span><div><b>Estrategia</b><small>Objetivo, público, oferta y canales</small></div><em>Semana 2</em></li>
+        <li data-i="2"><span class="st-ico"></span><div><b>Sistema</b><small>Marca + web + CRM + automatizaciones</small></div><em>Mes 1</em></li>
+        <li data-i="3"><span class="st-ico"></span><div><b>Ejecución</b><small>Contenido y paid media conectados</small></div><em>Mes 2</em></li>
+        <li data-i="4"><span class="st-ico"></span><div><b>Medición</b><small>Dashboard, aprendizajes, ajustes</small></div><em>Mensual</em></li>
+      </ol>
+      <div class="flow-result" id="flowResult">
+        <div>
+          <small>Resultado</small>
+          <b>Objetivo comercial cumplido</b>
+        </div>
+        <div class="bars"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PACKS ================= -->
+<section class="packs light" id="packs">
+  <div class="wrap packs-head">
+    <div>
+      <p class="eyebrow rv">Nuestros packs</p>
+      <h2 class="h2 rv">Tres formas de<br>trabajar <em>con nosotros.</em></h2>
+    </div>
+    <p class="lead rv">Cada pack responde a un momento distinto del negocio: construir base, sostener el crecimiento en el tiempo o activar una campaña puntual con objetivo claro.</p>
+  </div>
+
+  <div class="stack">
+    <article class="pack p-cream">
+      <div class="pack-copy">
+        <span class="pack-num">01</span>
+        <h3>Fundacional</h3>
+        <p class="pack-lead">Para negocios que necesitan construir base antes de escalar.</p>
+        <p>Marca, web y presencia digital ordenadas, listas para recibir tráfico. Un punto de partida sólido en lugar de acciones sueltas.</p>
+        <div class="pack-meta">
+          <div><small>Incluye</small>
+            <ul><li>Branding (identidad visual + naming si aplica)</li><li>Diseño web orientado a conversión</li><li>Setup de canales digitales (IG/FB, Google Business)</li><li>Estrategia inicial de contenido (pilares + tono)</li></ul>
+          </div>
+          <div><small>Formato</small><p>Producto puntual, típicamente 60 a 90 días.</p></div>
+        </div>
+      </div>
+      <div class="pack-visual v-build" aria-hidden="true">
+        <div class="brick b1">Marca</div><div class="brick b2">Web</div><div class="brick b3">Canales</div><div class="brick b4">Contenido</div>
+        <div class="base-line">Base lista para escalar</div>
+      </div>
+    </article>
+
+    <article class="pack p-blue">
+      <div class="pack-copy">
+        <span class="pack-num">02</span>
+        <h3>Estrategia 360</h3>
+        <p class="pack-lead">El sistema completo, sostenido en el tiempo.</p>
+        <p>Branding, web, contenido, paid media, CRM e IA trabajando bajo un mismo criterio. Para negocios que ya tienen base y quieren crecer con orden.</p>
+        <div class="pack-meta">
+          <div><small>Formato</small>
+            <ul><li>Servicio continuo</li><li>Fee mensual</li><li>Acompañamiento estratégico permanente</li></ul>
+          </div>
+        </div>
+      </div>
+      <div class="pack-visual v-orbit" aria-hidden="true">
+        <div class="ring r1"><span>Branding</span><span>Web</span><span>CRM</span></div>
+        <div class="ring r2"><span>Contenido</span><span>Paid media</span><span>IA</span></div>
+        <div class="core"><img src="assets/isotipo-blanco.svg" alt=""></div>
+      </div>
+    </article>
+
+    <article class="pack p-black">
+      <div class="pack-copy">
+        <span class="pack-num">03</span>
+        <h3>Acelerador</h3>
+        <p class="pack-lead">Para campañas con objetivo y plazo definidos.</p>
+        <p>Un lanzamiento, una venta estacional, un evento. Contenido, pauta y landing page de destino trabajando juntos para convertir en el tiempo que tenés.</p>
+        <div class="pack-meta">
+          <div><small>Formato</small><p>Un objetivo comercial claro, un deadline y todo enfocado ahí.</p></div>
+        </div>
+      </div>
+      <div class="pack-visual v-launch" aria-hidden="true">
+        <svg viewBox="0 0 400 260" preserveAspectRatio="none">
+          <defs><linearGradient id="lg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#0057ff" stop-opacity=".55"/><stop offset="1" stop-color="#0057ff" stop-opacity="0"/></linearGradient></defs>
+          <path class="area" d="M0,240 C60,235 100,228 150,215 C200,200 230,170 270,130 C310,90 350,50 400,20 L400,260 L0,260Z" fill="url(#lg)"/>
+          <path class="line" d="M0,240 C60,235 100,228 150,215 C200,200 230,170 270,130 C310,90 350,50 400,20" fill="none" stroke="#fffcf1" stroke-width="2.5"/>
+        </svg>
+        <div class="deadline"><small>Deadline</small><b>D-30</b></div>
+        <div class="goal"><small>Objetivo</small><b>Lanzamiento</b></div>
+      </div>
+    </article>
+  </div>
+
+  <div class="wrap packs-foot">
+    <p class="packs-claim rv">Fundacional <b>construye.</b> Estrategia 360 <b>sostiene.</b> Acelerador <b>activa.</b></p>
+    <p class="rv">¿No sabés cuál te conviene?</p>
+    <a href="#contacto" class="btn btn-blue rv">Agendá un diagnóstico gratuito <span class="arr">→</span></a>
+  </div>
+</section>
+
+<!-- ================= SERVICIOS ================= -->
+<section class="services" id="servicios">
+  <div class="wrap services-grid">
+    <div class="services-head">
+      <p class="eyebrow rv">Servicios</p>
+      <h2 class="h2 rv">No trabajamos servicios sueltos.<br><em>Trabajamos sistemas.</em></h2>
+      <p class="lead rv">Cada pieza tiene un lugar.</p>
+    </div>
+    <div class="acc" id="acc">
+      <div class="acc-item open"><button><span class="n">01</span>Branding<span class="pm"></span></button><div class="acc-body"><div><p>Identidad visual, naming y un sistema de marca coherente en cada punto de contacto. La base sobre la que se apoya todo lo demás.</p></div></div></div>
+      <div class="acc-item"><button><span class="n">02</span>Diseño web<span class="pm"></span></button><div class="acc-body"><div><p>Webs preparadas para convertir, comunicar y sostener cada etapa del crecimiento comercial. No es un portfolio, es un sistema.</p></div></div></div>
+      <div class="acc-item"><button><span class="n">03</span>Paid media<span class="pm"></span></button><div class="acc-body"><div><p>Campañas en Meta y Google con estructura, medición y optimización constante. Pauta que llega a un sistema preparado para recibirla.</p></div></div></div>
+      <div class="acc-item"><button><span class="n">04</span>Contenido para redes<span class="pm"></span></button><div class="acc-body"><div><p>Pilares, tono y calendario editorial. Piezas que construyen marca y conversación, no solo publicaciones.</p></div></div></div>
+      <div class="acc-item"><button><span class="n">05</span>Consultoría de negocio<span class="pm"></span></button><div class="acc-body"><div><p>Diagnóstico comercial, foco y prioridades. Ordenamos el negocio antes de invertir en hacerlo crecer.</p></div></div></div>
+      <div class="acc-item"><button><span class="n">06</span>Automatizaciones e IA<span class="pm"></span></button><div class="acc-body"><div><p>Flujos que ahorran horas: respuestas, seguimiento de leads, reportes y procesos internos conectados con IA.</p></div></div></div>
+      <div class="acc-item"><button><span class="n">07</span>CRM y ventas<span class="pm"></span></button><div class="acc-body"><div><p>Pipeline ordenado para que ningún lead se pierda entre el anuncio y el cierre.</p></div></div></div>
+      <div class="acc-item"><button><span class="n">08</span>LinkedIn<span class="pm"></span></button><div class="acc-body"><div><p>Marca personal y corporativa para negocios B2B: posicionamiento, contenido y generación de oportunidades.</p></div></div></div>
+      <div class="acc-item"><button><span class="n">09</span>Inbound marketing<span class="pm"></span></button><div class="acc-body"><div><p>Contenido y embudos que atraen, educan y nutren a tus futuros clientes hasta que están listos para comprar.</p></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CASOS ================= -->
+<section class="cases light" id="casos">
+  <div class="wrap packs-head">
+    <div>
+      <p class="eyebrow rv">Casos</p>
+      <h2 class="h2 rv">Lo que construimos<br>junto a <em>nuestros clientes.</em></h2>
+    </div>
+    <p class="lead rv">Trabajos reales, con números reales. Sin promesas, sin métricas de vanidad.</p>
+  </div>
+
+  <div class="wrap">
+    <article class="case rv">
+      <div class="case-copy">
+        <small class="case-cat">Fintech · Finance partner</small>
+        <h3>Neo-Structure:<br><em>escalado 4x en 12 meses.</em></h3>
+        <p>Finteem es un equipo de dirección financiera externa que acompaña a startups y negocios digitales en la toma de decisiones estratégicas. Desde control de burn rate hasta planificación de crecimiento, integra datos, proyección y criterio financiero en un solo sistema.</p>
+        <div class="case-stats">
+          <div><b data-count="40" data-prefix="+">+40</b><small>negocios acompañados</small></div>
+          <div><b data-count="15" data-prefix="+" data-suffix="M€">+15M€</b><small>en flujo financiero analizado</small></div>
+          <div><b data-count="100" data-suffix="%">100%</b><small>de proyectos con dashboard activo</small></div>
+        </div>
+        <a href="#contacto" class="link">Ver caso en detalle <span class="arr">→</span></a>
+      </div>
+      <div class="case-visual">
+        <div class="browser">
+          <div class="browser-bar"><i></i><i></i><i></i><span>finteem.com</span></div>
+          <div class="browser-body">
+            <span class="fin-logo">⟋ finteem</span>
+            <p class="fin-h">ENFOCATE EN CRECER<br><span>NOSOTROS EN TU FINANCE</span></p>
+            <span class="fin-btn">Agendá una llamada</span>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ================= TESTIMONIOS ================= -->
+<section class="testis" id="testimonios">
+  <div class="wrap">
+    <p class="eyebrow rv">Testimonios</p>
+    <h2 class="h2 rv">Lo que dicen los que<br><em>trabajan con nosotros.</em></h2>
+  </div>
+  <!-- data-video: ruta al testimonio en video (ej. assets/testimonios/finteem.mp4) -->
+  <div class="t-scroller">
+    <div class="t-card" data-video=""><div class="t-media g1"><span class="play"></span></div><div class="t-info"><b>Ramiro Rinaudi</b><span>Director · Finteem</span><small>@finteem</small></div></div>
+    <div class="t-card" data-video=""><div class="t-media g2"><span class="play"></span></div><div class="t-info"><b>Juan Tenaglia</b><span>Director · Biconic</span><small>@biconic.io</small></div></div>
+    <div class="t-card" data-video=""><div class="t-media g3"><span class="play"></span></div><div class="t-info"><b>Gemini Travel</b><span>Directora · Gemini Travel</span><small>@geminitravel.ok</small></div></div>
+    <div class="t-card" data-video=""><div class="t-media g4"><span class="play"></span></div><div class="t-info"><b>Erich Andreas Ebert</b><span>Director · Ebert Prop</span><small>@ebert.prop</small></div></div>
+    <div class="t-card" data-video=""><div class="t-media g5"><span class="play"></span></div><div class="t-info"><b>Matías Lujan</b><span>Director · ML RepoSport</span><small>@mlreposport</small></div></div>
+  </div>
+</section>
+
+<!-- ================= HABLEMOS ================= -->
+<section class="talk" id="contacto">
+  <canvas class="fx-bg" data-variant="talk"></canvas>
+  <div class="talk-inner wrap">
+    <p class="eyebrow center rv">Contacto</p>
+    <h2 class="talk-title rv">Hablemos<em>.</em></h2>
+    <p class="talk-sub rv">Contanos qué estás construyendo. Si podemos ayudar, te lo decimos. Si no, también.</p>
+    <a class="btn btn-cream btn-lg rv" target="_blank" rel="noopener"
+       href="https://wa.me/5493541549822?text=Hola%20Rumor%2C%20quiero%20contarles%20sobre%20mi%20negocio">
+      <svg class="wa" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12.04 2a9.9 9.9 0 0 0-8.5 15l-1.4 5 5.2-1.36A9.9 9.9 0 1 0 12.04 2Zm0 18.1a8.2 8.2 0 0 1-4.2-1.15l-.3-.18-3.08.8.82-3-.2-.31a8.2 8.2 0 1 1 6.96 3.84Zm4.5-6.14c-.25-.12-1.46-.72-1.69-.8-.22-.08-.39-.12-.55.13-.16.24-.63.8-.78.96-.14.16-.29.18-.53.06a6.7 6.7 0 0 1-3.32-2.9c-.25-.43.25-.4.71-1.33.08-.16.04-.3-.02-.42-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.41-.55-.42h-.47a.9.9 0 0 0-.65.3 2.74 2.74 0 0 0-.86 2.04 4.76 4.76 0 0 0 1 2.53 10.9 10.9 0 0 0 4.18 3.7c1.56.67 2.17.73 2.95.61.47-.07 1.46-.6 1.67-1.17.2-.58.2-1.07.14-1.17-.06-.1-.22-.16-.47-.28Z"/></svg>
+      Escribinos por WhatsApp
+    </a>
+    <p class="talk-alt rv">30 minutos, sin costo y sin compromiso · o escribinos a <a href="mailto:hola@rumoragencia.com">hola@rumoragencia.com</a></p>
+  </div>
+</section>
+
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer class="foot">
+  <div class="wrap foot-grid">
+    <div>
+      <img src="assets/logotipo-agencia-blanco.svg" alt="rumor agencia" class="foot-logo">
+      <p class="foot-claim">No vendemos servicios sueltos.<br><em>Vendemos un sistema.</em></p>
+    </div>
+    <div class="foot-col">
+      <small>Contacto</small>
+      <a href="https://wa.me/5493541549822" target="_blank" rel="noopener">(+54) 3541 54-9822</a>
+      <a href="mailto:hola@rumoragencia.com">hola@rumoragencia.com</a>
+    </div>
+    <div class="foot-col">
+      <small>Redes</small>
+      <a href="https://www.instagram.com/rumoragencia" target="_blank" rel="noopener">Instagram</a>
+      <a href="https://www.linkedin.com/company/rumoragencia" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </div>
+  <div class="wrap foot-bottom"><span>© 2026 Rumor Agencia</span><span>From noise to structure</span></div>
+</footer>
+
+<!-- Lightbox de testimonios -->
+<div class="lightbox" id="lightbox" hidden><button class="lb-close" aria-label="Cerrar">×</button><video controls playsinline></video></div>
+
+<script src="script.js"></script>
+</body>
+</html>
