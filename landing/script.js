@@ -194,8 +194,11 @@ function onScroll() {
   // Nosotros: las tres cards aparecen de a una y al final el cierre
   const r = about.getBoundingClientRect();
   const p = clamp01(-r.top / (r.height - vh));
-  glass.forEach((g, i) => { const on = p > .1 + i * .2; g.classList.toggle('on', on); bars[i].classList.toggle('on', on); });
-  final.classList.toggle('on', p > .72);
+  // primer scroll: las tres cards juntas · segundo scroll: el párrafo de cierre
+  const cardsOn = p > .12, finalOn = p > .55;
+  glass.forEach(g => g.classList.toggle('on', cardsOn));
+  final.classList.toggle('on', finalOn);
+  bars[0].classList.toggle('on', cardsOn); bars[1].classList.toggle('on', finalOn);
 
   // Reel: el marco se expande al entrar en pantalla
   const rr = reelFrame.getBoundingClientRect();

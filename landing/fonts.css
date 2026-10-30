@@ -1,0 +1,44 @@
+/* Myriad Pro.
+   Orden de carga: 1) instalada en la compu (local), 2) archivos en assets/fonts/ (subir .woff2 con licencia web).
+   Alternativa recomendada: kit de Adobe Fonts (ver README) — usa los nombres myriad-pro / myriad-pro-semiextended. */
+
+@font-face { font-family: "Rumor Myriad"; font-weight: 300; font-style: normal; font-display: swap;
+  src: local("Myriad Pro Light"), local("MyriadPro-Light"), url(assets/fonts/MyriadPro-Light.woff2) format("woff2"); }
+@font-face { font-family: "Rumor Myriad"; font-weight: 300; font-style: italic; font-display: swap;
+  src: local("Myriad Pro Light Italic"), local("MyriadPro-LightIt"), url(assets/fonts/MyriadPro-LightIt.woff2) format("woff2"); }
+@font-face { font-family: "Rumor Myriad"; font-weight: 400; font-style: normal; font-display: swap;
+  src: local("Myriad Pro Regular"), local("MyriadPro-Regular"), url(assets/fonts/MyriadPro-Regular.woff2) format("woff2"); }
+@font-face { font-family: "Rumor Myriad"; font-weight: 400; font-style: italic; font-display: swap;
+  src: local("Myriad Pro Italic"), local("MyriadPro-It"), url(assets/fonts/MyriadPro-It.woff2) format("woff2"); }
+@font-face { font-family: "Rumor Myriad"; font-weight: 600; font-style: normal; font-display: swap;
+  src: local("Myriad Pro Semibold"), local("MyriadPro-Semibold"), url(assets/fonts/MyriadPro-Semibold.woff2) format("woff2"); }
+@font-face { font-family: "Rumor Myriad"; font-weight: 600; font-style: italic; font-display: swap;
+  src: local("Myriad Pro Semibold Italic"), local("MyriadPro-SemiboldIt"), url(assets/fonts/MyriadPro-SemiboldIt.woff2) format("woff2"); }
+@font-face { font-family: "Rumor Myriad"; font-weight: 700; font-style: normal; font-display: swap;
+  src: local("Myriad Pro Bold"), local("MyriadPro-Bold"), url(assets/fonts/MyriadPro-Bold.woff2) format("woff2"); }
+@font-face { font-family: "Rumor Myriad"; font-weight: 700; font-style: italic; font-display: swap;
+  src: local("Myriad Pro Bold Italic"), local("MyriadPro-BoldIt"), url(assets/fonts/MyriadPro-BoldIt.woff2) format("woff2"); }
+@font-face { font-family: "Rumor Myriad"; font-weight: 900; font-style: normal; font-display: swap;
+  src: local("Myriad Pro Black"), local("MyriadPro-Black"), url(assets/fonts/MyriadPro-Black.woff2) format("woff2"); }
+@font-face { font-family: "Rumor Myriad"; font-weight: 900; font-style: italic; font-display: swap;
+  src: local("Myriad Pro Black Italic"), local("MyriadPro-BlackIt"), url(assets/fonts/MyriadPro-BlackIt.woff2) format("woff2"); }
+@font-face { font-family: "Rumor Myriad SemiExt"; font-weight: 300; font-style: normal; font-display: swap;
+  src: local("Myriad Pro Light SemiExtended"), local("MyriadPro-LightSemiExt"), url(assets/fonts/MyriadPro-LightSemiExt.woff2) format("woff2"); }
+@font-face { font-family: "Rumor Myriad SemiExt"; font-weight: 300; font-style: italic; font-display: swap;
+  src: local("Myriad Pro Light SemiExtended Italic"), local("MyriadPro-LightSemiExtIt"), url(assets/fonts/MyriadPro-LightSemiExtIt.woff2) format("woff2"); }
+@font-face { font-family: "Rumor Myriad SemiExt"; font-weight: 400; font-style: normal; font-display: swap;
+  src: local("Myriad Pro SemiExtended"), local("MyriadPro-SemiExt"), url(assets/fonts/MyriadPro-SemiExt.woff2) format("woff2"); }
+@font-face { font-family: "Rumor Myriad SemiExt"; font-weight: 400; font-style: italic; font-display: swap;
+  src: local("Myriad Pro SemiExtended Italic"), local("MyriadPro-SemiExtIt"), url(assets/fonts/MyriadPro-SemiExtIt.woff2) format("woff2"); }
+@font-face { font-family: "Rumor Myriad SemiExt"; font-weight: 600; font-style: normal; font-display: swap;
+  src: local("Myriad Pro Semibold SemiExtended"), local("MyriadPro-SemiboldSemiExt"), url(assets/fonts/MyriadPro-SemiboldSemiExt.woff2) format("woff2"); }
+@font-face { font-family: "Rumor Myriad SemiExt"; font-weight: 600; font-style: italic; font-display: swap;
+  src: local("Myriad Pro Semibold SemiExtended Italic"), local("MyriadPro-SemiboldSemiExtIt"), url(assets/fonts/MyriadPro-SemiboldSemiExtIt.woff2) format("woff2"); }
+@font-face { font-family: "Rumor Myriad SemiExt"; font-weight: 700; font-style: normal; font-display: swap;
+  src: local("Myriad Pro Bold SemiExtended"), local("MyriadPro-BoldSemiExt"), url(assets/fonts/MyriadPro-BoldSemiExt.woff2) format("woff2"); }
+@font-face { font-family: "Rumor Myriad SemiExt"; font-weight: 700; font-style: italic; font-display: swap;
+  src: local("Myriad Pro Bold SemiExtended Italic"), local("MyriadPro-BoldSemiExtIt"), url(assets/fonts/MyriadPro-BoldSemiExtIt.woff2) format("woff2"); }
+@font-face { font-family: "Rumor Myriad SemiExt"; font-weight: 900; font-style: normal; font-display: swap;
+  src: local("Myriad Pro Black SemiExtended"), local("MyriadPro-BlackSemiExt"), url(assets/fonts/MyriadPro-BlackSemiExt.woff2) format("woff2"); }
+@font-face { font-family: "Rumor Myriad SemiExt"; font-weight: 900; font-style: italic; font-display: swap;
+  src: local("Myriad Pro Black SemiExtended Italic"), local("MyriadPro-BlackSemiExtIt"), url(assets/fonts/MyriadPro-BlackSemiExtIt.woff2) format("woff2"); }
