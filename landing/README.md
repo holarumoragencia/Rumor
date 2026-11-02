@@ -22,3 +22,10 @@ Landing estática (HTML + CSS + JS, sin build). Abrir `landing/index.html` servi
   - Para que la vean todos los visitantes: en fonts.adobe.com crear un *Web Project* con Myriad Pro (Light, Regular, Semibold, Bold, Black y sus SemiExtended) y pegar el `<link>` del kit en `index.html` donde indica el comentario. Agregar el dominio al proyecto.
   - Alternativa: subir los `.woff2` (con licencia web) a `assets/fonts/` con los nombres de `fonts.css` (ej. `MyriadPro-Black.woff2`).
   - Si Myriad Pro está instalada en la compu, el navegador ya la usa localmente.
+
+## SEO y seguridad (ya incluido)
+- `index.html`: título y descripción para Google, URL canónica, vista previa al compartir (Open Graph / X con `og-image.jpg`), favicon y datos estructurados (schema.org) con teléfono, mail y redes.
+- `robots.txt` y `sitemap.xml`: para que Google rastree el sitio. Dar de alta el sitemap en Google Search Console.
+- `.htaccess`: fuerza HTTPS y dominio sin `www`, cabeceras de seguridad, compresión y caché. Incluye una CSP comentada para activar cuando estén definidos los scripts externos (Pixel, GA…).
+- `404.html`: página de error con la marca.
+- **Dominio:** todo apunta a `https://rumoragencia.com/`. Si el dominio es otro, reemplazarlo en `index.html`, `robots.txt` y `sitemap.xml`.
