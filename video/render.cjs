@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Renderiza video/index.html cuadro a cuadro y arma un MP4 vertical 1080x1920.
 // Uso: node video/render.cjs [--fps 30] [--out video/out/rumor-servicios.mp4] [--still 7]
+//      [--page rumor-talking/index.html] [--query bg=cream]
 const path = require('path');
 const fs = require('fs');
 const { spawnSync } = require('child_process');
@@ -13,7 +14,9 @@ const args = Object.fromEntries(process.argv.slice(2).reduce((acc, a, i, arr) =>
   a.startsWith('--') ? [...acc, [a.slice(2), arr[i + 1]]] : acc, []));
 const FPS = Number(args.fps || 30);
 const OUT = path.resolve(args.out || path.join(__dirname, 'out', 'rumor-servicios.mp4'));
-const FRAMES_DIR = path.join(__dirname, 'out', 'frames');
+const PAGE = path.join(__dirname, args.page || 'index.html');
+const QUERY = args.query ? '&' + args.query : '';
+const FRAMES_DIR = path.join(__dirname, 'out', 'frames-' + path.basename(OUT, '.mp4'));
 
 (async () => {
   const browser = await chromium.launch({
@@ -21,8 +24,9 @@ const FRAMES_DIR = path.join(__dirname, 'out', 'frames');
   });
   const page = await browser.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
   page.on('pageerror', e => { console.error('page error:', e); process.exit(1); });
-  await page.goto('file://' + path.join(__dirname, 'index.html') + '?capture');
+  await page.goto('file://' + PAGE + '?capture' + QUERY);
   await page.evaluate(() => document.fonts.ready);
+  if (args.page) await page.waitForFunction(() => window.READY === true);
   const stage = await page.$('#stage');
 
   if (args.still !== undefined) {

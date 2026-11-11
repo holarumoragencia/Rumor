@@ -24,3 +24,23 @@ Todo está en `video/index.html`:
 - Colores del difuminado: shader `FS` (`mist`, `black`, `blue`, `blue2`, `deep`).
 
 Tipografías: Arial (sistema) para textos; "agencia" usa Graphie si está instalada (cae a Inter ExtraLight).
+
+---
+
+# Reel · "Everyone's talking. Are they talking about you?"
+
+`video/rumor-talking/index.html`: reel vertical 1080×1920 de 10 s en loop. La frase se repite en mosaico
+(inglés, español y spanglish, una fila por idioma) y se deforma con remolinos líquidos. En algunos momentos
+la frase se lee grande y en otros se vuelve textura. "you" y "vos" van en crimson pink `#e8175d`.
+
+- **Fondo negro** (`?bg=black`): fondo `#191919`, letras azul Rumor `#0057ff` que se funden con crema `#fffcf1`.
+- **Fondo crema** (`?bg=cream`): fondo `#fffcf1`, letras azul `#003afe` que se funden con negro `#191919`.
+
+Exportar:
+
+```bash
+node video/render.cjs --page rumor-talking/index.html --out out/rumor-talking-negro.mp4
+node video/render.cjs --page rumor-talking/index.html --query bg=cream --out out/rumor-talking-crema.mp4
+```
+
+Textos en el array `PHRASES` (el segundo tramo de cada frase es el acento). Colores en `PAL` / `THEME`.

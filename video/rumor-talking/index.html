@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Rumor · Everyone's talking (reel)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #000; }
+  body { display: grid; place-items: center; min-height: 100vh; overflow: hidden; }
+  body.capture { display: block; min-height: 0; }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; transform-origin: top left; }
+  #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="gl" width="1080" height="1920"></canvas></div>
+<script>
+/* ============================================================
+   Rumor · "Everyone's talking. Are they talking about you?"
+   Frase repetida en mosaico (inglés / español / spanglish) y deformada
+   con remolinos líquidos. Loop perfecto de DURATION segundos.
+   Versiones: ?bg=black (default) | ?bg=cream
+   ============================================================ */
+const DURATION = 10;
+
+// --- Textos (cada fila del mosaico alterna idioma). El segundo tramo va en crimson. ---
+const PHRASES = [
+  ["Everyone's talking. Are they talking about ", "you", "?"],          // inglés
+  ["Todos hablan. ¿Están hablando de ", "vos", "?"],                   // español
+  ["Everyone's hablando. ¿Are they talking de ", "vos", "?"],          // spanglish
+  ["Todos están talking. ¿Hablan about ", "you", "?"],                 // spanglish 2
+];
+
+// --- Paleta Rumor ---
+const hex = h => [1,3,5].map(i => parseInt(h.slice(i, i + 2), 16) / 255);
+const PAL = {
+  black: hex('#191919'),
+  cream: hex('#fffcf1'),
+  blue:  hex('#003afe'),
+  blue2: hex('#0057ff'),
+  crimson: hex('#e8175d'),   // acento crimson pink
+};
+const params = new URLSearchParams(location.search);
+const MODE = params.get('bg') === 'cream' ? 'cream' : 'black';
+// fondo, tinta principal, tinta secundaria (se funden), acento
+const THEME = MODE === 'cream'
+  ? { bg: PAL.cream, inkA: PAL.blue, inkB: PAL.black, accent: PAL.crimson, light: 0 }
+  : { bg: PAL.black, inkA: PAL.blue2, inkB: PAL.cream, accent: PAL.crimson, light: 1 };
+
+if (params.has('capture')) document.body.classList.add('capture');
+else {
+  const fit = () => { const s = Math.min(innerWidth / 1080, innerHeight / 1920);
+    document.getElementById('stage').style.transform = `scale(${s})`;
+    document.getElementById('stage').style.marginBottom = `${1920 * (s - 1)}px`; };
+  fit(); addEventListener('resize', fit);
+}
+
+// ---------- Textura de texto (mosaico que repite sin costuras) ----------
+const TEX = 4096;
+function buildTextTexture() {
+  const c = document.createElement('canvas');
+  c.width = c.height = TEX;
+  const x = c.getContext('2d');
+  x.fillStyle = '#000'; x.fillRect(0, 0, TEX, TEX);
+  const ROWS = 32;                       // 4096/32 = 128 texeles por fila
+  const rowH = TEX / ROWS;
+  const font = 'bold 104px Arial, "Liberation Sans", Helvetica, sans-serif';
+  x.font = font; x.textBaseline = 'middle';
+  const GAP = 70;
+  for (let r = 0; r < ROWS; r++) {
+    const segs = PHRASES[r % PHRASES.length];
+    const w = segs.reduce((a, s) => a + x.measureText(s).width, 0) + GAP;
+    const n = Math.max(1, Math.round(TEX / w));
+    const sx = TEX / (n * w);            // estira levemente para que n frases llenen el ancho exacto
+    const shift = ((r * 0.37) % 1) * w;  // desfase entre filas
+    const y = r * rowH + rowH / 2;
+    for (let k = -1; k <= n; k++) {
+      let px = k * w + shift;
+      for (let i = 0; i < segs.length; i++) {
+        // R = texto, G = acento
+        x.fillStyle = i === 1 ? '#00ff00' : '#ff0000';
+        x.setTransform(sx, 0, 0, 1, 0, 0);
+        x.fillText(segs[i], px, y);
+        px += x.measureText(segs[i]).width;
+      }
+    }
+    x.setTransform(1, 0, 0, 1, 0, 0);
+  }
+  return c;
+}
+
+// ---------- WebGL ----------
+const cv = document.getElementById('gl');
+const gl = cv.getContext('webgl', { preserveDrawingBuffer: true, antialias: false });
+
+const VS = `attribute vec2 p; void main(){ gl_Position = vec4(p, 0., 1.); }`;
+const FS = `
+precision highp float;
+uniform sampler2D tex;
+uniform vec2 res;
+uniform float ph;          // fase del loop 0..1
+uniform vec3 bg, inkA, inkB, accent;
+uniform float light;       // 1 = fondo oscuro (tintas se suman), 0 = fondo claro
+const float TAU = 6.2831853;
+const float TEX = 4096.;
+
+vec2 rot(vec2 v, float a){ float c = cos(a), s = sin(a); return vec2(c*v.x - s*v.y, s*v.x + c*v.y); }
+float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+
+// Remolino: gira y magnifica (mag>1 = letras grandes) o comprime (mag<1 = túnel denso)
+vec2 vortex(vec2 q, vec2 c, float R, float spin, float mag, inout float depth){
+  vec2 d = q - c;
+  float k = exp(-dot(d, d) / (R * R));
+  d = rot(d, spin * k);
+  d *= mix(1., 1. / mag, k);
+  depth += k * (mag < 1. ? -(1. - mag) : 0.);
+  return c + d;
+}
+
+// Deformación de pantalla -> espacio de la textura. Todo es periódico en ph (loop perfecto).
+vec2 warp(vec2 p, float a, out float depth){
+  depth = 0.;
+  vec2 q = p;
+  float s1 = sin(a), c1 = cos(a), s2 = sin(2. * a), c2 = cos(2. * a);
+  // ondas lentas tipo líquido
+  q.x += 45. * sin(q.y * 0.0042 + a + 1.3) + 14. * sin(q.y * 0.011 - 2. * a);
+  q.y += 38. * sin(q.x * 0.0037 - a) + 10. * cos(q.x * 0.013 + 2. * a);
+
+  // franja vertical que estira las letras (glitch del original)
+  float bx = 260. * sin(a + 0.6);
+  float band = exp(-pow((q.x - bx) / 80., 2.)) * (0.5 + 0.5 * s2);
+  q.y = mix(q.y, q.y * 0.3, band * 0.7);
+
+  // túnel: compresión hacia un punto que pasea
+  vec2 ct = vec2(200. * c1, -150. + 260. * s1);
+  q = vortex(q, ct, 460., 1.1 * s1, 0.5 + 0.1 * c2, depth);
+
+  // remolinos que magnifican (aquí la frase se lee grande)
+  float pulseA = 0.5 + 0.5 * cos(a);           // máximo al inicio/fin del loop
+  float pulseB = 0.5 + 0.5 * cos(a + 3.14159);  // máximo a la mitad
+  vec2 cA = vec2(-120. + 90. * s1, -430. + 120. * c1);
+  vec2 cB = vec2(160. + 80. * c1, 470. + 140. * s1);
+  q = vortex(q, cA, 330. + 120. * pulseA, -1.8 * s1 - 0.4, 1. + 2.4 * pulseA, depth);
+  q = vortex(q, cB, 300. + 130. * pulseB, 1.7 * c1 + 0.3, 1. + 2.2 * pulseB, depth);
+  q = vortex(q, vec2(-330. * c1, 860. * s2), 220., 2.2 * c1, 1.5, depth);
+  return q;
+}
+
+vec2 sampleText(vec2 p, float a, vec2 drift, out float depth){
+  vec2 q = warp(p, a, depth);
+  vec2 uv = (q * 2.3 + drift) / TEX;            // ~2.3 texeles por pixel -> letra base ~45px
+  return texture2D(tex, uv).rg;
+}
+
+void main(){
+  vec2 p = gl_FragCoord.xy - res * 0.5;
+  p.y = -p.y;
+  float a = ph * TAU;
+  vec2 drift = vec2(900. + 340. * cos(a), 1300. + 260. * sin(a));
+
+  float dA, dB;
+  // Tinta A y tinta B: misma frase, deformación con un leve desfase -> se separan y se funden
+  vec2 tA = sampleText(p, a, drift, dA);
+  vec2 tB = sampleText(p + vec2(4., -2.), a - 0.06, drift, dB);
+
+  // Campo que reparte las tintas (manchas que se mueven)
+  float f = sin(p.x * 0.0035 + 1.7 * sin(a) + p.y * 0.0012)
+          + sin(p.y * 0.0026 - a + 0.8) + 0.6 * sin((p.x + p.y) * 0.004 + 2. * a);
+  float wB = smoothstep(-0.5, 1.4, f);           // peso de la tinta B
+  // las zonas comprimidas (túnel) se hunden en el fondo
+  float dim = clamp(1. + 0.75 * dA, 0.22, 1.);
+  float dimB = clamp(1. + 0.75 * dB, 0.22, 1.);
+
+  float mA = tA.r * dim * (1. - 0.75 * wB);
+  float mB = max(tB.r, tB.g) * dimB * wB;
+  float acc = tA.g * dim;                        // el acento solo en la capa principal (sin doble imagen)
+
+  vec3 col = bg;
+  if (light > 0.5) {
+    col += inkA * mA * 1.15;
+    col += vec3(0.0, 0.18, 0.55) * mA * 0.25;     // brillo eléctrico
+    col = mix(col, inkB, mB * 0.92);
+    col = mix(col, mix(inkA, inkB, 0.5), mA * mB * 0.5);
+  } else {
+    col = mix(col, inkA, clamp(mA * 1.25, 0., 1.));
+    col = mix(col, inkB, clamp(mB * 1.1, 0., 1.));
+  }
+  col = mix(col, accent, clamp(acc * 1.1, 0., 1.));
+
+  // grano
+  float g = hash(gl_FragCoord.xy + floor(ph * 300.) * 17.) - 0.5;
+  col += g * (light > 0.5 ? 0.045 : 0.03);
+  // viñeta suave
+  vec2 uvn = gl_FragCoord.xy / res - 0.5;
+  float vig = smoothstep(0.85, 0.25, length(uvn * vec2(1.0, 0.75)));
+  col = mix(bg * (light > 0.5 ? 0.6 : 0.97), col, 0.55 + 0.45 * vig);
+  gl_FragColor = vec4(clamp(col, 0., 1.), 1.);
+}`;
+
+function sh(type, src) {
+  const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+  return s;
+}
+const prog = gl.createProgram();
+gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS));
+gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS));
+gl.linkProgram(prog); gl.useProgram(prog);
+const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+const loc = gl.getAttribLocation(prog, 'p');
+gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+const U = n => gl.getUniformLocation(prog, n);
+
+let ready = false;
+function initTexture() {
+  const t = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, t);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, buildTextTexture());
+  gl.generateMipmap(gl.TEXTURE_2D);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.uniform1i(U('tex'), 0);
+  gl.uniform2f(U('res'), cv.width, cv.height);
+  gl.uniform3fv(U('bg'), THEME.bg);
+  gl.uniform3fv(U('inkA'), THEME.inkA);
+  gl.uniform3fv(U('inkB'), THEME.inkB);
+  gl.uniform3fv(U('accent'), THEME.accent);
+  gl.uniform1f(U('light'), THEME.light);
+  ready = true;
+}
+
+function render(t) {
+  if (!ready) return;
+  gl.viewport(0, 0, cv.width, cv.height);
+  gl.uniform1f(U('ph'), (t % DURATION) / DURATION);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+
+window.DURATION = DURATION;
+window.seek = t => { render(t); return true; };
+
+document.fonts.load('bold 104px Arial').finally(() => {
+  initTexture();
+  render(0);
+  window.READY = true;
+  if (!params.has('capture')) {
+    const t0 = performance.now();
+    (function loop(){ render(((performance.now() - t0) / 1000) % DURATION); requestAnimationFrame(loop); })();
+  }
+});
+</script>
+</body>
+</html>
