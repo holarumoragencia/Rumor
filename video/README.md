@@ -35,6 +35,8 @@ Tipografías: Arial (sistema) para textos; "agencia" usa Graphie si está instal
   El idioma cambia en el pico de la deformación.
 - La frase va partida en dos renglones que se alternan ("Everyone's talking." / "Are they talking about you?").
 - "you" / "vos" en crimson pink `#fd6e88` con halo difuso que tiñe las letras vecinas.
+- Ondas amplias y orgánicas, leve inclinación y renglones que se deslizan distinto (nada queda perfecto).
+- Glitch retro (~0,7 s) en cada cambio de idioma: franjas desplazadas, aberración fuerte y cambio en bloques.
 - Post-proceso retro: resplandor de fósforo, aberración cromática, líneas de barrido, temblor y franja de tracking, parpadeo y grano.
 - **Fondo negro** (`?bg=black`): `#191919`, letras azul `#0057ff` + capa difusa de crema azulado.
 - **Fondo crema** (`?bg=cream`): `#fffcf1`, letras azul `#003afe` + capa difusa negra.
