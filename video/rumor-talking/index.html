@@ -39,14 +39,14 @@ const PAL = {
   cream: hex('#fffcf1'),
   blue:  hex('#003afe'),
   blue2: hex('#0057ff'),
-  crimson: hex('#e8175d'),   // acento crimson pink
+  crimson: hex('#fd6e88'),   // acento crimson pink
 };
 const params = new URLSearchParams(location.search);
 const MODE = params.get('bg') === 'cream' ? 'cream' : 'black';
 // fondo, tinta principal, tinta secundaria (se funden), acento
 const THEME = MODE === 'cream'
   ? { bg: PAL.cream, inkA: PAL.blue, inkB: PAL.black, accent: PAL.crimson, light: 0 }
-  : { bg: PAL.black, inkA: PAL.blue2, inkB: PAL.cream, accent: PAL.crimson, light: 1 };
+  : { bg: PAL.black, inkA: PAL.blue2, inkB: PAL.cream.map((c, i) => c * 0.38 + PAL.blue2[i] * 0.62), accent: PAL.crimson, light: 1 }; // crema que vira a azul claro
 
 if (params.has('capture')) document.body.classList.add('capture');
 else {
@@ -63,7 +63,7 @@ function buildTextTexture() {
   c.width = c.height = TEX;
   const x = c.getContext('2d');
   x.fillStyle = '#000'; x.fillRect(0, 0, TEX, TEX);
-  const ROWS = 32;                       // 4096/32 = 128 texeles por fila
+  const ROWS = 20;                       // 4096/20 ≈ 205 texeles por fila -> interlineado amplio
   const rowH = TEX / ROWS;
   const font = 'bold 104px Arial, "Liberation Sans", Helvetica, sans-serif';
   x.font = font; x.textBaseline = 'middle';
@@ -124,8 +124,8 @@ vec2 warp(vec2 p, float a, out float depth){
   vec2 q = p;
   float s1 = sin(a), c1 = cos(a), s2 = sin(2. * a), c2 = cos(2. * a);
   // ondas lentas tipo líquido
-  q.x += 45. * sin(q.y * 0.0042 + a + 1.3) + 14. * sin(q.y * 0.011 - 2. * a);
-  q.y += 38. * sin(q.x * 0.0037 - a) + 10. * cos(q.x * 0.013 + 2. * a);
+  q.x += 45. * sin(q.y * 0.0042 + a + 1.3) + 8. * sin(q.y * 0.008 - 2. * a);
+  q.y += 38. * sin(q.x * 0.0037 - a) + 6. * cos(q.x * 0.009 + 2. * a);
 
   // franja vertical que estira las letras (glitch del original)
   float bx = 260. * sin(a + 0.6);
@@ -147,10 +147,13 @@ vec2 warp(vec2 p, float a, out float depth){
   return q;
 }
 
-vec2 sampleText(vec2 p, float a, vec2 drift, out float depth){
+// x = texto, y = acento, z = acento difuminado (gaussiano vía mipmaps) que salpica a las letras vecinas
+vec4 sampleText(vec2 p, float a, vec2 drift, out float depth){
   vec2 q = warp(p, a, depth);
   vec2 uv = (q * 2.3 + drift) / TEX;            // ~2.3 texeles por pixel -> letra base ~45px
-  return texture2D(tex, uv).rg;
+  vec2 t = texture2D(tex, uv, 0.7).rg;          // leve suavizado: nada demasiado definido
+  vec2 h1 = texture2D(tex, uv, 4.6).rg, h2 = texture2D(tex, uv, 6.2).rg;
+  return vec4(t, 0.5 * h1.g + 0.5 * h2.g, h1.r);   // w = brillo difuso del texto (bloom)
 }
 
 void main(){
@@ -161,13 +164,13 @@ void main(){
 
   float dA, dB;
   // Tinta A y tinta B: misma frase, deformación con un leve desfase -> se separan y se funden
-  vec2 tA = sampleText(p, a, drift, dA);
-  vec2 tB = sampleText(p + vec2(4., -2.), a - 0.06, drift, dB);
+  vec4 tA = sampleText(p, a, drift, dA);
+  vec4 tB = sampleText(p + vec2(4., -2.), a - 0.06, drift, dB);
 
   // Campo que reparte las tintas (manchas que se mueven)
   float f = sin(p.x * 0.0035 + 1.7 * sin(a) + p.y * 0.0012)
           + sin(p.y * 0.0026 - a + 0.8) + 0.6 * sin((p.x + p.y) * 0.004 + 2. * a);
-  float wB = smoothstep(-0.5, 1.4, f);           // peso de la tinta B
+  float wB = smoothstep(-0.9, 1.2, f);           // peso de la tinta B
   // las zonas comprimidas (túnel) se hunden en el fondo
   float dim = clamp(1. + 0.75 * dA, 0.22, 1.);
   float dimB = clamp(1. + 0.75 * dB, 0.22, 1.);
@@ -176,15 +179,24 @@ void main(){
   float mB = max(tB.r, tB.g) * dimB * wB;
   float acc = tA.g * dim;                        // el acento solo en la capa principal (sin doble imagen)
 
+  // salpicado del acento: tiñe las letras de alrededor y deja un halo suave
+  float glow = smoothstep(0.0, 0.11, tA.z) * dim;
+  vec3 cA = mix(inkA, accent, glow * 0.9);
+  vec3 cB = mix(inkB, accent, glow * 0.8);
+  float bloom = tA.w * dim;
+
   vec3 col = bg;
   if (light > 0.5) {
-    col += inkA * mA * 1.15;
-    col += vec3(0.0, 0.18, 0.55) * mA * 0.25;     // brillo eléctrico
-    col = mix(col, inkB, mB * 0.92);
-    col = mix(col, mix(inkA, inkB, 0.5), mA * mB * 0.5);
+    col += accent * glow * 0.22;
+    col += mix(inkA, inkB, wB) * bloom * 0.35;        // resplandor difuso del texto
+    col = mix(col, cA * 1.1, clamp(mA * 1.15, 0., 1.));
+    col = mix(col, cB, mB * 0.9);
+    col = mix(col, mix(cB, vec3(1.0, 0.99, 0.95), 0.35), mA * mB * 0.45);   // donde se cruzan, un toque crema
   } else {
-    col = mix(col, inkA, clamp(mA * 1.25, 0., 1.));
-    col = mix(col, inkB, clamp(mB * 1.1, 0., 1.));
+    col = mix(col, accent, glow * 0.16);
+    col = mix(col, inkA, bloom * 0.12);
+    col = mix(col, cA, clamp(mA * 1.25, 0., 1.));
+    col = mix(col, cB, clamp(mB * 1.1, 0., 1.));
   }
   col = mix(col, accent, clamp(acc * 1.1, 0., 1.));
 
