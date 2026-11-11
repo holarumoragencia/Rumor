@@ -29,12 +29,15 @@ Tipografías: Arial (sistema) para textos; "agencia" usa Graphie si está instal
 
 # Reel · "Everyone's talking. Are they talking about you?"
 
-`video/rumor-talking/index.html`: reel vertical 1080×1920 de 10 s en loop. La frase se repite en mosaico
-(inglés, español y spanglish, una fila por idioma) y se deforma con remolinos líquidos. En algunos momentos
-la frase se lee grande y en otros se vuelve textura. "you" y "vos" van en crimson pink `#fd6e88`, con un halo difuso que tiñe las letras vecinas.
+`video/rumor-talking/index.html`: reel vertical 1080×1920 de 12 s en loop, con estética de pantalla retro (CRT).
 
-- **Fondo negro** (`?bg=black`): fondo `#191919`, letras azul Rumor `#0057ff` que se funden con un crema que vira a azul claro.
-- **Fondo crema** (`?bg=cream`): fondo `#fffcf1`, letras azul `#003afe` que se funden con negro `#191919`.
+- 3 momentos de 4 s: inglés → español → spanglish. En cada uno: deformado → **calma (~1,6 s, se lee)** → deformado.
+  El idioma cambia en el pico de la deformación.
+- La frase va partida en dos renglones que se alternan ("Everyone's talking." / "Are they talking about you?").
+- "you" / "vos" en crimson pink `#fd6e88` con halo difuso que tiñe las letras vecinas.
+- Post-proceso retro: resplandor de fósforo, aberración cromática, líneas de barrido, temblor y franja de tracking, parpadeo y grano.
+- **Fondo negro** (`?bg=black`): `#191919`, letras azul `#0057ff` + capa difusa de crema azulado.
+- **Fondo crema** (`?bg=cream`): `#fffcf1`, letras azul `#003afe` + capa difusa negra.
 
 Exportar:
 
@@ -43,4 +46,4 @@ node video/render.cjs --page rumor-talking/index.html --out out/rumor-talking-ne
 node video/render.cjs --page rumor-talking/index.html --query bg=cream --out out/rumor-talking-crema.mp4
 ```
 
-Textos en el array `PHRASES` (el segundo tramo de cada frase es el acento). Colores en `PAL` / `THEME`.
+Textos en `LANGS`, duración por idioma en `SEG`, curva de calma en `render(t)` (`calm`/`amp`), colores en `PAL` / `THEME`.

@@ -18,35 +18,37 @@
 <script>
 /* ============================================================
    Rumor · "Everyone's talking. Are they talking about you?"
-   Frase repetida en mosaico (inglés / español / spanglish) y deformada
-   con remolinos líquidos. Loop perfecto de DURATION segundos.
-   Versiones: ?bg=black (default) | ?bg=cream
+   - 3 momentos (inglés → español → spanglish), 4 s cada uno.
+     En cada momento: deformado → CALMA (se lee) → deformado. El cambio de idioma
+     ocurre mientras está deformado, así no se nota el corte.
+   - La frase va partida en dos renglones que se alternan.
+   - Post-proceso de pantalla retro (CRT): resplandor, aberración cromática,
+     líneas de barrido, temblor horizontal, parpadeo y grano. Sin marco.
+   Versiones: ?bg=black (default) | ?bg=cream. Loop perfecto de DURATION s.
    ============================================================ */
-const DURATION = 10;
-
-// --- Textos (cada fila del mosaico alterna idioma). El segundo tramo va en crimson. ---
-const PHRASES = [
-  ["Everyone's talking. Are they talking about ", "you", "?"],          // inglés
-  ["Todos hablan. ¿Están hablando de ", "vos", "?"],                   // español
-  ["Everyone's hablando. ¿Are they talking de ", "vos", "?"],          // spanglish
-  ["Todos están talking. ¿Hablan about ", "you", "?"],                 // spanglish 2
+const SEG = 4;                      // segundos por idioma
+const LANGS = [
+  // cada idioma: dos renglones que se alternan; [antes, ACENTO, después]
+  [["Everyone's talking.", "", ""], ["Are they talking about ", "you", "?"]],   // inglés
+  [["Todos hablan.", "", ""],       ["¿Hablan de ", "vos", "?"]],               // español
+  [["Everyone's hablando.", "", ""], ["¿Are they talking de ", "vos", "?"]],    // spanglish
 ];
+const DURATION = SEG * LANGS.length;
 
 // --- Paleta Rumor ---
 const hex = h => [1,3,5].map(i => parseInt(h.slice(i, i + 2), 16) / 255);
 const PAL = {
-  black: hex('#191919'),
-  cream: hex('#fffcf1'),
-  blue:  hex('#003afe'),
-  blue2: hex('#0057ff'),
+  black: hex('#191919'), cream: hex('#fffcf1'),
+  blue: hex('#003afe'), blue2: hex('#0057ff'),
   crimson: hex('#fd6e88'),   // acento crimson pink
 };
 const params = new URLSearchParams(location.search);
 const MODE = params.get('bg') === 'cream' ? 'cream' : 'black';
-// fondo, tinta principal, tinta secundaria (se funden), acento
+const mixc = (a, b, k) => a.map((v, i) => v * (1 - k) + b[i] * k);
+// fondo, tinta principal, tinta secundaria (capa suave de atrás), acento
 const THEME = MODE === 'cream'
   ? { bg: PAL.cream, inkA: PAL.blue, inkB: PAL.black, accent: PAL.crimson, light: 0 }
-  : { bg: PAL.black, inkA: PAL.blue2, inkB: PAL.cream.map((c, i) => c * 0.38 + PAL.blue2[i] * 0.62), accent: PAL.crimson, light: 1 }; // crema que vira a azul claro
+  : { bg: PAL.black, inkA: PAL.blue2, inkB: mixc(PAL.blue2, PAL.cream, 0.4), accent: PAL.crimson, light: 1 };
 
 if (params.has('capture')) document.body.classList.add('capture');
 else {
@@ -56,34 +58,34 @@ else {
   fit(); addEventListener('resize', fit);
 }
 
-// ---------- Textura de texto (mosaico que repite sin costuras) ----------
+// ---------- Texturas de texto (una por idioma, mosaico sin costuras) ----------
 const TEX = 4096;
-function buildTextTexture() {
+function buildTextTexture(rowsDef) {
   const c = document.createElement('canvas');
   c.width = c.height = TEX;
   const x = c.getContext('2d');
   x.fillStyle = '#000'; x.fillRect(0, 0, TEX, TEX);
-  const ROWS = 20;                       // 4096/20 ≈ 205 texeles por fila -> interlineado amplio
+  const ROWS = 20;                       // ≈205 texeles por fila -> interlineado amplio
   const rowH = TEX / ROWS;
-  const font = 'bold 104px Arial, "Liberation Sans", Helvetica, sans-serif';
-  x.font = font; x.textBaseline = 'middle';
-  const GAP = 70;
+  x.font = 'bold 104px Arial, "Liberation Sans", Helvetica, sans-serif';
+  x.textBaseline = 'middle';
+  const GAP = 150;
   for (let r = 0; r < ROWS; r++) {
-    const segs = PHRASES[r % PHRASES.length];
+    const segs = rowsDef[r % rowsDef.length];
     const w = segs.reduce((a, s) => a + x.measureText(s).width, 0) + GAP;
     const n = Math.max(1, Math.round(TEX / w));
-    const sx = TEX / (n * w);            // estira levemente para que n frases llenen el ancho exacto
-    const shift = ((r * 0.37) % 1) * w;  // desfase entre filas
+    const sx = TEX / (n * w);
+    const shift = ((r * 0.37) % 1) * w;
     const y = r * rowH + rowH / 2;
     for (let k = -1; k <= n; k++) {
       let px = k * w + shift;
-      for (let i = 0; i < segs.length; i++) {
-        // R = texto, G = acento
-        x.fillStyle = i === 1 ? '#00ff00' : '#ff0000';
+      segs.forEach((s, i) => {
+        if (!s) return;
+        x.fillStyle = i === 1 ? '#00ff00' : '#ff0000';   // R = texto, G = acento
         x.setTransform(sx, 0, 0, 1, 0, 0);
-        x.fillText(segs[i], px, y);
-        px += x.measureText(segs[i]).width;
-      }
+        x.fillText(s, px, y);
+        px += x.measureText(s).width;
+      });
     }
     x.setTransform(1, 0, 0, 1, 0, 0);
   }
@@ -93,22 +95,25 @@ function buildTextTexture() {
 // ---------- WebGL ----------
 const cv = document.getElementById('gl');
 const gl = cv.getContext('webgl', { preserveDrawingBuffer: true, antialias: false });
+const W = cv.width, H = cv.height, FBO = 2048;
 
 const VS = `attribute vec2 p; void main(){ gl_Position = vec4(p, 0., 1.); }`;
-const FS = `
+
+/* ---- Pasada 1: escena (texto deformado) ---- */
+const FS_SCENE = `
 precision highp float;
-uniform sampler2D tex;
+uniform sampler2D texA, texB;   // idioma actual y siguiente
+uniform float langMix;          // 0 = texA, 1 = texB
 uniform vec2 res;
-uniform float ph;          // fase del loop 0..1
+uniform float ph;               // fase del loop 0..1
+uniform float amp;              // intensidad de la deformación (0.1 calma … 1 máximo)
 uniform vec3 bg, inkA, inkB, accent;
-uniform float light;       // 1 = fondo oscuro (tintas se suman), 0 = fondo claro
+uniform float light;
 const float TAU = 6.2831853;
 const float TEX = 4096.;
 
 vec2 rot(vec2 v, float a){ float c = cos(a), s = sin(a); return vec2(c*v.x - s*v.y, s*v.x + c*v.y); }
-float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 
-// Remolino: gira y magnifica (mag>1 = letras grandes) o comprime (mag<1 = túnel denso)
 vec2 vortex(vec2 q, vec2 c, float R, float spin, float mag, inout float depth){
   vec2 d = q - c;
   float k = exp(-dot(d, d) / (R * R));
@@ -118,95 +123,123 @@ vec2 vortex(vec2 q, vec2 c, float R, float spin, float mag, inout float depth){
   return c + d;
 }
 
-// Deformación de pantalla -> espacio de la textura. Todo es periódico en ph (loop perfecto).
 vec2 warp(vec2 p, float a, out float depth){
   depth = 0.;
   vec2 q = p;
-  float s1 = sin(a), c1 = cos(a), s2 = sin(2. * a), c2 = cos(2. * a);
-  // ondas lentas tipo líquido
-  q.x += 45. * sin(q.y * 0.0042 + a + 1.3) + 8. * sin(q.y * 0.008 - 2. * a);
-  q.y += 38. * sin(q.x * 0.0037 - a) + 6. * cos(q.x * 0.009 + 2. * a);
-
-  // franja vertical que estira las letras (glitch del original)
-  float bx = 260. * sin(a + 0.6);
-  float band = exp(-pow((q.x - bx) / 80., 2.)) * (0.5 + 0.5 * s2);
-  q.y = mix(q.y, q.y * 0.3, band * 0.7);
-
-  // túnel: compresión hacia un punto que pasea
-  vec2 ct = vec2(200. * c1, -150. + 260. * s1);
-  q = vortex(q, ct, 460., 1.1 * s1, 0.5 + 0.1 * c2, depth);
-
-  // remolinos que magnifican (aquí la frase se lee grande)
-  float pulseA = 0.5 + 0.5 * cos(a);           // máximo al inicio/fin del loop
-  float pulseB = 0.5 + 0.5 * cos(a + 3.14159);  // máximo a la mitad
-  vec2 cA = vec2(-120. + 90. * s1, -430. + 120. * c1);
-  vec2 cB = vec2(160. + 80. * c1, 470. + 140. * s1);
-  q = vortex(q, cA, 330. + 120. * pulseA, -1.8 * s1 - 0.4, 1. + 2.4 * pulseA, depth);
-  q = vortex(q, cB, 300. + 130. * pulseB, 1.7 * c1 + 0.3, 1. + 2.2 * pulseB, depth);
-  q = vortex(q, vec2(-330. * c1, 860. * s2), 220., 2.2 * c1, 1.5, depth);
+  float s1 = sin(a), c1 = cos(a), s2 = sin(2. * a);
+  // ondas líquidas (40% menos que antes y casi nulas en la calma)
+  q.x += amp * (28. * sin(q.y * 0.0042 + 2. * a + 1.3) + 5. * sin(q.y * 0.008 - 3. * a));
+  q.y += amp * (24. * sin(q.x * 0.0037 - 2. * a) + 4. * cos(q.x * 0.009 + 3. * a));
+  // franja que estira las letras (solo cuando deforma)
+  float bx = 240. * sin(a * 3. + 0.6);
+  float band = exp(-pow((q.x - bx) / 80., 2.)) * amp * amp;
+  q.y = mix(q.y, q.y * 0.35, band * 0.6);
+  // túnel suave
+  vec2 ct = vec2(180. * c1, -120. + 220. * s1);
+  q = vortex(q, ct, 420., 0.35 * s1 * amp, mix(1., 0.62, amp), depth);
+  // lupa: agranda la frase hacia el centro de la pantalla (zona segura de IG)
+  vec2 cA = vec2(60. * sin(3. * a), -120. + 90. * cos(3. * a));
+  q = vortex(q, cA, 360., 0.25 * s2 * amp, 1. + 1.5 * amp, depth);
   return q;
 }
 
-// x = texto, y = acento, z = acento difuminado (gaussiano vía mipmaps) que salpica a las letras vecinas
-vec4 sampleText(vec2 p, float a, vec2 drift, out float depth){
+vec3 sampleLang(vec2 uv, float bias){
+  vec3 a = vec3(texture2D(texA, uv, bias).rg, 0.);
+  vec3 b = vec3(texture2D(texB, uv, bias).rg, 0.);
+  return mix(a, b, langMix);
+}
+// x = texto, y = acento, z = acento difuminado (halo gaussiano vía mipmaps)
+vec3 sampleText(vec2 p, float a, vec2 drift, float bias, out float depth){
   vec2 q = warp(p, a, depth);
-  vec2 uv = (q * 2.3 + drift) / TEX;            // ~2.3 texeles por pixel -> letra base ~45px
-  vec2 t = texture2D(tex, uv, 0.7).rg;          // leve suavizado: nada demasiado definido
-  vec2 h1 = texture2D(tex, uv, 4.6).rg, h2 = texture2D(tex, uv, 6.2).rg;
-  return vec4(t, 0.5 * h1.g + 0.5 * h2.g, h1.r);   // w = brillo difuso del texto (bloom)
+  vec2 uv = (q * 1.6 + drift) / TEX;           // 1.6 texeles por pixel -> letra base ~65px
+  vec3 t = sampleLang(uv, bias);
+  float halo = 0.5 * sampleLang(uv, 4.6).g + 0.5 * sampleLang(uv, 6.2).g;
+  return vec3(t.xy, halo);
 }
 
 void main(){
   vec2 p = gl_FragCoord.xy - res * 0.5;
   p.y = -p.y;
   float a = ph * TAU;
-  vec2 drift = vec2(900. + 340. * cos(a), 1300. + 260. * sin(a));
+  vec2 drift = vec2(900. + 260. * cos(a), 1300. + 160. * sin(a));
 
   float dA, dB;
-  // Tinta A y tinta B: misma frase, deformación con un leve desfase -> se separan y se funden
-  vec4 tA = sampleText(p, a, drift, dA);
-  vec4 tB = sampleText(p + vec2(4., -2.), a - 0.06, drift, dB);
+  vec3 tA = sampleText(p, a, drift, 0., dA);                                   // capa principal, nítida
+  vec3 tB = sampleText(p + vec2(3., -2.), a - 0.04, drift, 3.0, dB);            // capa de atrás, difusa
 
-  // Campo que reparte las tintas (manchas que se mueven)
-  float f = sin(p.x * 0.0035 + 1.7 * sin(a) + p.y * 0.0012)
-          + sin(p.y * 0.0026 - a + 0.8) + 0.6 * sin((p.x + p.y) * 0.004 + 2. * a);
-  float wB = smoothstep(-0.9, 1.2, f);           // peso de la tinta B
-  // las zonas comprimidas (túnel) se hunden en el fondo
-  float dim = clamp(1. + 0.75 * dA, 0.22, 1.);
-  float dimB = clamp(1. + 0.75 * dB, 0.22, 1.);
+  float dim = clamp(1. + 0.75 * dA, 0.3, 1.);
+  float mA = tA.x * dim;
+  float mB = max(tB.x, tB.y) * clamp(1. + 0.75 * dB, 0.3, 1.) * (1. - mA);
+  float acc = tA.y * dim;
 
-  float mA = tA.r * dim * (1. - 0.75 * wB);
-  float mB = max(tB.r, tB.g) * dimB * wB;
-  float acc = tA.g * dim;                        // el acento solo en la capa principal (sin doble imagen)
-
-  // salpicado del acento: tiñe las letras de alrededor y deja un halo suave
-  float glow = smoothstep(0.0, 0.11, tA.z) * dim;
-  vec3 cA = mix(inkA, accent, glow * 0.9);
-  vec3 cB = mix(inkB, accent, glow * 0.8);
-  float bloom = tA.w * dim;
+  float glow = smoothstep(0.0, 0.11, tA.z) * dim;     // el rosa salpica a las letras vecinas
+  vec3 cA = mix(inkA, accent, glow * 0.85);
+  vec3 cB = mix(inkB, accent, glow * 0.7);
 
   vec3 col = bg;
   if (light > 0.5) {
-    col += accent * glow * 0.22;
-    col += mix(inkA, inkB, wB) * bloom * 0.35;        // resplandor difuso del texto
+    col += accent * glow * 0.2;
+    col = mix(col, cB, mB * 0.55);
     col = mix(col, cA * 1.1, clamp(mA * 1.15, 0., 1.));
-    col = mix(col, cB, mB * 0.9);
-    col = mix(col, mix(cB, vec3(1.0, 0.99, 0.95), 0.35), mA * mB * 0.45);   // donde se cruzan, un toque crema
   } else {
-    col = mix(col, accent, glow * 0.16);
-    col = mix(col, inkA, bloom * 0.12);
-    col = mix(col, cA, clamp(mA * 1.25, 0., 1.));
-    col = mix(col, cB, clamp(mB * 1.1, 0., 1.));
+    col = mix(col, accent, glow * 0.14);
+    col = mix(col, cB, mB * 0.35);
+    col = mix(col, cA, clamp(mA * 1.2, 0., 1.));
   }
   col = mix(col, accent, clamp(acc * 1.1, 0., 1.));
+  gl_FragColor = vec4(clamp(col, 0., 1.), 1.);
+}`;
 
-  // grano
-  float g = hash(gl_FragCoord.xy + floor(ph * 300.) * 17.) - 0.5;
-  col += g * (light > 0.5 ? 0.045 : 0.03);
-  // viñeta suave
-  vec2 uvn = gl_FragCoord.xy / res - 0.5;
-  float vig = smoothstep(0.85, 0.25, length(uvn * vec2(1.0, 0.75)));
-  col = mix(bg * (light > 0.5 ? 0.6 : 0.97), col, 0.55 + 0.45 * vig);
+/* ---- Pasada 2: pantalla retro (CRT) ---- */
+const FS_CRT = `
+precision highp float;
+uniform sampler2D scene;
+uniform vec2 res;
+uniform float fbo;
+uniform float ph;
+uniform float frame;
+uniform vec3 bg;
+uniform float light;
+const float TAU = 6.2831853;
+float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+vec3 S(vec2 px, float bias){ return texture2D(scene, clamp(px, vec2(1.), res - 1.) / fbo, bias).rgb; }
+
+void main(){
+  vec2 px = gl_FragCoord.xy;
+  float y = res.y - px.y;
+  // temblor horizontal por línea + una franja de "tracking" que baja
+  float line = floor(y / 3.);
+  float jit = (hash(vec2(line, frame)) - 0.5) * 1.6;
+  float bandY = fract(ph * 2.) * (res.y + 400.) - 200.;
+  float track = exp(-pow((y - bandY) / 60., 2.));
+  jit += track * (hash(vec2(line * 0.37, frame + 3.)) - 0.5) * 14.;
+  px.x += jit;
+
+  // aberración cromática (mayor hacia los bordes)
+  float edge = abs(px.x / res.x - 0.5) * 2.;
+  float ca = 2. + 2.5 * edge;
+  vec3 col;
+  col.r = S(px + vec2(ca, 0.), 0.).r;
+  col.g = S(px, 0.).g;
+  col.b = S(px - vec2(ca, 0.), 0.).b;
+
+  // resplandor de fósforo (bloom) a partir de mipmaps
+  vec3 b1 = S(px, 3.5), b2 = S(px, 5.), b3 = S(px, 6.5);
+  vec3 bloom = b1 * 0.45 + b2 * 0.35 + b3 * 0.2;
+  if (light > 0.5) col += max(bloom - bg, 0.) * 0.95;
+  else col = mix(col, min(col, bloom), 0.35);
+
+  // líneas de barrido (cada 4 px) y franja de tracking un poco más clara
+  float scan = 0.5 + 0.5 * cos(y * TAU / 4.);
+  col *= mix(light > 0.5 ? 0.72 : 0.9, 1.0, scan);
+  col += track * (light > 0.5 ? 0.05 : 0.025);
+
+  // parpadeo, grano y viñeta
+  col *= 1. + 0.03 * sin(ph * TAU * 24.) + (hash(vec2(frame, 7.)) - 0.5) * 0.04;
+  col += (hash(px + frame * 13.1) - 0.5) * (light > 0.5 ? 0.06 : 0.045);
+  vec2 uv = gl_FragCoord.xy / res - 0.5;
+  float vig = smoothstep(0.95, 0.3, length(uv * vec2(1.0, 0.8)));
+  col = mix(bg * (light > 0.5 ? 0.5 : 0.93), col, 0.5 + 0.5 * vig);
   gl_FragColor = vec4(clamp(col, 0., 1.), 1.);
 }`;
 
@@ -215,40 +248,96 @@ function sh(type, src) {
   if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
   return s;
 }
-const prog = gl.createProgram();
-gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS));
-gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS));
-gl.linkProgram(prog); gl.useProgram(prog);
+function program(fs) {
+  const pr = gl.createProgram();
+  gl.attachShader(pr, sh(gl.VERTEX_SHADER, VS));
+  gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(pr);
+  if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr));
+  const u = {}; const n = gl.getProgramParameter(pr, gl.ACTIVE_UNIFORMS);
+  for (let i = 0; i < n; i++) { const nm = gl.getActiveUniform(pr, i).name; u[nm] = gl.getUniformLocation(pr, nm); }
+  return { pr, u };
+}
 const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
-const loc = gl.getAttribLocation(prog, 'p');
-gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-const U = n => gl.getUniformLocation(prog, n);
+const P1 = program(FS_SCENE), P2 = program(FS_CRT);
 
-let ready = false;
-function initTexture() {
+function mipTexture(src, w, h) {
   const t = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, t);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, buildTextTexture());
-  gl.generateMipmap(gl.TEXTURE_2D);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+  if (src) gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src);
+  else gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, src ? gl.REPEAT : gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, src ? gl.REPEAT : gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  gl.uniform1i(U('tex'), 0);
-  gl.uniform2f(U('res'), cv.width, cv.height);
-  gl.uniform3fv(U('bg'), THEME.bg);
-  gl.uniform3fv(U('inkA'), THEME.inkA);
-  gl.uniform3fv(U('inkB'), THEME.inkB);
-  gl.uniform3fv(U('accent'), THEME.accent);
-  gl.uniform1f(U('light'), THEME.light);
+  if (src) gl.generateMipmap(gl.TEXTURE_2D);
+  return t;
+}
+
+let ready = false, langTex = [], sceneTex, fb;
+function init() {
+  langTex = LANGS.map(l => mipTexture(buildTextTexture(l)));
+  sceneTex = mipTexture(null, FBO, FBO);
+  fb = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, sceneTex, 0);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   ready = true;
+}
+
+const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+
+function draw(prog) {
+  gl.useProgram(prog.pr);
+  const loc = gl.getAttribLocation(prog.pr, 'p');
+  gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
 }
 
 function render(t) {
   if (!ready) return;
-  gl.viewport(0, 0, cv.width, cv.height);
-  gl.uniform1f(U('ph'), (t % DURATION) / DURATION);
+  t = ((t % DURATION) + DURATION) % DURATION;
+  const seg = Math.floor(t / SEG), s = (t % SEG) / SEG;
+  // deformación: máxima en los bordes del momento, calma en el medio (≈1,6 s legible)
+  const calm = smooth(0.12, 0.3, s) * (1 - smooth(0.7, 0.88, s));
+  const amp = 1 - 0.92 * calm;
+  // cambio de idioma en el pico de deformación, con fundido corto
+  const next = (seg + 1) % LANGS.length;
+  const lm = smooth(0.93, 1.0, s);
+
+  // pasada 1 -> framebuffer
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+  gl.viewport(0, 0, FBO, FBO);
+  gl.clearColor(...THEME.bg, 1); gl.clear(gl.COLOR_BUFFER_BIT);   // así el bloom no oscurece los bordes
+  gl.viewport(0, 0, W, H);
+  draw(P1);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, langTex[seg]);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, langTex[next]);
+  const u1 = P1.u;
+  gl.uniform1i(u1.texA, 0); gl.uniform1i(u1.texB, 1);
+  gl.uniform1f(u1.langMix, lm);
+  gl.uniform2f(u1.res, W, H);
+  gl.uniform1f(u1.ph, t / DURATION);
+  gl.uniform1f(u1.amp, amp);
+  gl.uniform3fv(u1.bg, THEME.bg); gl.uniform3fv(u1.inkA, THEME.inkA);
+  gl.uniform3fv(u1.inkB, THEME.inkB); gl.uniform3fv(u1.accent, THEME.accent);
+  gl.uniform1f(u1.light, THEME.light);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, sceneTex);
+  gl.generateMipmap(gl.TEXTURE_2D);
+
+  // pasada 2 -> pantalla, con efecto retro
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.viewport(0, 0, W, H);
+  draw(P2);
+  const u2 = P2.u;
+  gl.uniform1i(u2.scene, 0);
+  gl.uniform2f(u2.res, W, H);
+  gl.uniform1f(u2.fbo, FBO);
+  gl.uniform1f(u2.ph, t / DURATION);
+  gl.uniform1f(u2.frame, Math.floor(t * 30));
+  gl.uniform3fv(u2.bg, THEME.bg);
+  gl.uniform1f(u2.light, THEME.light);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
 
@@ -256,7 +345,7 @@ window.DURATION = DURATION;
 window.seek = t => { render(t); return true; };
 
 document.fonts.load('bold 104px Arial').finally(() => {
-  initTexture();
+  init();
   render(0);
   window.READY = true;
   if (!params.has('capture')) {
@@ -265,5 +354,3 @@ document.fonts.load('bold 104px Arial').finally(() => {
   }
 });
 </script>
-</body>
-</html>
