@@ -110,6 +110,7 @@ uniform float amp;              // intensidad de la deformación (0.1 calma … 
 uniform vec3 bg, inkA, inkB, accent;
 uniform float light;
 uniform float glitch;           // 0..1 en el cambio de idioma
+uniform float ondas;            // 1 = variante con remolinos localizados (?ondas=1)
 const float TAU = 6.2831853;
 const float TEX = 4096.;
 float LM;                       // mezcla de idioma por pixel (en bloques durante el glitch)
@@ -123,6 +124,17 @@ vec2 vortex(vec2 q, vec2 c, float R, float spin, float mag, inout float depth){
   d = rot(d, spin * k);
   d *= mix(1., 1. / mag, k);
   depth += k * (mag < 1. ? -(1. - mag) : 0.);
+  return c + d;
+}
+
+// Remolino localizado como el video de referencia: gira en círculos y ondula en anillos,
+// solo dentro de su radio. Fuera de él, el texto queda calmo y legible.
+vec2 swirl(vec2 q, vec2 c, float R, float str, float a){
+  vec2 d = q - c;
+  float r = length(d);
+  float k = exp(-r * r / (R * R));
+  d = rot(d, str * 1.9 * k * k);
+  d += (r > 1. ? d / r : vec2(0.)) * 16. * str * k * sin(r * 0.028 - a * 6.);
   return c + d;
 }
 
@@ -143,6 +155,14 @@ vec2 warp(vec2 p, float a, out float depth){
   // lupa: agranda la frase hacia el centro de la pantalla (zona segura de IG)
   vec2 cA = vec2(60. * sin(3. * a), -120. + 90. * cos(3. * a));
   q = vortex(q, cA, 360., 0.25 * s2 * amp, 1. + 1.5 * amp, depth);
+  if (ondas > 0.5) {
+    // se alternan: cuando un lado ondula, el otro está calmo
+    float wl = 0.5 + 0.5 * cos(a * 3.), wr = 1. - wl;
+    vec2 cl = vec2(-300. + 50. * sin(a * 2.), -380. + 260. * sin(a));
+    vec2 cr = vec2(300. + 50. * cos(a * 2.), 420. + 240. * cos(a));
+    q = swirl(q, cl, 300., wl * wl, a);
+    q = swirl(q, cr, 300., -wr * wr, a);
+  }
   return q;
 }
 
@@ -344,6 +364,7 @@ function render(t) {
   gl.uniform1i(u1.texA, 0); gl.uniform1i(u1.texB, 1);
   gl.uniform1f(u1.langMix, lm);
   gl.uniform1f(u1.glitch, glitch);
+  gl.uniform1f(u1.ondas, params.get('ondas') === '1' ? 1 : 0);
   gl.uniform2f(u1.res, W, H);
   gl.uniform1f(u1.ph, t / DURATION);
   gl.uniform1f(u1.amp, amp);

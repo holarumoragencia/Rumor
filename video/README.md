@@ -49,3 +49,12 @@ node video/render.cjs --page rumor-talking/index.html --query bg=cream --out out
 ```
 
 Textos en `LANGS`, duración por idioma en `SEG`, curva de calma en `render(t)` (`calm`/`amp`), colores en `PAL` / `THEME`.
+
+**Variante de prueba con remolinos** (`?ondas=1`): suma remolinos localizados como los del primer video de referencia.
+Se alternan entre un lado y el otro, así siempre hay una zona calma que se lee.
+
+```bash
+node video/render.cjs --page rumor-talking/index.html --query ondas=1 --out out/rumor-talking-ondas-negro.mp4
+node video/render.cjs --page rumor-talking/index.html --query "bg=cream&ondas=1" --out out/rumor-talking-ondas-crema.mp4
+```
+
