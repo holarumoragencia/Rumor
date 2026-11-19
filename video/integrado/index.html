@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Todo integrado · Gemini</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --blue: #0056ff; --cream: #fffcf1; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #000; }
+  body { display: grid; place-items: center; min-height: 100vh; overflow: hidden; }
+  body.capture { display: block; min-height: 0; }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: var(--blue); transform-origin: top left; }
+  #bg { position: absolute; inset: 0; }
+  #world { position: absolute; inset: 0; transform-origin: 50% 45%; }
+  .L { position: absolute; display: block; will-change: transform, opacity, filter; transform-origin: center; }
+  .L img { display: block; width: 100%; height: 100%; }
+  .shine { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: overlay; opacity: 0;
+    background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.95) 50%, transparent 65%) no-repeat;
+    background-size: 250% 100%; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; }
+  .dot { position: absolute; border-radius: 50%; background: var(--cream); }
+  #ripple { position: absolute; border-radius: 50%; border: 4px solid var(--cream); opacity: 0; }
+  #grain { position: absolute; inset: -40px; pointer-events: none; opacity: .07; mix-blend-mode: overlay; }
+  #hud { position: fixed; left: 12px; bottom: 10px; color: #aaa; font: 12px monospace; }
+  body.capture #hud { display: none; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <defs id="filters"></defs>
+</svg>
+<div id="stage">
+  <canvas id="bg" width="1080" height="1920"></canvas>
+  <div id="world"></div>
+  <canvas id="grain" width="580" height="1000"></canvas>
+</div>
+<div id="hud"></div>
+<script src="layers/layers.js"></script>
+<script>
+const DURATION = 10;
+const W = 1080, H = 1920;
+const L = window.LAYERS;
+const $ = id => document.getElementById(id);
+const clamp01 = x => Math.max(0, Math.min(1, x));
+const lerp = (a, b, k) => a + (b - a) * k;
+const easeOut = x => 1 - Math.pow(1 - x, 3);
+const easeOut5 = x => 1 - Math.pow(1 - x, 5);
+const easeInOut = x => x < .5 ? 4*x*x*x : 1 - Math.pow(-2*x + 2, 3) / 2;
+const back = (x, s = 1.7) => { x = x - 1; return x*x*((s+1)*x + s) + 1; };
+// resorte amortiguado: 0 → 1 con rebote
+const spring = (x, f = 4.2, d = 6) => x <= 0 ? 0 : 1 - Math.exp(-d*x) * Math.cos(f*Math.PI*x);
+const prog = (t, a, d) => clamp01((t - a) / d);
+
+/* ---------- capas ---------- */
+const world = $('world');
+const EL = {};
+const ORDER = ['samana', 'natal', 'aruba', 'r', 'chat1', 'chat2', 'chat3',
+  'titulo1_w0', 'titulo1_w1', 'titulo2_w0', 'titulo2_w1', 'titulo2_w2', 'bajada_l0', 'bajada_l1',
+  'medicion', 'contenido', 'anuncios', 'cursor'];
+const defs = $('filters');
+for (const name of ORDER) {
+  const m = L[name];
+  const d = document.createElement('div');
+  d.className = 'L'; d.id = 'L-' + name;
+  Object.assign(d.style, { left: m.x + 'px', top: m.y + 'px', width: m.w + 'px', height: m.h + 'px' });
+  d.innerHTML = `<img src="layers/${name}.png" alt="">`;
+  // desenfoque de movimiento direccional (SVG)
+  defs.insertAdjacentHTML('beforeend',
+    `<filter id="mb-${name}" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="0 0"/></filter>`);
+  world.appendChild(d);
+  EL[name] = { el: d, m, blur: defs.lastElementChild.firstElementChild };
+}
+// brillo sobre las promos
+for (const name of ['samana', 'aruba', 'natal']) {
+  const s = document.createElement('div');
+  s.className = 'shine';
+  s.style.webkitMaskImage = s.style.maskImage = `url(layers/${name}.png)`;
+  EL[name].el.appendChild(s);
+  EL[name].shine = s;
+}
+// puntos de "escribiendo"
+const dots = L._dots.map(([x, y, d]) => {
+  const e = document.createElement('div');
+  e.className = 'dot';
+  const r = 7.5;
+  Object.assign(e.style, { left: (x - L.chat3.x - r) + 'px', top: (y - L.chat3.y - r) + 'px', width: 2*r + 'px', height: 2*r + 'px' });
+  EL.chat3.el.appendChild(e);
+  return e;
+});
+const ripple = document.createElement('div');
+ripple.id = 'ripple';
+world.insertBefore(ripple, EL.cursor.el);
+
+/* aplica estado a una capa */
+function set(name, { x = 0, y = 0, s = 1, sx = 1, sy = 1, r = 0, o = 1, blur = 0, mbx = 0, mby = 0, origin } = {}) {
+  const { el, blur: fb } = EL[name];
+  el.style.opacity = o;
+  el.style.visibility = o <= .001 ? 'hidden' : 'visible';
+  if (origin) el.style.transformOrigin = origin;
+  el.style.transform = `translate(${x}px, ${y}px) rotate(${r}deg) scale(${s * sx}, ${s * sy})`;
+  const filt = [];
+  if (mbx > .3 || mby > .3) { fb.setAttribute('stdDeviation', `${mbx.toFixed(2)} ${mby.toFixed(2)}`); filt.push(`url(#mb-${name})`); }
+  if (blur > .2) filt.push(`blur(${blur.toFixed(2)}px)`);
+  el.style.filter = filt.length ? filt.join(' ') : 'none';
+}
+const float = (t, ph, ax = 4, ay = 6, sp = 1) => ({
+  x: Math.sin(t * .9 * sp + ph) * ax, y: Math.cos(t * 1.1 * sp + ph * 1.3) * ay, r: Math.sin(t * .7 * sp + ph) * .6 });
+
+/* ---------- fondo vivo ---------- */
+const bg = $('bg').getContext('2d');
+function blob(x, y, r, c0, c1) {
+  const g = bg.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, c0); g.addColorStop(1, c1);
+  bg.fillStyle = g; bg.fillRect(0, 0, W, H);
+}
+function drawBg(t) {
+  bg.fillStyle = '#0056ff'; bg.fillRect(0, 0, W, H);
+  blob(540 + Math.sin(t*.45)*320, 380 + Math.cos(t*.35)*160, 760, 'rgba(70,140,255,.55)', 'rgba(70,140,255,0)');
+  blob(880 + Math.cos(t*.4)*180, 1250 + Math.sin(t*.5)*220, 680, 'rgba(0,40,210,.55)', 'rgba(0,40,210,0)');
+  blob(160 + Math.sin(t*.3+2)*160, 1500 + Math.cos(t*.42)*200, 620, 'rgba(40,120,255,.45)', 'rgba(40,120,255,0)');
+  blob(540, 1960, 900, 'rgba(0,30,170,.45)', 'rgba(0,30,170,0)');
+}
+// grano animado
+const gc = $('grain').getContext('2d');
+const grainFrames = [];
+for (let i = 0; i < 6; i++) {
+  const id = gc.createImageData(580, 1000);
+  for (let p = 0; p < id.data.length; p += 4) { const v = Math.random() * 255; id.data[p] = id.data[p+1] = id.data[p+2] = v; id.data[p+3] = 255; }
+  grainFrames.push(id);
+}
+$('grain').style.width = (W + 80) + 'px'; $('grain').style.height = (H + 80) + 'px';
+
+/* ---------- guion ---------- */
+// sonidos: [tiempo, nombre, ganancia, paneo]
+const T = {
+  contenido: .25, anuncios: .42, medicion: .59,
+  cursorIn: .95, click: 1.75,
+  t1: 2.2, t2: 2.75, baj: 3.35,
+  r: 4.1,
+  chat1: 4.75, chat2: 5.45, chat3: 6.15,
+  aruba: 6.75, sides: 7.05,
+  shine: 8.1,
+};
+window.SFX = [
+  [T.contenido - .12, 'whoosh', .55, -.4], [T.anuncios - .12, 'whoosh', .5, .4], [T.medicion - .12, 'whoosh', .5, -.3],
+  [T.cursorIn + .1, 'swish', .25, .5], [T.click, 'click', .9, .2],
+  [T.t1 - .05, 'swish', .35, 0], [T.t2 - .05, 'swish', .3, 0], [T.baj, 'tick', .4, 0], [T.baj + .18, 'tick', .35, 0],
+  [T.r - .02, 'impact', .85, -.3],
+  [T.chat1, 'pop_in', .7, .3], [T.chat2, 'pop_in', .7, .2], [T.chat3, 'pop_typing', .6, .35],
+  [T.aruba - .15, 'whoosh_long', .6, 0], [T.sides, 'whoosh', .45, -.5], [T.sides + .1, 'whoosh', .45, .5],
+  [T.shine, 'shimmer', .35, 0],
+];
+
+/* card de servicio que entra deslizando con desenfoque de movimiento */
+function slideCard(name, t, t0, dir, ph) {
+  const k = prog(t, t0, .75);
+  const sp = spring(k, 2.2, 6.5);
+  const vel = Math.abs(spring(prog(t + 1/60, t0, .75), 2.2, 6.5) - sp) * 60;
+  const dx = (1 - sp) * dir * 900;
+  const f = float(t, ph, 5, 7);
+  const settle = clamp01((t - t0 - .6) / .8);
+  set(name, {
+    x: dx + f.x * settle, y: f.y * settle, r: (1 - sp) * dir * -9 + f.r * settle,
+    sx: 1 + Math.min(vel * .05, .25), sy: 1 - Math.min(vel * .02, .08),
+    o: clamp01(k * 6), mbx: Math.min(vel * 30, 46),
+  });
+  return f;
+}
+
+function render(t) {
+  drawBg(t);
+  gc.putImageData(grainFrames[Math.floor(t * 24) % grainFrames.length], 0, 0);
+  $('grain').style.transform = `translate(${-((t*24|0)%7)*5}px, ${-((t*24|0)%5)*6}px) scale(2)`;
+  $('grain').style.transformOrigin = '0 0';
+
+  // cámara: push-in lento + micro sacudón en el impacto de las promos
+  const shake = Math.exp(-Math.max(t - T.aruba - .35, 0) * 9) * (t > T.aruba + .35 ? 1 : 0);
+  world.style.transform = `translate(${Math.sin(t*43)*3*shake}px, ${Math.cos(t*37)*4*shake}px) scale(${1.0 + t * .0035})`;
+
+  /* 1. Servicios */
+  slideCard('contenido', t, T.contenido, -1, 0);
+  // Anuncios: además se hunde al click
+  const fa = slideCard('anuncios', t, T.anuncios, 1, 1.7);
+  const pk = prog(t, T.click, .7);
+  if (t >= T.click) {
+    const press = Math.sin(Math.min(pk * 4, 1) * Math.PI) * .07; // hundida rápida
+    const rebound = pk > .25 ? (1 - spring((pk - .25) / .75, 3, 5)) * -.02 : 0;
+    const e = EL.anuncios.el;
+    e.style.transform += ` scale(${1 - press + rebound})`;
+    e.style.filter = `drop-shadow(0 0 ${30 * Math.sin(pk * Math.PI)}px rgba(255,252,241,.9))`;
+  }
+  slideCard('medicion', t, T.medicion, -1, 3.1);
+
+  /* cursor: entra en curva, hace click, queda flotando */
+  const ck = easeInOut(prog(t, T.cursorIn, .75));
+  const p0 = [560, 520], p1 = [-120, 160], p2 = [0, 0]; // offsets respecto a la posición final
+  const bz = (a, b, c, u) => (1-u)*(1-u)*a + 2*(1-u)*u*b + u*u*c;
+  const cx = bz(p0[0], p1[0], p2[0], ck), cy = bz(p0[1], p1[1], p2[1], ck);
+  const cs = t >= T.click ? 1 - Math.sin(Math.min(prog(t, T.click, .18), 1) * Math.PI) * .2 : 1;
+  const cf = float(t, 4, 3, 4) ;
+  const cset = clamp01((t - T.click - .3) / .6);
+  set('cursor', { x: cx + cf.x * cset + fa.x * 0, y: cy + cf.y * cset, s: cs, r: (1-ck) * -18, o: clamp01(prog(t, T.cursorIn, .2)),
+    origin: '0 0', mbx: 0 });
+  // onda del click
+  const rk = prog(t, T.click, .55);
+  const rr = 10 + easeOut(rk) * 70;
+  Object.assign(ripple.style, { left: (L.cursor.x + 2 - rr) + 'px', top: (L.cursor.y + 2 - rr) + 'px',
+    width: 2*rr + 'px', height: 2*rr + 'px', opacity: t >= T.click ? (1 - rk) * .9 : 0, borderWidth: (5 * (1 - rk) + 1) + 'px' });
+
+  /* 2. Título: palabras que suben desde una máscara con desenfoque */
+  const words = [['titulo1_w0', T.t1], ['titulo1_w1', T.t1 + .14], ['titulo2_w0', T.t2], ['titulo2_w1', T.t2 + .11], ['titulo2_w2', T.t2 + .22]];
+  for (const [name, t0] of words) {
+    const k = prog(t, t0, .8);
+    const e = easeOut5(k);
+    const h = L[name].h;
+    set(name, { y: (1 - e) * h * .9, r: (1 - e) * 4, o: clamp01(k * 3), blur: (1 - e) * 14, mby: 0, origin: '0 100%' });
+    // máscara: sólo se ve lo que está por encima de la línea base final
+    EL[name].el.style.clipPath = `inset(-60px -40px ${((1 - e) * h * .9).toFixed(1)}px -40px)`;
+  }
+  // tras entrar, "integrado," da un pulso
+  const pulse = Math.sin(clamp01((t - T.t1 - .75) / .4) * Math.PI) * .04;
+  if (pulse > 0) EL.titulo1_w1.el.style.transform += ` scale(${1 + pulse})`;
+
+  /* bajada: línea por línea */
+  [['bajada_l0', T.baj], ['bajada_l1', T.baj + .18]].forEach(([name, t0]) => {
+    const k = prog(t, t0, .7), e = easeOut5(k);
+    set(name, { y: (1 - e) * 26, o: clamp01(k * 2), blur: (1 - e) * 8 });
+    EL[name].el.style.clipPath = `inset(0 ${(1 - easeOut(clamp01(k * 1.4))) * 100}% -10px 0)`;
+  });
+
+  /* 3. R de Rumor: entra girando con rebote y destello */
+  const rk2 = prog(t, T.r, 1.0);
+  const rs = spring(rk2, 2.6, 5.5);
+  const rf = float(t, 2.2, 2, 4, .8);
+  const rset = clamp01((t - T.r - .8) / .8);
+  set('r', { s: .2 + .8 * rs, r: (1 - rs) * -90 + rf.r * rset, y: rf.y * rset, o: clamp01(rk2 * 5), blur: (1 - easeOut(clamp01(rk2 * 2.5))) * 16 });
+  const glow = Math.exp(-Math.max(t - T.r - .15, 0) * 5) * (t > T.r ? 1 : 0);
+  if (glow > .01) EL.r.el.style.filter = (EL.r.el.style.filter === 'none' ? '' : EL.r.el.style.filter + ' ') + `drop-shadow(0 0 ${40 * glow}px rgba(255,252,241,${.9 * glow}))`;
+
+  /* 4. Chat: burbujas que "pop" desde la derecha */
+  [['chat1', T.chat1, 0], ['chat2', T.chat2, .7], ['chat3', T.chat3, 1.4]].forEach(([name, t0, ph]) => {
+    const k = prog(t, t0, .7);
+    const s = spring(k, 2.4, 6);
+    const f = float(t, ph + 5, 0, 3, .9);
+    const st = clamp01((t - t0 - .5) / .6);
+    set(name, { s: .3 + .7 * s, y: (1 - s) * 40 + f.y * st, o: clamp01(k * 5), origin: '100% 100%' });
+  });
+  // tres puntos rebotando
+  dots.forEach((d, i) => {
+    const ph = ((t - T.chat3) * 1.6 - i * .18) % 1;
+    const b = t > T.chat3 + .2 ? Math.max(0, Math.sin(Math.max(ph, 0) * Math.PI * 2)) : 0;
+    d.style.transform = `translateY(${-b * 9}px)`;
+    d.style.opacity = .55 + b * .45;
+  });
+
+  /* 5. Promos: Aruba sube desde abajo, las otras se abren desde detrás */
+  const ak = prog(t, T.aruba, .9);
+  const as = spring(ak, 2, 5.5);
+  const avel = Math.abs(spring(prog(t + 1/60, T.aruba, .9), 2, 5.5) - as) * 60;
+  const af = float(t, 6, 0, 5, .7);
+  const ast = clamp01((t - T.aruba - .8) / .8);
+  set('aruba', { y: (1 - as) * 760 + af.y * ast, o: clamp01(ak * 6), mby: Math.min(avel * 26, 40), r: (1 - as) * 4 });
+  [['samana', -1, 9], ['natal', 1, 11]].forEach(([name, dir, ph]) => {
+    const k = prog(t, T.sides, .9);
+    const s = spring(k, 2, 5.5);
+    const vel = Math.abs(spring(prog(t + 1/60, T.sides, .9), 2, 5.5) - s) * 60;
+    const f = float(t, ph, 3, 6, .7);
+    const st = clamp01((t - T.sides - .8) / .8);
+    set(name, { x: (1 - s) * -dir * 210 + f.x * st, y: (1 - s) * 120 + f.y * st, r: (1 - s) * -dir * 14 + f.r * st,
+      o: clamp01(k * 4), mbx: Math.min(vel * 24, 34) });
+  });
+  // brillo que cruza las promos
+  ['samana', 'aruba', 'natal'].forEach((name, i) => {
+    const k = prog(t, T.shine + i * .12, .9);
+    const s = EL[name].shine;
+    s.style.opacity = k > 0 && k < 1 ? .85 : 0;
+    s.style.backgroundPosition = `${lerp(130, -30, easeInOut(k))}% 0`;
+  });
+
+  $('hud').textContent = t.toFixed(2) + 's';
+}
+
+/* API para el render cuadro a cuadro */
+window.DURATION = DURATION;
+window.seek = t => render(t);
+const capture = location.search.includes('capture');
+if (capture) document.body.classList.add('capture');
+else {
+  const fit = () => { const s = Math.min(innerWidth / W, innerHeight / H); $('stage').style.transform = `scale(${s})`;
+    $('stage').style.marginRight = (W * s - W) + 'px'; $('stage').style.marginBottom = (H * s - H) + 'px'; };
+  addEventListener('resize', fit); fit();
+  const t0 = performance.now();
+  (function loop() { render(((performance.now() - t0) / 1000) % DURATION); requestAnimationFrame(loop); })();
+}
+</script>
+</body>
+</html>
