@@ -143,6 +143,7 @@
     /* Rectángulos (relativos al fondo) de los elementos a respetar.
        data-rbf-avoid="text" usa las líneas reales del texto; cualquier otro valor, la caja entera. */
     var avoidEls = [];
+    var spread = root.hasAttribute('data-rbf-spread');
     function avoidZones(r) {
       var host = root.parentElement || document;
       avoidEls = Array.prototype.slice.call(host.querySelectorAll('[data-rbf-avoid]'));
@@ -190,6 +191,7 @@
           // y cero detrás de cada elemento marcado.
           wm = smooth(0.35, 0.85, yn) * (0.6 + 0.4 * xn);   // celu: abajo, más a la derecha
           wd = smooth(0.42, 0.8, xn);                       // compu: mitad derecha
+          if (spread) { wm = 1; wd = 1; }                  // data-rbf-spread: presencia pareja
           var m = 1;
           for (var z = 0; z < zones.length; z++) {
             var Z = zones[z];

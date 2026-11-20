@@ -163,6 +163,7 @@
   /* ---------- Fondo animado del hero (grilla booleana Rumor) ---------- */
   .rbf-bg{position:absolute;inset:0;z-index:0;overflow:hidden;background:#191919;pointer-events:none}
   .rbf-bg canvas{display:block;width:100%;height:100%}
+  .card.result .rbf-bg{opacity:.5}   /* en la card del resultado, más tenue */
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -265,20 +266,20 @@ STAGES.forEach((s, si) => {
 // result card
 const r = document.createElement("article");
 r.className = "card result"; r.id = "resultado";
-r.innerHTML = `<div class="halftone"></div>
-  <div class="card-top"><span class="en">Your result</span><span class="en">rumor</span></div>
-  <div class="gauge"><svg viewBox="0 0 200 110"><path class="g-bg" d="M15 100 A85 85 0 0 1 185 100" fill="none" stroke-width="16" stroke-linecap="round"/>
+r.innerHTML = `<div class="rbf-bg" aria-hidden="true" data-rbf-spread><canvas></canvas></div>
+  <div class="card-top" data-rbf-avoid="text"><span class="en">Your result</span><span class="en">rumor</span></div>
+  <div class="gauge" data-rbf-avoid><svg viewBox="0 0 200 110"><path class="g-bg" d="M15 100 A85 85 0 0 1 185 100" fill="none" stroke-width="16" stroke-linecap="round"/>
     <path class="g-fg" id="gFg" d="M15 100 A85 85 0 0 1 185 100" fill="none" stroke-width="16" stroke-linecap="round"/></svg>
     <div class="gauge-txt"><b id="gNum">0</b><span>/15</span></div></div>
-  <div class="verdict" id="verdict"></div>
-  <p class="advice" id="advice"></p>
-  <div class="chips" id="chips"></div>
-  <div class="ctas">
+  <div class="verdict" id="verdict" data-rbf-avoid="text"></div>
+  <p class="advice" id="advice" data-rbf-avoid="text"></p>
+  <div class="chips" id="chips" data-rbf-avoid></div>
+  <div class="ctas" data-rbf-avoid>
     <a class="btn primary" href="https://wa.me/5493541549822?text=Hola%20Rumor%2C%20hice%20la%20checklist%20de%20Black%20Friday" target="_blank" rel="noopener">Hablemos por WhatsApp</a>
     <button type="button" class="btn ghost" id="copy">Copiar lo que me falta</button>
   </div>
-  <p class="contact">(+54) 3541 54-9822 · hola@rumoragencia.com</p>
-  <button type="button" class="reset" id="reset">Empezar de nuevo</button>`;
+  <p class="contact" data-rbf-avoid="text">(+54) 3541 54-9822 · hola@rumoragencia.com</p>
+  <button type="button" class="reset" id="reset" data-rbf-avoid="text">Empezar de nuevo</button>`;
 deck.appendChild(r); cards.push(r);
 const rp = document.createElement("button");
 rp.type = "button"; rp.className = "pill res"; rp.innerHTML = `<span class="pn">Resultado</span>`;
@@ -483,6 +484,7 @@ if (document.fonts) document.fonts.ready.then(layout);
     /* Rectángulos (relativos al fondo) de los elementos a respetar.
        data-rbf-avoid="text" usa las líneas reales del texto; cualquier otro valor, la caja entera. */
     var avoidEls = [];
+    var spread = root.hasAttribute('data-rbf-spread');
     function avoidZones(r) {
       var host = root.parentElement || document;
       avoidEls = Array.prototype.slice.call(host.querySelectorAll('[data-rbf-avoid]'));
@@ -530,6 +532,7 @@ if (document.fonts) document.fonts.ready.then(layout);
           // y cero detrás de cada elemento marcado.
           wm = smooth(0.35, 0.85, yn) * (0.6 + 0.4 * xn);   // celu: abajo, más a la derecha
           wd = smooth(0.42, 0.8, xn);                       // compu: mitad derecha
+          if (spread) { wm = 1; wd = 1; }                  // data-rbf-spread: presencia pareja
           var m = 1;
           for (var z = 0; z < zones.length; z++) {
             var Z = zones[z];
