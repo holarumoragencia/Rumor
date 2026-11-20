@@ -14,7 +14,7 @@
   #bg{display:block;width:100%;height:100%}
 
   /* Título fijo arriba (dentro de zona segura) */
-  .title{position:absolute;left:0;right:0;top:282px;text-align:center;font-weight:900;font-stretch:125%;font-variation-settings:"wdth" 125;
+  .title{position:absolute;left:0;right:0;top:290px;text-align:center;font-weight:900;font-stretch:125%;font-variation-settings:"wdth" 125;
     font-size:64px;line-height:1;letter-spacing:-.02em;text-transform:uppercase}
   .title em{font-style:normal;color:var(--blue2)}
   .title span{background:var(--black);padding:10px 18px 12px}
@@ -24,7 +24,7 @@
   .tag{position:absolute;background:var(--blue);color:var(--paper);font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:19px;letter-spacing:.14em;text-transform:uppercase;padding:9px 14px;line-height:1}
   .tag.k{background:var(--black);color:var(--paper)}
   .seg{position:absolute;display:flex;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:21px;letter-spacing:.06em}
-  .seg i{font-style:normal;display:block;padding:12px 16px;border:2px solid var(--blue2);margin-left:-2px;background:var(--black);color:var(--paper)}
+  .seg i{font-style:normal;display:block;padding:.55em .75em;border:2px solid var(--blue2);margin-left:-2px;background:var(--black);color:var(--paper)}
   .seg i.on{background:var(--blue2);color:#fff}
 
   /* Sujeto */
@@ -37,11 +37,11 @@
   .frame i{position:absolute;width:12px;height:12px;background:var(--paper)}
   .frame i:nth-child(1){left:-7px;top:-7px}.frame i:nth-child(2){right:-7px;top:-7px}
   .frame i:nth-child(3){left:-7px;bottom:-7px}.frame i:nth-child(4){right:-7px;bottom:-7px}
-  #sujeto{position:absolute;left:0;bottom:0;width:1080px}
+  #sujeto{position:absolute;left:0;top:-89px;width:1080px}  /* cabeza en y≈440, mentón ≈1300 */
 
   /* Subtítulo: una palabra, posición fija */
   /* Subtítulo: una palabra, posición fija. 55 px = tamaño 55 de Premiere en secuencia 1080×1920 */
-  .sub{position:absolute;left:0;right:0;top:395px;text-align:center;font-family:"Archivo Black","Arial Black",Arial,sans-serif;font-size:55px;line-height:1;
+  .sub{position:absolute;left:0;right:0;top:1372px;text-align:center;font-family:"Archivo Black","Arial Black",Arial,sans-serif;font-size:55px;line-height:1;
     color:#fff;-webkit-text-stroke:8px var(--black);paint-order:stroke fill;text-shadow:0 4px 0 var(--black)}
 
   #grain{position:absolute;inset:0;width:100%;height:100%;mix-blend-mode:soft-light;opacity:.22;pointer-events:none}
@@ -57,16 +57,17 @@
 <div id="stage">
   <canvas id="bg" class="layer" width="1080" height="1920"></canvas>
 
-  <!-- detrás del sujeto (asoman a los costados de la cabeza) -->
-  <div class="tag" style="left:66px;top:560px">Checklist · Rumor</div>
-  <div class="box" style="left:66px;top:602px;width:220px;font-size:26px">Solo 7 días para estar listo.</div>
-  <div class="seg" style="left:800px;top:640px"><i>+/−</i><i class="on">27/11</i></div>
+  <!-- detrás del sujeto: asoman a los costados y se van por los bordes -->
+  <div class="tag" style="left:-6px;top:600px;font-size:22px;padding:11px 16px">Rumor · BF</div>
+  <div class="box" style="left:850px;top:700px;width:260px;font-size:40px;line-height:1.05;padding:22px 26px 24px">Solo<br>7 días.</div>
 
   <img id="sujeto" src="prueba/sujeto-completo.png" alt="">
 
-  <!-- delante del sujeto (al costado de la cara, sin taparla) -->
-  <div class="tag" style="left:40px;top:1110px">¿Listo?</div>
-  <div class="box" style="left:40px;top:1150px;width:215px;font-size:24px">15 checks.<br>5 etapas.<br>2 minutos.</div>
+  <!-- delante del sujeto: parte baja del cuadro, más grandes y sueltos -->
+  <div class="tag" style="left:40px;top:1508px;font-size:22px;padding:11px 16px">¿Listo para pautar?</div>
+  <div class="box" style="left:40px;top:1556px;width:560px;font-size:48px;line-height:1.08;padding:24px 28px 28px">15 checks.<br>5 etapas.<br>Menos de 2 minutos.</div>
+  <div class="seg" style="right:-4px;top:1650px;font-size:30px"><i>+/−</i><i class="on">07 días</i><i>27/11</i></div>
+  <div class="tag k" style="right:40px;top:1730px;font-size:22px;padding:11px 16px">Black Friday ready</div>
 
   <div class="title"><span>Black Friday <em>2026</em></span></div>
   <div class="sub" id="sub">campaña</div>
