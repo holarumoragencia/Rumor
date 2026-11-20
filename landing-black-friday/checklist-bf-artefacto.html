@@ -153,9 +153,17 @@
   @media (min-width:900px){.swipe{display:none}}
 
   footer{position:relative;overflow:hidden}
-  footer .wrap{padding:26px 22px 40px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted)}
-  footer a{color:var(--paper)}
-  .claim{font-family:"Archivo",Arial,Helvetica,sans-serif;font-weight:800;color:var(--paper);font-size:15px}
+  footer .wrap{padding:36px 22px 40px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:28px}
+  footer a{color:var(--paper);text-decoration:none}
+  .f-brand{display:flex;flex-direction:column;gap:18px}
+  .f-title{font-family:"Archivo",Arial,Helvetica,sans-serif;font-weight:900;font-stretch:125%;font-variation-settings:"wdth" 125;
+    font-size:clamp(24px,3.2vw,34px);line-height:1;letter-spacing:-.02em;color:var(--paper)}
+  .f-title em{font-style:normal;color:var(--blue2)}
+  .f-iso{width:30px;height:auto;display:block}
+  .f-links{list-style:none;display:flex;flex-direction:column;gap:10px;font-size:14px}
+  .f-links a{display:inline-flex;align-items:center;gap:10px;color:rgba(255,252,241,.85);transition:color .2s}
+  .f-links a:hover{color:#fff}
+  .f-links svg{width:18px;height:18px;flex:none;color:var(--blue2)}
 
   .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,120px);background:var(--blue);color:var(--paper);padding:12px 18px;border-radius:99px;font-size:14px;font-weight:700;z-index:50;opacity:0;visibility:hidden;transition:transform .35s cubic-bezier(.3,1.5,.5,1),opacity .2s,visibility .2s}
   .toast.show{transform:translate(-50%,0);opacity:1;visibility:visible}
@@ -203,8 +211,16 @@
 </main>
 
 <footer><div class="rbf-bg" aria-hidden="true"><canvas></canvas></div><div class="wrap">
-  <span class="claim" data-rbf-avoid="text">Ordenamos primero. Después escalamos.</span>
-  <span data-rbf-avoid="text"><a href="https://rumoragencia.com" target="_blank" rel="noopener">rumoragencia.com</a> · <a href="https://instagram.com/rumor.agencia" target="_blank" rel="noopener">@rumor.agencia</a></span>
+  <div class="f-brand">
+    <span class="f-title" data-rbf-avoid="text">Black Friday <em>2026</em></span>
+    <svg class="f-iso" data-rbf-avoid viewBox="0 0 119.52 144.65" role="img" aria-label="Rumor"><path fill="#FFFCF1" d="M119.2,141.6l-26.12-41.65c-.36-.56-.99-.9-1.66-.9h-31.2c-1.85,0-2.68-2.31-1.26-3.49l48.05-35.88c7.73-6.4,12.21-15.92,12.21-25.96h0C119.22,15.09,104.13,0,85.52,0H1.97C.88,0,0,.88,0,1.97v32.68c0,1.09.88,1.97,1.97,1.97h59.09c10.4,0,12.25,5.3,4.13,11.79l-30.31,24.18c-15.84,12.64-30.7,24.49-34.13,27.23-.47.37-.74.94-.74,1.54v41.16c0,1.67,1.95,2.58,3.23,1.52l45.93-40.1c.94-.78,2.35-.53,2.96.52l22.91,39.2c.35.61,1,.98,1.7.98h40.81c1.56,0,2.51-1.73,1.66-3.04Z"/></svg>
+  </div>
+  <ul class="f-links" data-rbf-avoid>
+    <li><a href="https://rumoragencia.com" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg>rumoragencia.com</a></li>
+    <li><a href="https://instagram.com/rumor.agencia" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".6" fill="currentColor"/></svg>@rumor.agencia</a></li>
+    <li><a href="https://wa.me/5493541549822" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.6 20.4l1.2-4.1A8.6 8.6 0 1 1 8 19.3z"/><path d="M9.2 8.6c.2-.5.6-.6 1-.5l.9 1.8c.1.3 0 .5-.2.7l-.5.6c.6 1.2 1.6 2.2 2.8 2.8l.6-.5c.2-.2.5-.3.7-.2l1.8.9c.1.4 0 .8-.5 1-1 .6-2.4.5-4-.6a10 10 0 0 1-2.6-2.6c-1.1-1.6-1.2-3-.6-4z" fill="currentColor" stroke="none"/></svg>(+54) 3541 54-9822</a></li>
+    <li><a href="mailto:hola@rumoragencia.com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg>hola@rumoragencia.com</a></li>
+  </ul>
 </div></footer>
 
 <div class="toast" id="toast"></div>
