@@ -117,7 +117,7 @@
   .card.done .next{background:#fff;color:var(--black)}
 
   /* result card */
-  .card.result{background:var(--black);color:var(--paper);border-color:rgba(255,252,241,.25);box-shadow:7px 7px 0 var(--blue)}
+  .card.result{background:var(--black);color:var(--paper);border-color:rgba(255,252,241,.25);box-shadow:7px 7px 0 var(--blue),inset 0 1px 0 rgba(255,252,241,.12)}
   .card.result .halftone{color:var(--paper);opacity:.14}
   .card.result .en{color:rgba(255,252,241,.55)}
   .gauge{position:relative;width:100%;max-width:340px;margin:10px auto 0;z-index:1}
@@ -171,7 +171,11 @@
   /* ---------- Fondo animado del hero (grilla booleana Rumor) ---------- */
   .rbf-bg{position:absolute;inset:0;z-index:0;overflow:hidden;background:#191919;pointer-events:none}
   .rbf-bg canvas{display:block;width:100%;height:100%}
-  .card.result .rbf-bg{opacity:.5}   /* en la card del resultado, más tenue */
+  /* card del resultado: animación detrás de un vidrio esmerilado */
+  .card.result .rbf-bg{opacity:.38}
+  .card.result .rbf-bg canvas{filter:blur(9px);transform:scale(1.06)}
+  .card.result .rbf-bg::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(155deg,rgba(255,252,241,.10),rgba(255,252,241,0) 38%),rgba(25,25,25,.18)}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
