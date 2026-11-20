@@ -40,15 +40,15 @@
   /* ---------- Tramo del artefacto ---------- */
   #win{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:hidden;background:var(--black);visibility:hidden}
   #art{position:absolute;left:0;top:0;width:390px;height:1700px;border:0;transform-origin:0 0;background:var(--black)}
-  #frame{position:absolute;pointer-events:none;border:2px solid rgba(255,252,241,.6);display:none}
-  #frame i{position:absolute;width:14px;height:14px;background:var(--paper)}
-  #frame i:nth-child(1){left:-8px;top:-8px}#frame i:nth-child(2){right:-8px;top:-8px}
-  #frame i:nth-child(3){left:-8px;bottom:-8px}#frame i:nth-child(4){right:-8px;bottom:-8px}
-  #frameTag{position:absolute;display:none}
-  /* toque (dedo) */
-  .touch{position:absolute;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;pointer-events:none;display:none;
-    background:rgba(255,252,241,.22);border:2px solid rgba(255,252,241,.85);box-shadow:0 6px 18px rgba(0,0,0,.25)}
-  .ripple{position:absolute;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;border:2px solid var(--paper);pointer-events:none;display:none}
+  #scene{position:absolute;inset:0;transform-origin:540px 900px}
+  #fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  #vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 75% 62% at 50% 46%,transparent 58%,rgba(0,0,0,.42) 100%)}
+  /* cursor con halo de luz (referencia) */
+  #cursor{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:#fff;pointer-events:none;display:none;
+    box-shadow:0 0 0 1px rgba(0,0,0,.12),0 6px 16px rgba(0,0,0,.35)}
+  #spot{position:absolute;width:700px;height:700px;margin:-350px 0 0 -350px;border-radius:50%;pointer-events:none;display:none;mix-blend-mode:screen;
+    background:radial-gradient(circle,rgba(255,252,241,.20) 0,rgba(255,252,241,.07) 30%,transparent 62%)}
+  .ripple{position:absolute;width:60px;height:60px;margin:-30px 0 0 -30px;border-radius:50%;border:2px solid #fff;pointer-events:none;display:none}
   /* marcas de "pendiente" sobre los checks sin marcar */
   .mark{position:absolute;pointer-events:none;display:none}
   .mark b{position:absolute;width:26px;height:26px;border:4px solid var(--blue2)}
@@ -67,17 +67,18 @@
 </head>
 <body>
 <div id="stage">
-  <canvas id="bg" width="1080" height="1920"></canvas>
-  <div class="seg" id="back"></div>
-  <img id="sujeto" alt="">
-  <div class="seg" id="front"></div>
+  <div id="scene">
+    <canvas id="bg" width="1080" height="1920"></canvas>
+    <div class="seg" id="back"></div>
+    <img id="sujeto" alt="">
+    <div class="seg" id="front"></div>
+  </div>
   <div id="win"><iframe id="art" scrolling="no"></iframe></div>
-  <div id="frame"><i></i><i></i><i></i><i></i></div>
-  <div id="frameTag" class="tag"></div>
+  <canvas id="fx" width="1080" height="1920"></canvas>
   <div class="mark" id="mk1"><b></b><b></b><b></b><b></b></div>
-  <div class="mark" id="mk2"><b></b><b></b><b></b><b></b></div>
+  <div id="spot"></div>
   <div class="ripple" id="ripple"></div>
-  <div class="touch" id="touch"></div>
+  <div id="cursor"></div>
   <div id="outro">
     <div id="dim"></div>
     <canvas id="rc" width="1080" height="1920"></canvas>
@@ -88,6 +89,7 @@
   </div>
   <div class="title" id="title"><b id="titleTxt"></b>
     <svg viewBox="0 0 119.52 144.65" aria-label="Rumor"><path fill="#FFFCF1" d="M119.2,141.6l-26.12-41.65c-.36-.56-.99-.9-1.66-.9h-31.2c-1.85,0-2.68-2.31-1.26-3.49l48.05-35.88c7.73-6.4,12.21-15.92,12.21-25.96h0C119.22,15.09,104.13,0,85.52,0H1.97C.88,0,0,.88,0,1.97v32.68c0,1.09.88,1.97,1.97,1.97h59.09c10.4,0,12.25,5.3,4.13,11.79l-30.31,24.18c-15.84,12.64-30.7,24.49-34.13,27.23-.47.37-.74.94-.74,1.54v41.16c0,1.67,1.95,2.58,3.23,1.52l45.93-40.1c.94-.78,2.35-.53,2.96.52l22.91,39.2c.35.61,1,.98,1.7.98h40.81c1.56,0,2.51-1.73,1.66-3.04Z"/></svg></div>
+  <div id="vig"></div>
   <div class="sub" id="sub"></div>
   <canvas id="grain" width="1080" height="1920"></canvas>
 </div>
@@ -219,8 +221,6 @@ function drawTitle(t, step) {
 const img = document.getElementById('sujeto');
 async function drawSubject(seg, lt) {
   let s = segById[seg], f;
-  if (seg === 'vo' && lt < 0.6) { s = segById.p1; f = s.n; }                       // fundido de entrada
-  else if (seg === 'vo' && lt > segById.vo.dur - 0.55) { s = segById.fin; f = 1; } // fundido de salida
   if (!s.frames) { img.style.display = 'none'; return; }
   img.style.display = '';
   if (!f) f = Math.min(s.n, Math.floor(lt * FPS) + 1);
@@ -241,43 +241,64 @@ function grain(step) {
    0,24 "son 15 puntos" · 1,49 "en 5 etapas" · 2,59 "que las vas a hacer en menos de 2 minutos"
    4,68 "el destino" · 5,86 "la medición" · 7,21 "la oferta" · 8,44 "la respuesta" · 9,95 "y el presupuesto"
    11,61 "marcás lo que ya resolviste" · 13,38 "lo que queda en blanco es tu tarea pendiente para esta semana"
-   17,76 "y al final te dice si estás listo" · 20,13 "o todavía no"                                         */
+   17,76 "y al final te dice si estás listo" · 20,13 "o todavía no"
+   Todo lo que pasa en el artefacto lo dispara el cursor con clics reales.                                  */
 const PRE = 4000;   // ms de reloj del artefacto antes del tramo (su fondo ya pasó el arranque)
-const TAPS = [[11.70, 's0i0'], [12.25, 's0i1'], [12.80, 's0i2'], [14.35, 's1i0']];
-const go = i => w => w.eval(`goTo(${i})`);   // goTo es una constante del script del artefacto
-const EV = [
-  [5.80, go(1)], [7.15, go(2)], [8.38, go(3)], [9.88, go(4)],
-  [10.80, go(0)],
-  ...TAPS.map(([t, id]) => [t, (w, d) => d.querySelector(`[data-id="${id}"]`).click()]),
-  // al completar la etapa 01 el artefacto pasa solo a la 02 (0,9 s después)
-  [17.15, go(5)],
+
+/* Recorrido del cursor: [llega, destino, clic?]. Destino en coordenadas del artefacto:
+   {pill:i} pastilla de etapa · {sw:id} interruptor de un check · {sel, ax, ay} cualquier elemento · {x,y} */
+const CUR = [
+  [0.70, { x: 300, y: 640 }],
+  [1.10, { sel: '.ring', ax: .66, ay: .55 }],               // "15 puntos"
+  [1.80, { pill: 0 }], [2.15, { pill: 1 }], [2.50, { pill: 2 }], [2.85, { pill: 3 }],   // "5 etapas"
+  [3.65, { sel: '.hero p', ax: .45, ay: .5 }],              // "menos de 2 minutos"
+  [4.80, { sel: '#etapa-01 h2', ax: .55, ay: .6 }],         // "el destino"
+  [5.80, { pill: 1 }, 1],                                   // "la medición"
+  [7.15, { pill: 2 }, 1],                                   // "la oferta"
+  [8.38, { pill: 3 }, 1],                                   // "la respuesta"
+  [9.88, { pill: 4 }, 1],                                   // "y el presupuesto"
+  [11.10, { sel: '#etapa-05 h2', ax: .6, ay: .6 }],
+  [11.75, { sw: 's4i0' }, 1],                               // "marcás lo que ya resolviste"
+  [12.40, { sw: 's4i1' }, 1],
+  [13.60, { sel: '[data-id="s4i2"]', ax: .4, ay: .45 }],    // "lo que queda en blanco…"
+  [15.20, { sel: '[data-id="s4i2"]', ax: .62, ay: .55 }],
+  [16.40, { sel: '#etapa-05 .next', ax: .3, ay: .5 }],
+  [17.15, { sel: '#etapa-05 .next', ax: .5, ay: .5 }, 1],   // "Ver resultado"
+  [18.30, { sel: '#gNum', ax: .5, ay: .5 }],                // "y al final te dice si estás listo"
+  [20.15, { sel: '#verdict', ax: .62, ay: .6 }],            // "o todavía no"
 ];
-/* Cámara: [entra, duración del movimiento, foco, zoom]. Foco = selector + ancla (0..1) o {x,y} en px del artefacto */
-/* Zoom máximo 1,08: la card (350 px + sombra) siempre entra completa a lo ancho.
-   Con zoom < 1 el artefacto se achica y su fondo plano sigue hasta los bordes. */
+const CLICKS = CUR.filter(c => c[2]).map(c => c[0]);
+const PAGE_FX = [5.80, 7.15, 8.38, 9.88, 17.15];          // transiciones digitales entre páginas
+
+/* Cámara continua (sin frenadas): curva suave que pasa por estos puntos [t, foco, zoom].
+   Zoom ≤ 1,08 en las cards para que entren siempre completas. */
 const CAM = [
-  [0.00, 0.01, { x: 195, y: 346 }, 1.00],                    // la página completa
-  [0.45, 1.00, { x: 195, y: 380 }, 1.06],                    // "15 puntos": el contador
-  [1.45, 0.90, { x: 195, y: 470 }, 1.02],                    // "5 etapas": la tira de etapas
-  [2.50, 1.10, { x: 195, y: 560 }, 0.92],                    // "menos de 2 minutos": se ve todo
-  [4.30, 1.00, { x: 195, y: 926 }, 0.86],                    // las 5 etapas: card completa con aire
-  [5.30, 5.30, { x: 195, y: 926 }, 0.91],                    // empuje lento mientras cambian
-  [12.95, 0.70, { x: 195, y: 926 }, 0.88],                   // etapa completa: READY
-  [13.85, 0.80, { x: 195, y: 926 }, 0.92],                   // 02: lo que queda en blanco
-  [17.10, 0.90, { sel: '#resultado', ax: .5, ay: .5 }, 0.66],// resultado completo (card alta: 942 px)
-  [19.85, 0.80, { sel: '#resultado', ax: .5, ay: .5 }, 0.69],// "o todavía no"
+  [-1.0, { x: 195, y: 346 }, 0.97],
+  [0.00, { x: 195, y: 346 }, 1.00],
+  [1.20, { x: 160, y: 380 }, 1.20],                         // contador
+  [2.50, { x: 195, y: 500 }, 1.06],                         // tira de etapas
+  [3.70, { x: 195, y: 430 }, 0.96],
+  [4.90, { x: 195, y: 926 }, 0.88],                         // card completa
+  [8.00, { x: 195, y: 926 }, 0.91],
+  [11.00, { x: 195, y: 940 }, 0.94],
+  [13.80, { x: 195, y: 960 }, 0.98],                        // checks
+  [16.60, { x: 195, y: 940 }, 0.93],
+  [17.90, { sel: '#resultado', ax: .5, ay: .5 }, 0.66],     // resultado completo
+  [20.85, { sel: '#resultado', ax: .5, ay: .5 }, 0.71],
+  [22.00, { sel: '#resultado', ax: .5, ay: .5 }, 0.72],
 ];
 const WIN = { x: 0, y: 0, w: 1080, h: 1920 }, AW = 390, AH = 1700, S0 = WIN.w / AW;
-const winEl = document.getElementById('win'), art = document.getElementById('art'), frameEl = document.getElementById('frame');
-const touchEl = document.getElementById('touch'), rippleEl = document.getElementById('ripple');
-let A = null;   // estado del artefacto: { w, d, lt, ev, starts }
+const winEl = document.getElementById('win'), art = document.getElementById('art');
+const curEl = document.getElementById('cursor'), spotEl = document.getElementById('spot'), rippleEl = document.getElementById('ripple');
+const fx = document.getElementById('fx'), fxc = fx.getContext('2d');
+let A = null;   // estado del artefacto: { w, d, lt, ci, starts }
 
 function loadArt() {
   return new Promise(res => {
     art.onload = () => {
       const w = art.contentWindow, d = art.contentDocument;
       (d.fonts ? d.fonts.ready : Promise.resolve()).then(() => {
-        A = { w, d, lt: -1, ev: 0, starts: new Map() };
+        A = { w, d, lt: -1, ci: 0, starts: new Map() };
         w.__vt.hook = vt => syncAnims(vt);
         w.__vt.advanceTo(PRE); syncAnims(PRE);
         res();
@@ -295,77 +316,141 @@ function syncAnims(vt) {
     if (ct >= end) an.finish(); else an.currentTime = Math.max(0, ct);
   }
 }
+function targetEl(f) {
+  if (f.pill !== undefined) return A.d.querySelectorAll('.pill')[f.pill];
+  if (f.sw) return A.d.querySelector(`[data-id="${f.sw}"] .sw`);
+  return f.sel ? A.d.querySelector(f.sel) : null;
+}
+function pointOf(f) {
+  const el = targetEl(f);
+  if (!el) return { x: f.x, y: f.y };
+  const r = el.getBoundingClientRect();
+  return { x: r.left + r.width * (f.ax ?? .5), y: r.top + r.height * (f.ay ?? .5) };
+}
 async function artTo(lt) {
   if (!A || lt < A.lt) await loadArt();          // ir hacia atrás: se recarga y se repite desde cero
-  while (A.ev < EV.length && EV[A.ev][0] <= lt) {
-    const [te, fn] = EV[A.ev++];
+  const clicks = CUR.filter(c => c[2]);
+  while (A.ci < clicks.length && clicks[A.ci][0] <= lt) {
+    const [te, f] = clicks[A.ci++];
     A.w.__vt.advanceTo(PRE + te * 1000); syncAnims(PRE + te * 1000);
-    fn(A.w, A.d); syncAnims(PRE + te * 1000);
+    const el = targetEl(f); (el.closest('button') || el).click(); syncAnims(PRE + te * 1000);
   }
   A.w.__vt.advanceTo(PRE + lt * 1000); syncAnims(PRE + lt * 1000);
   A.lt = lt;
 }
-function focusOf(f) {
-  if (!f.sel) return { x: f.x, y: f.y };
-  const r = A.d.querySelector(f.sel).getBoundingClientRect();
-  return { x: r.left + r.width * f.ax, y: r.top + r.height * f.ay };
+
+// Curva de Hermite con tangentes suaves (Catmull-Rom con tiempos desparejos): la cámara nunca se frena en seco
+function hermite(keys, t, get) {
+  let i = 1; while (i < keys.length - 2 && t > keys[i + 1][0]) i++;
+  const k0 = keys[i - 1], k1 = keys[i], k2 = keys[i + 1], k3 = keys[Math.min(keys.length - 1, i + 2)];
+  const p0 = get(k0), p1 = get(k1), p2 = get(k2), p3 = get(k3);
+  const h = k2[0] - k1[0], u = clamp((t - k1[0]) / h);
+  const m1 = (p2 - p0) / (k2[0] - k0[0]) * h, m2 = (p3 - p1) / Math.max(1e-3, k3[0] - k1[0]) * h;
+  const u2 = u * u, u3 = u2 * u;
+  return (2 * u3 - 3 * u2 + 1) * p1 + (u3 - 2 * u2 + u) * m1 + (-2 * u3 + 3 * u2) * p2 + (u3 - u2) * m2;
 }
 function camAt(lt) {
-  let c = { ...focusOf(CAM[0][2]), z: CAM[0][3] };
-  for (const [t, dur, f, z] of CAM) {
-    if (lt < t) break;
-    const tg = focusOf(f), io = 0.5 - 0.5 * Math.cos(Math.PI * clamp((lt - t) / dur));   // seno entrada/salida
-    c = { x: c.x + (tg.x - c.x) * io, y: c.y + (tg.y - c.y) * io, z: c.z + (z - c.z) * io };
-  }
-  c.z *= 1 + 0.008 * Math.sin(lt * 0.7);      // respiración leve de cámara
+  const fc = new Map(CAM.map(k => [k, pointOf(k[1])]));
+  const c = { x: hermite(CAM, lt, k => fc.get(k).x), y: hermite(CAM, lt, k => fc.get(k).y), z: hermite(CAM, lt, k => k[2]) };
+  c.z = clamp(c.z, 0.6, c.y > 560 ? 1.08 : 1.25) * (1 + 0.006 * Math.sin(lt * 0.8));
   const S = S0 * c.z, hw = WIN.w / 2 / S, hh = WIN.h / 2 / S;
-  c.x = hw * 2 >= AW ? AW / 2 : clamp(c.x, hw, AW - hw);      // si entra todo el ancho, centrado
-  c.y = Math.max(c.y, hh);                                     // arriba no se pasa del inicio de la página
+  c.x = hw * 2 >= AW ? AW / 2 : clamp(c.x, hw, AW - hw);
+  c.y = Math.max(c.y, hh);
   return { S, tx: WIN.w / 2 - c.x * S, ty: WIN.h / 2 - c.y * S };
 }
-const toReel = (cam, x, y) => ({ x: WIN.x + cam.tx + x * cam.S, y: WIN.y + cam.ty + y * cam.S });
+const toReel = (cam, p) => ({ x: WIN.x + cam.tx + p.x * cam.S, y: WIN.y + cam.ty + p.y * cam.S });
+
+// Cursor: viaja en arco suave entre destinos y se asienta; al hacer clic se achica y deja una onda
+function cursorAt(lt, cam) {
+  let i = 0; while (i < CUR.length - 1 && lt >= CUR[i + 1][0]) i++;
+  const a = CUR[i], b = CUR[Math.min(i + 1, CUR.length - 1)];
+  const pa = toReel(cam, pointOf(a[1]));
+  if (a === b || lt < a[0]) return pa;
+  const pb = toReel(cam, pointOf(b[1]));
+  const dist = Math.hypot(pb.x - pa.x, pb.y - pa.y);
+  const mv = clamp(0.32 + dist / 1600, 0.38, Math.min(0.95, b[0] - a[0]));
+  const u = clamp((lt - (b[0] - mv)) / mv), e = u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
+  const nx = -(pb.y - pa.y) / (dist || 1), ny = (pb.x - pa.x) / (dist || 1), bow = dist * 0.12 * (i % 2 ? 1 : -1) * Math.sin(Math.PI * e);
+  return { x: pa.x + (pb.x - pa.x) * e + nx * bow, y: pa.y + (pb.y - pa.y) * e + ny * bow };
+}
+
+// Transición digital entre páginas: una ola de celdas + − % barre la pantalla y la imagen se separa en RGB
+function drawPageFx(lt) {
+  fxc.clearRect(0, 0, 1080, 1920);
+  let k = -1; for (const t of PAGE_FX) if (lt >= t - 0.12 && lt < t + 0.5) k = (lt - (t - 0.12)) / 0.62;
+  if (k < 0) return 0;
+  const C = 54, front = k * 1.5 - 0.25, step = Math.floor(lt * 30);
+  fxc.font = '700 24px "IBM Plex Mono", monospace'; fxc.textAlign = 'center'; fxc.textBaseline = 'middle';
+  for (let j = 0; j * C < 1920; j++) for (let i = 0; i * C < 1080; i++) {
+    const ph = (i * C) / 1080 * 0.65 + (j * C) / 1920 * 0.35 + (hash(i, j) - .5) * 0.08;
+    const d = front - ph; if (d < 0 || d > 0.22) continue;
+    const r = hash(i * 3 + step, j), a = 1 - d / 0.22;
+    const x = i * C, y = j * C;
+    fxc.globalAlpha = a * (r < 0.15 ? 0.3 : 1);
+    if (r < 0.45) { fxc.fillStyle = '#003AFE'; fxc.fillRect(x, y, C, C); fxc.fillStyle = '#FFFCF1'; fxc.fillText('+', x + C / 2, y + C / 2 + 1); }
+    else if (r < 0.62) { fxc.fillStyle = '#FFFCF1'; fxc.fillRect(x, y, C, C); fxc.fillStyle = '#191919'; fxc.fillText('%', x + C / 2, y + C / 2 + 1); }
+    else if (r < 0.8) { fxc.fillStyle = '#191919'; fxc.fillRect(x, y, C, C); fxc.fillStyle = '#0057FF'; fxc.fillText('−', x + C / 2, y + C / 2 + 1); }
+  }
+  fxc.globalAlpha = 1;
+  return Math.sin(Math.PI * clamp(k));   // intensidad para la separación RGB
+}
 
 async function drawArt(seg, lt) {
   const on = seg === 'vo';
-  winEl.style.visibility = on ? 'visible' : 'hidden'; frameEl.style.display = 'none';
-  touchEl.style.display = rippleEl.style.display = 'none';
-  ['mk1', 'mk2'].forEach(id => document.getElementById(id).style.display = 'none');
-  if (!on) return;
+  winEl.style.visibility = on ? 'visible' : 'hidden';
+  curEl.style.display = spotEl.style.display = rippleEl.style.display = 'none';
+  document.getElementById('mk1').style.display = 'none';
+  if (!on) { fxc.clearRect(0, 0, 1080, 1920); return; }
   await artTo(lt);
   const cam = camAt(lt);
   art.style.transform = `translate(${cam.tx}px,${cam.ty}px) scale(${cam.S})`;
 
-  // Entrada y salida: fundido suave desde/hacia el sujeto, con una leve escala y desenfoque
+  // Entrada/salida "de acción": llega desde un zoom con desenfoque de movimiento y se va igual
   const dur = segById.vo.dur;
-  const fin = ease(lt / 0.6), fout = ease((dur - lt) / 0.55), f = Math.min(fin, fout);
-  winEl.style.opacity = f;
-  winEl.style.transform = `scale(${1 + 0.05 * (1 - f)})`;
-  winEl.style.filter = f < 1 ? `blur(${(1 - f) * 10}px)` : 'none';
-  frameEl.style.display = 'none';
+  const kin = 1 - ease(lt / 0.5), kout = clamp((lt - (dur - 0.38)) / 0.38) ** 3;
+  const g = drawPageFx(lt);
+  const sc = 1 + 0.32 * kin + 0.45 * kout, bl = 22 * Math.max(kin, kout);
+  winEl.style.opacity = Math.min(1, lt / 0.08);
+  winEl.style.transform = `scale(${sc * (1 + 0.012 * g)})`;
+  const rgb = g > 0.02 ? ` drop-shadow(${7 * g}px 0 0 rgba(227,38,43,.55)) drop-shadow(${-7 * g}px 0 0 rgba(0,87,255,.6))` : '';
+  winEl.style.filter = (bl > 0.3 ? `blur(${bl}px) brightness(${1 + 0.25 * kout})` : '') + rgb || 'none';
 
-  // Toques: el círculo llega, presiona y deja una onda
-  for (const [tt, id] of TAPS) {
-    if (lt < tt - 0.32 || lt > tt + 0.4) continue;
-    const r = A.d.querySelector(`[data-id="${id}"] .sw`).getBoundingClientRect();
-    const p = toReel(cam, r.left + r.width / 2, r.top + r.height / 2);
-    const k = (lt - tt);
-    touchEl.style.display = 'block';
-    Object.assign(touchEl.style, { left: p.x + 'px', top: p.y + 'px',
-      opacity: k < 0 ? ease((k + 0.32) / 0.15) : 1 - ease((k - 0.15) / 0.25),
-      transform: `scale(${k < -0.08 ? 1.15 - 0.15 * ease((k + 0.32) / 0.24) : k < 0.08 ? 0.82 : 0.82 + 0.18 * ease((k - 0.08) / 0.15)})` });
-    if (k > 0) { rippleEl.style.display = 'block'; Object.assign(rippleEl.style, { left: p.x + 'px', top: p.y + 'px', opacity: 1 - ease(k / 0.4), transform: `scale(${1 + 1.4 * ease(k / 0.4)})` }); }
+  // Cursor con halo
+  const vis = clamp((lt - 0.45) / 0.25) * (1 - clamp((lt - (dur - 0.45)) / 0.2));
+  if (vis > 0) {
+    const p = cursorAt(lt, cam);
+    let press = 1;
+    for (const tc of CLICKS) { const k = lt - tc; if (k > -0.1 && k < 0.25) press = Math.min(press, k < 0 ? 1 - 0.3 * ease((k + 0.1) / 0.1) : 0.7 + 0.3 * ease(k / 0.25)); if (k >= 0 && k < 0.45) {
+      rippleEl.style.display = 'block'; Object.assign(rippleEl.style, { left: p.x + 'px', top: p.y + 'px', opacity: 0.9 * (1 - ease(k / 0.45)), transform: `scale(${1 + 1.6 * ease(k / 0.45)})` }); } }
+    curEl.style.display = spotEl.style.display = 'block';
+    Object.assign(curEl.style, { left: p.x + 'px', top: p.y + 'px', opacity: vis, transform: `scale(${press})` });
+    Object.assign(spotEl.style, { left: p.x + 'px', top: p.y + 'px', opacity: vis });
   }
-  // "Lo que queda en blanco": esquinas que marcan los checks pendientes de la 02
-  if (lt > 14.9 && lt < 17.05) {
-    ['s1i1', 's1i2'].forEach((id, i) => {
-      const tin = 14.9 + i * 0.25; if (lt < tin) return;
-      const r = A.d.querySelector(`[data-id="${id}"]`).getBoundingClientRect();
-      const a = toReel(cam, r.left, r.top), b = toReel(cam, r.right, r.bottom), m = document.getElementById('mk' + (i + 1));
-      const pin = ease((lt - tin) / 0.35), blink = 1;
-      Object.assign(m.style, { display: 'block', left: a.x - 6 + 'px', top: a.y - 6 + 'px', width: b.x - a.x + 12 + 'px', height: b.y - a.y + 12 + 'px',
-        opacity: pin * (lt > 16.85 ? 1 - ease((lt - 16.85) / 0.2) : blink), transform: `scale(${1.12 - 0.12 * pin})` });
-    });
+  // "Lo que queda en blanco": esquinas sobre el check pendiente
+  if (lt > 13.5 && lt < 17.0) {
+    const r = A.d.querySelector('[data-id="s4i2"]').getBoundingClientRect();
+    const a = toReel(cam, { x: r.left, y: r.top }), b = toReel(cam, { x: r.right, y: r.bottom }), m = document.getElementById('mk1');
+    const pin = ease((lt - 13.5) / 0.4), pout = 1 - ease((lt - 16.75) / 0.25);
+    Object.assign(m.style, { display: 'block', left: a.x - 6 + 'px', top: a.y - 6 + 'px', width: b.x - a.x + 12 + 'px', height: b.y - a.y + 12 + 'px',
+      opacity: pin * pout, transform: `scale(${1.1 - 0.1 * pin})` });
   }
+}
+
+/* Cámara de la escena del sujeto: apertura con "lente que hace foco" y entrada/salida de acción */
+const sceneEl = document.getElementById('scene');
+function drawScene(seg, lt) {
+  let s = 1, bl = 0, br = 1;
+  if (seg === 'p1') {
+    const o = 1 - Math.pow(1 - clamp(lt / 0.75), 4);               // apertura: foco + zoom in
+    s = 1 + 0.08 * o + 0.012 * (lt / 10); bl = 14 * (1 - o); br = 0.85 + 0.15 * o;
+    const k = clamp((lt - (segById.p1.dur - 0.38)) / 0.38) ** 3;    // salida: empuje con desenfoque
+    s *= 1 + 0.45 * k; bl = Math.max(bl, 22 * k); br += 0.25 * k;
+  } else if (seg === 'fin') {
+    const k = 1 - ease(lt / 0.5);                                  // entrada: llega desde el empuje
+    s = (1.08 + 0.01 * (lt / 5)) * (1 + 0.32 * k); bl = 22 * k; br = 1 + 0.2 * k;
+  }
+  sceneEl.style.transform = `scale(${s})`;
+  sceneEl.style.filter = bl > 0.3 || br !== 1 ? `blur(${bl}px) brightness(${br})` : 'none';
 }
 
 /* ===================== CIERRE: el isotipo se arma con las celdas de la grilla ===================== */
@@ -422,6 +507,7 @@ window.seek = async (tl) => {
   const showTitle = seg.id === 'p1' || seg.id === 'fin';
   titleEl.style.display = showTitle ? '' : 'none';
   if (showTitle) drawTitle(lt, step);
+  drawScene(seg.id, lt);
   await drawArt(seg.id, lt);
   drawOutro(seg.id, lt, step);
   await drawSubject(seg.id, lt);
