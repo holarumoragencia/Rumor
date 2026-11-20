@@ -14,14 +14,17 @@
   #bg{display:block;width:100%;height:100%}
 
   /* Título fijo arriba (dentro de zona segura) */
-  .title{position:absolute;left:0;right:0;top:290px;text-align:center;font-weight:900;font-stretch:125%;font-variation-settings:"wdth" 125;
-    font-size:64px;line-height:1;letter-spacing:-.02em;text-transform:uppercase}
+  /* Título como el footer del artefacto: alineado a la izquierda + isotipo */
+  .title{position:absolute;left:66px;top:286px;display:flex;flex-direction:column;align-items:flex-start;gap:22px}
+  .title b{font-weight:900;font-stretch:125%;font-variation-settings:"wdth" 125;font-size:72px;line-height:1;letter-spacing:-.02em;color:var(--paper)}
   .title em{font-style:normal;color:var(--blue2)}
-  .title span{background:var(--black);padding:10px 18px 12px}
+  .title svg{width:52px;height:auto;display:block}
+  .con-fondo .title b{background:var(--black);padding:8px 16px 12px;margin-left:-16px}
+  .con-fondo .title svg{background:var(--black);padding:10px 12px;margin-left:-12px;box-sizing:content-box}
 
   /* Recuadros con copies (estilo Boolean Sequence) */
   .box{position:absolute;background:var(--black);color:var(--paper);font-weight:500;font-size:31px;line-height:1.18;padding:18px 22px 20px;letter-spacing:-.005em}
-  .tag{position:absolute;background:var(--blue);color:var(--paper);font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:19px;letter-spacing:.14em;text-transform:uppercase;padding:9px 14px;line-height:1}
+  .tag{position:absolute;background:var(--blue);color:var(--paper);font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:21px;letter-spacing:.02em;padding:9px 14px;line-height:1}
   .tag.k{background:var(--black);color:var(--paper)}
   .seg{position:absolute;display:flex;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:21px;letter-spacing:.06em}
   .seg i{font-style:normal;display:block;padding:.55em .75em;border:2px solid var(--blue2);margin-left:-2px;background:var(--black);color:var(--paper)}
@@ -69,7 +72,8 @@
   <div class="seg" style="right:-4px;top:1650px;font-size:30px"><i>+/−</i><i class="on">07 días</i><i>27/11</i></div>
   <div class="tag k" style="right:40px;top:1730px;font-size:22px;padding:11px 16px">Black Friday ready</div>
 
-  <div class="title"><span>Black Friday <em>2026</em></span></div>
+  <div class="title"><b>Black Friday <em>2026</em></b>
+    <svg viewBox="0 0 119.52 144.65" aria-label="Rumor"><path fill="#FFFCF1" d="M119.2,141.6l-26.12-41.65c-.36-.56-.99-.9-1.660-.9h-31.2c-1.85,0-2.680-2.31-1.260-3.49l48.05-35.88c7.730-6.400,12.210-15.920,12.210-25.960h0C119.22,15.09,104.13,0,85.52,0H1.97C.88,0,0,.88,0,1.970v32.680c0,1.090.88,1.970,1.970,1.970h59.090c10.400,0,12.250,5.300,4.130,11.790l-30.310,24.180c-15.840,12.640-30.700,24.490-34.130,27.230-.47.370-.74.940-.74,1.540v41.160c0,1.670,1.950,2.580,3.230,1.520l45.930-40.100c.94-.78,2.350-.53,2.960.52l22.910,39.200c.35.610,1,.98,1.700.98h40.810c1.560,0,2.510-1.730,1.660-3.040Z"/></svg></div>
   <div class="sub" id="sub">campaña</div>
 
   <canvas id="grain" width="1080" height="1920"></canvas>
@@ -86,6 +90,7 @@
   const Q = new URLSearchParams(location.search);
   if (Q.has('capture')) document.body.classList.add('capture');
   if (Q.has('guias')) document.body.classList.add('guias');
+  if (Q.has('fondo')) document.body.classList.add('con-fondo');
   const G = RumorGrid(document.getElementById('bg'), { modo: 'pleno' });
 
   // grano determinista (cambia a 12 pasos/seg como el fondo)
