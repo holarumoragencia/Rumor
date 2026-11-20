@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&display=swap" rel="stylesheet">
 <style>
-  :root{--black:#191919;--paper:#FFFCF1;--blue:#003AFE;--blue2:#0057FF;--muted:#77756c;--line:#ddd8c6}
+  :root{--black:#191919;--paper:#FFFCF1;--ice:#EDF1FF;--blue:#003AFE;--blue2:#0057FF;--muted:#77756c;--line:#ddd8c6}
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{background:var(--black)}
   body{color:var(--black);font-family:Arial,Helvetica,sans-serif;line-height:1.4;-webkit-font-smoothing:antialiased;overflow-x:hidden}
@@ -73,13 +73,13 @@
   .count small{font-size:20px;opacity:.4}
   .card.done .count{opacity:0}
   .big{font-family:"Archivo",Arial,Helvetica,sans-serif;font-weight:900;font-size:clamp(96px,22vw,132px);line-height:.78;letter-spacing:-.05em;
-    color:transparent;-webkit-text-stroke:2px var(--blue);transition:color .35s,-webkit-text-stroke-color .35s}
+    color:var(--black);-webkit-text-stroke:2px var(--black);transition:color .35s,-webkit-text-stroke-color .35s}
   .en{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);transition:color .35s}
   .card h2{font-family:"Archivo",Arial,Helvetica,sans-serif;font-weight:800;font-size:30px;letter-spacing:-.02em;margin-top:18px;position:relative;z-index:1}
   .why{color:var(--muted);font-size:15px;margin:6px 0 18px;position:relative;z-index:1;transition:color .35s}
   .tiles{display:flex;flex-direction:column;gap:10px;position:relative;z-index:1}
   .tile{display:flex;align-items:center;gap:14px;width:100%;text-align:left;cursor:pointer;
-    background:var(--paper);border:2px solid var(--black);border-radius:16px;padding:15px 14px 15px 16px;
+    background:var(--ice);border:2px solid var(--black);border-radius:16px;padding:15px 14px 15px 16px;
     transition:transform .12s,background .25s,color .25s,box-shadow .12s;box-shadow:0 3px 0 var(--black)}
   .tile:hover{transform:translateY(-1px);box-shadow:0 4px 0 var(--black)}
   .tile:active{transform:translateY(2px) scale(.985);box-shadow:0 1px 0 var(--black)}
@@ -87,7 +87,7 @@
   .tile .t{flex:1}
   .tile b{display:block;font-size:16px;line-height:1.25}
   .tile small{display:block;font-size:13px;opacity:.65;margin-top:4px}
-  .sw{flex:none;width:54px;height:32px;border-radius:32px;background:#d6d1bf;position:relative;transition:background .25s}
+  .sw{flex:none;width:54px;height:32px;border-radius:32px;background:#C7D2F6;position:relative;transition:background .25s}
   .sw::after{content:"";position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;
     box-shadow:0 1px 3px rgba(0,0,0,.35);transition:transform .35s cubic-bezier(.3,1.7,.5,1)}
   .tile[aria-checked="true"]{background:var(--black);color:var(--paper)}
