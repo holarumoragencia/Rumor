@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Checklist Black Friday — Rumor Agencia</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&display=swap" rel="stylesheet">
 <style>
   :root{--black:#191919;--paper:#FFFCF1;--blue:#003AFE;--blue2:#0057FF;--muted:#77756c;--line:#ddd8c6}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -30,14 +30,19 @@
   .when .d{font-family:"Archivo",Arial,Helvetica,sans-serif;font-weight:900;font-size:26px;letter-spacing:-.02em;line-height:1;background:#fff;color:var(--blue);border-radius:6px;padding:5px 8px}
   .when .l{font-size:12px;letter-spacing:.08em;text-transform:uppercase;line-height:1.25}
   .hero p{margin-top:16px;color:rgba(255,252,241,.75);font-size:16px;max-width:440px}
-  .ring{position:relative;width:clamp(120px,26vw,190px);aspect-ratio:1}
-  .ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+  /* contador: píldora que se llena + número apaisado */
+  .ring{position:relative;width:clamp(220px,19vw,250px);aspect-ratio:220/112}
+  .ring svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
   .ring .bg{stroke:rgba(255,252,241,.14)}
-  .ring .fg{stroke:var(--blue2);transition:stroke-dashoffset .6s cubic-bezier(.3,1.3,.5,1)}
-  .ring-txt{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
-  .ring-txt b{font-family:"Archivo",Arial,Helvetica,sans-serif;font-weight:900;font-size:clamp(34px,7vw,54px);line-height:1;letter-spacing:-.03em}
-  .ring-txt span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.6;margin-top:4px}
-  @media (max-width:560px){.hero-grid{grid-template-columns:1fr}.ring{justify-self:start;width:120px}}
+  .ring .fg{stroke:var(--blue2);transition:stroke-dashoffset .6s cubic-bezier(.3,1.3,.5,1),opacity .2s}
+  .ring-txt{position:absolute;inset:0;padding-top:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .ring-seq{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:.06em;line-height:1;white-space:nowrap}
+  .ring-seq i{font-style:normal;color:rgba(255,252,241,.35);transition:color .3s}
+  .ring-seq i.on{color:var(--blue2)}
+  .ring-txt b{font-family:"Archivo",Arial,Helvetica,sans-serif;font-weight:900;font-stretch:125%;font-variation-settings:"wdth" 125;
+    font-size:clamp(44px,4.4vw,54px);line-height:.9;letter-spacing:-.02em;margin:5px 0 4px;font-variant-numeric:tabular-nums}
+  .ring-txt .cap{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:.06em;color:rgba(255,252,241,.55)}
+  @media (max-width:560px){.hero-grid{grid-template-columns:1fr}.ring{justify-self:start;width:220px}}
 
   /* ---------- STAGE STRIP ---------- */
   .strip{position:sticky;top:0;z-index:10;background:rgba(25,25,25,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,252,241,.12)}
@@ -174,9 +179,9 @@
         <p data-rbf-avoid="text">15 checks en 5 etapas. Tocá lo que ya tenés resuelto. Lo que quede sin marcar es tu tarea antes del jueves 26.</p>
       </div>
       <div class="ring" aria-hidden="true" data-rbf-avoid>
-        <svg viewBox="0 0 120 120"><circle class="bg" cx="60" cy="60" r="52" fill="none" stroke-width="10"/>
-          <circle class="fg" id="ringFg" cx="60" cy="60" r="52" fill="none" stroke-width="10" stroke-linecap="round"/></svg>
-        <div class="ring-txt"><b id="ringNum">0</b><span>de 15</span></div>
+        <svg viewBox="0 0 220 112"><path class="bg" d="M110 6H160A50 50 0 0 1 160 106H60A50 50 0 0 1 60 6Z" fill="none" stroke-width="7"/>
+          <path class="fg" id="ringFg" pathLength="100" d="M110 6H160A50 50 0 0 1 160 106H60A50 50 0 0 1 60 6Z" fill="none" stroke-width="7" stroke-linecap="round"/></svg>
+        <div class="ring-txt"><span class="ring-seq" id="ringSeq"></span><b id="ringNum">00</b><span class="cap">de 15 checks</span></div>
       </div>
     </div>
   </div>
@@ -280,7 +285,7 @@ rp.type = "button"; rp.className = "pill res"; rp.innerHTML = `<span class="pn">
 strip.appendChild(rp); pills.push(rp);
 
 // geometry
-const ringFg = document.getElementById("ringFg"), RC = 2 * Math.PI * 52;
+const ringFg = document.getElementById("ringFg"), RC = 100;
 ringFg.style.strokeDasharray = RC;
 const gFg = document.getElementById("gFg"), GL = gFg.getTotalLength();
 gFg.style.strokeDasharray = GL;
@@ -344,8 +349,12 @@ function render(){
     pills[si].classList.toggle("full", n === 3);
     pills[si].querySelectorAll(".dots i").forEach((d, di) => d.classList.toggle("on", di < n));
   });
-  document.getElementById("ringNum").textContent = total;
+  document.getElementById("ringNum").textContent = String(total).padStart(2, "0");
   ringFg.style.strokeDashoffset = RC * (1 - total / TOTAL);
+  ringFg.style.opacity = total ? 1 : 0;
+  // secuencia booleana: un signo por check (+ hecho / − pendiente), agrupada por etapa
+  document.getElementById("ringSeq").innerHTML = STAGES.map((s, si) => [0,1,2].map(ii =>
+    state[`s${si}i${ii}`] ? '<i class="on">+</i>' : '<i>−</i>').join("")).join(" ");
   document.getElementById("gNum").textContent = total;
   gFg.style.strokeDashoffset = GL * (1 - total / TOTAL);
   gFg.style.stroke = total === TOTAL ? "#0057FF" : total >= 11 ? "#6f8dff" : total > 0 ? "#FFFCF1" : "rgba(255,252,241,.3)";
