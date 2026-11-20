@@ -9,19 +9,9 @@
   html,body{margin:0;background:#0e0e0e;color:#FFFCF1;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
   .demo-wrap{padding:24px 16px 48px;max-width:1960px;margin:0 auto;display:grid;gap:28px}
   .demo-label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.55;margin:0 0 8px}
-  .demo-row{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start}
-  .hero{position:relative;overflow:hidden;background:#191919;border-radius:4px}
-  .hero--desk{width:100%;height:420px}
+    .hero{position:relative;overflow:hidden;background:#191919;border-radius:4px}
+  .hero--desk{width:100%;height:490px}
   .hero--mob{width:390px;max-width:100%;height:480px}
-  .mock{position:absolute;inset:0;z-index:1;pointer-events:none;display:flex;padding:32px}
-  .hero--desk .mock{align-items:center;justify-content:space-between}
-  .hero--mob .mock{flex-direction:column;padding:24px}
-  .mock h1{margin:0;font-size:clamp(26px,3vw,46px);line-height:1.05;font-weight:800;max-width:560px}
-  .mock h1 span{color:#0057FF}
-  .mock p{margin:12px 0 0;opacity:.8;max-width:460px;font-size:15px}
-  .ring{width:220px;height:220px;border-radius:50%;border:3px solid #FFFCF1;display:grid;place-items:center;font-size:40px;font-weight:800;margin-right:8%;background:rgba(25,25,25,.35)}
-  .toggle{font:inherit;font-size:13px;background:#FFFCF1;color:#191919;border:0;border-radius:3px;padding:8px 12px;cursor:pointer;justify-self:start}
-  .hide-mock .mock{display:none}
   /* ====== FIN DEMO ====== */
 </style>
 
@@ -36,32 +26,20 @@
 </head>
 <body>
 
-<div class="demo-wrap" id="demo">
-  <button class="toggle" onclick="document.getElementById('demo').classList.toggle('hide-mock')">Mostrar / ocultar texto de prueba</button>
-
+<div class="demo-wrap">
   <div>
-    <p class="demo-label">Compu · 100% × 420 px</p>
+    <p class="demo-label">Vista previa · compu · 100% × 490 px</p>
     <section class="hero hero--desk">
       <!-- ================================================================
            BLOQUE A COPIAR · 2/3 · HTML (va como primer hijo de la portada)
            ================================================================ -->
       <div class="rbf-bg" aria-hidden="true"><canvas></canvas></div>
       <!-- ============================================================== -->
-      <div class="mock">
-        <div><h1>Checklist <span>Black Friday</span></h1><p>Texto de prueba para chequear contraste sobre el fondo.</p></div>
-        <div class="ring">12:04</div>
-      </div>
     </section>
   </div>
-
-  <div class="demo-row">
-    <div>
-      <p class="demo-label">Celular · 390 × 480 px</p>
-      <section class="hero hero--mob">
-        <div class="rbf-bg" aria-hidden="true"><canvas></canvas></div>
-        <div class="mock"><h1>Checklist <span>Black Friday</span></h1><p>Texto de prueba para chequear contraste.</p></div>
-      </section>
-    </div>
+  <div>
+    <p class="demo-label">Vista previa · celular · 390 × 480 px</p>
+    <section class="hero hero--mob"><div class="rbf-bg" aria-hidden="true"><canvas></canvas></div></section>
   </div>
 </div>
 
@@ -85,12 +63,22 @@
   var WIPE = 0.22;           // fracción de cada tema que dura el barrido al siguiente
   var STATIC_T = 0.12;       // momento usado con prefers-reduced-motion (tema azul)
 
+  /* ---------- Zonas que quedan oscuras (compu) ----------
+     Medido sobre la portada real: contenido centrado de 1300 px máx.,
+     título hasta el 72% del contenido, contador centrado en el 91% / 57% del alto. */
+  var LAYOUT = {
+    contentMax: 1300, pad: 32,   // ancho máx. del contenido y margen lateral (px)
+    textEnd: 0.72,               // hasta dónde llega el texto (fracción del contenido)
+    counterX: 0.91, counterY: 0.57, counterR: 125, // centro y radio exterior del contador (px)
+    topBar: 95                   // franja superior con logo y etiqueta (px)
+  };
+
   /* ---------- Temas (dos valores por celda: apagada / prendida) ----------
      off: signo chico sobre negro · on: bloque de color con el signo opuesto
      thr: umbral de la mancha (más alto = menos superficie prendida)            */
   var THEMES = [
     { name: 'azul',   block: C.blue,  onInk: C.white, onG: ['+'],        offInk: C.blue2, offG: '-',   offA: 0.55, thr: -0.02 },
-    { name: 'blanco', block: C.white, onInk: C.black, onG: ['%', '50'],  offInk: C.white, offG: 'dot', offA: 0.20, thr: 0.10 },
+    { name: 'blanco', block: C.white, onInk: C.black, onG: ['%', '50'],  offInk: C.white, offG: 'dot', offA: 0.20, thr: 0.24 },
     { name: 'rojo',   block: C.red,   onInk: C.black, onG: ['-'],        offInk: C.red,   offG: '+',   offA: 0.50, thr: 0.02 }
   ];
 
@@ -163,6 +151,8 @@
       sprites = buildSprites(px);
 
       var a = smooth(0.85, 1.7, W / H);          // 0 = celu vertical · 1 = compu apaisada
+      var cw = Math.min(W - 2 * LAYOUT.pad, LAYOUT.contentMax), cl = (W - cw) / 2;
+      var tEnd = cl + LAYOUT.textEnd * cw, cX = cl + LAYOUT.counterX * cw, cY = H * LAYOUT.counterY;
       var n = cols * rows;
       U = new Float32Array(n); WT = new Float32Array(n);
       for (var j = 0; j < rows; j++) for (var i = 0; i < cols; i++) {
@@ -172,7 +162,11 @@
         U[k] = (xn * 0.45 + yn * 0.55) * (1 - a) + (xn * 0.85 + yn * 0.15) * a;
         // Presencia: celu → tercio inferior-derecho · compu → franja centro-derecha
         var wm = smooth(0.3, 0.85, yn) * (0.6 + 0.4 * xn);
-        var wd = smooth(0.34, 0.74, xn) * (1 - 0.3 * Math.abs(yn - 0.5) * 2);
+        var X = xn * W, Y = yn * H;
+        var wd = smooth(tEnd, tEnd + 0.07 * cw, X)                       // nada detrás del texto
+               * smooth(LAYOUT.topBar * 0.7, LAYOUT.topBar * 1.15, Y);   // ni del logo / etiqueta
+        var dc = Math.sqrt((X - cX) * (X - cX) + (Y - cY) * (Y - cY));
+        wd *= smooth(LAYOUT.counterR, LAYOUT.counterR * 1.3, dc);                     // contador siempre limpio
         WT[k] = wm * (1 - a) + wd * a;
       }
       lastKey = -1;
