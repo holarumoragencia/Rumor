@@ -18,7 +18,7 @@ TRAMOS = {
   'vo': [  # voz_de_fondo_del_medio.wav (se usa hasta 21,75 s; lo que sigue se repite en el final)
     (1.14, 2.18, 'Son 15 puntos'),
     (2.39, 3.31, 'en 5 etapas'),
-    (3.49, 5.01, 'que lo hacés en menos de 2 minutos'),
+    (3.49, 5.01, 'que las vas a hacer en menos de 2 minutos'),
     (5.58, 6.23, 'El destino'),
     (6.76, 7.59, 'La medición'),
     (8.11, 8.81, 'La oferta'),
@@ -33,7 +33,7 @@ TRAMOS = {
   ],
   'fin': [  # final.mp4
     (0.70, 3.40, 'Si querés usar esta herramienta gratuita comentá Black'),
-    (3.78, 4.83, 'y te la enviamos por privado'),
+    (3.78, 4.83, 'y te lo enviamos por privado'),
   ],
 }
 LEER = {'15': 'quince', '7': 'siete', '5': 'cinco', '2': 'dos'}

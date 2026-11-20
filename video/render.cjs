@@ -26,6 +26,7 @@ const FRAMES_DIR = path.join(__dirname, 'out', 'frames');
   page.on('pageerror', e => { console.error('page error:', e); process.exit(1); });
   await page.goto('file://' + PAGE + '?capture' + QUERY);
   await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(() => window.READY);
   const stage = await page.$('#stage');
 
   if (args.still !== undefined) {

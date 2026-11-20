@@ -36,6 +36,33 @@
     color:#fff;-webkit-text-stroke:8px var(--black);paint-order:stroke fill;text-shadow:0 4px 0 var(--black);transform-origin:50% 60%}
 
   #grain{position:absolute;inset:0;width:100%;height:100%;mix-blend-mode:soft-light;opacity:.22;pointer-events:none}
+
+  /* ---------- Tramo del artefacto ---------- */
+  #win{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:hidden;background:var(--black);visibility:hidden}
+  #art{position:absolute;left:0;top:0;width:390px;height:1400px;border:0;transform-origin:0 0;background:var(--black)}
+  #frame{position:absolute;pointer-events:none;border:2px solid rgba(255,252,241,.6);display:none}
+  #frame i{position:absolute;width:14px;height:14px;background:var(--paper)}
+  #frame i:nth-child(1){left:-8px;top:-8px}#frame i:nth-child(2){right:-8px;top:-8px}
+  #frame i:nth-child(3){left:-8px;bottom:-8px}#frame i:nth-child(4){right:-8px;bottom:-8px}
+  #frameTag{position:absolute;display:none}
+  /* toque (dedo) */
+  .touch{position:absolute;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;pointer-events:none;display:none;
+    background:rgba(255,252,241,.22);border:2px solid rgba(255,252,241,.85);box-shadow:0 6px 18px rgba(0,0,0,.25)}
+  .ripple{position:absolute;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;border:2px solid var(--paper);pointer-events:none;display:none}
+  /* marcas de "pendiente" sobre los checks sin marcar */
+  .mark{position:absolute;pointer-events:none;display:none}
+  .mark b{position:absolute;width:26px;height:26px;border:4px solid var(--blue2)}
+  .mark b:nth-child(1){left:-10px;top:-10px;border-right:0;border-bottom:0}.mark b:nth-child(2){right:-10px;top:-10px;border-left:0;border-bottom:0}
+  .mark b:nth-child(3){left:-10px;bottom:-10px;border-right:0;border-top:0}.mark b:nth-child(4){right:-10px;bottom:-10px;border-left:0;border-top:0}
+
+  /* ---------- Cierre ---------- */
+  #outro{position:absolute;inset:0;display:none}
+  #dim{position:absolute;inset:0;background:var(--black)}
+  #rc{position:absolute;inset:0;width:100%;height:100%}
+  .imago{position:absolute;left:110px;top:750px;width:860px;height:auto}
+  #imagoR{clip-path:inset(0 0 48% 0)}
+  #outTag{position:absolute;left:0;right:0;top:1218px;text-align:center}
+  #outTag span{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:30px;letter-spacing:.02em;color:var(--paper);background:var(--blue);padding:12px 20px;display:inline-block;white-space:pre}
 </style>
 </head>
 <body>
@@ -44,6 +71,21 @@
   <div class="seg" id="back"></div>
   <img id="sujeto" alt="">
   <div class="seg" id="front"></div>
+  <div id="win"><iframe id="art" scrolling="no"></iframe></div>
+  <div id="frame"><i></i><i></i><i></i><i></i></div>
+  <div id="frameTag" class="tag"></div>
+  <div class="mark" id="mk1"><b></b><b></b><b></b><b></b></div>
+  <div class="mark" id="mk2"><b></b><b></b><b></b><b></b></div>
+  <div class="ripple" id="ripple"></div>
+  <div class="touch" id="touch"></div>
+  <div id="outro">
+    <div id="dim"></div>
+    <canvas id="rc" width="1080" height="1920"></canvas>
+    <svg id="isoPath" style="display:none" viewBox="0 0 119.52 144.65"><path d="M119.2,141.6l-26.12-41.65c-.36-.56-.99-.9-1.66-.9h-31.2c-1.850,0-2.68-2.31-1.26-3.49l48.05-35.88c7.73-6.4,12.21-15.92,12.21-25.96h0C119.22,15.09,104.13,0,85.52,0H1.97C.88,0,0,.88,0,1.97v32.68c0,1.09.88,1.97,1.97,1.97h59.09c10.4,0,12.25,5.3,4.13,11.79l-30.31,24.18c-15.84,12.64-30.7,24.49-34.13,27.23-.47.37-.74.94-.74,1.54v41.16c0,1.67,1.95,2.58,3.23,1.52l45.93-40.1c.94-.78,2.35-.53,2.96.52l22.91,39.2c.35.61,1,.98,1.7.98h40.81c1.56,0,2.51-1.73,1.66-3.04Z"/></svg>
+    <img class="imago" id="imagoR" src="../assets/imagotipo-blanco.svg" alt="">
+    <img class="imago" id="imagoW" src="../assets/imagotipo-blanco.svg" alt="rumor">
+    <div id="outTag"><span id="outTagTxt"></span></div>
+  </div>
   <div class="title" id="title"><b id="titleTxt"></b>
     <svg viewBox="0 0 119.52 144.65" aria-label="Rumor"><path fill="#FFFCF1" d="M119.2,141.6l-26.12-41.65c-.36-.56-.99-.9-1.66-.9h-31.2c-1.85,0-2.68-2.31-1.26-3.49l48.05-35.88c7.73-6.4,12.21-15.92,12.21-25.96h0C119.22,15.09,104.13,0,85.52,0H1.97C.88,0,0,.88,0,1.97v32.68c0,1.09.88,1.97,1.97,1.97h59.09c10.4,0,12.25,5.3,4.13,11.79l-30.31,24.18c-15.84,12.64-30.7,24.49-34.13,27.23-.47.37-.74.94-.74,1.54v41.16c0,1.67,1.95,2.58,3.23,1.52l45.93-40.1c.94-.78,2.35-.53,2.96.52l22.91,39.2c.35.61,1,.98,1.7.98h40.81c1.56,0,2.51-1.73,1.66-3.04Z"/></svg></div>
   <div class="sub" id="sub"></div>
@@ -51,6 +93,7 @@
 </div>
 <script src="../bf-fondo/grid.js"></script>
 <script src="subs.js"></script>
+<script src="artefacto.js"></script>
 <script>
 /* ===================== LÍNEA DE TIEMPO =====================
    Tiempos globales del reel (s). El fondo corre continuo de punta a punta.
@@ -88,7 +131,7 @@ const L = [
   ['fin', 0.85, 3.45, 'front', 'box',  'left:40px;top:1556px;width:600px;font-size:48px', '15 checks para\nsalir a pautar\ntranquilo.'],
   // fin · "...comentá Black y te la enviamos por privado"
   ['fin', 2.70, 5.45, 'front', 'sg',   'right:-4px;top:1650px', 'comentá|*Black'],
-  ['fin', 3.55, 5.45, 'front', 'tag',  'left:40px;top:1508px', 'Te la enviamos por DM'],
+  ['fin', 3.55, 5.45, 'front', 'tag',  'left:40px;top:1508px', 'Te lo enviamos por DM'],
   ['fin', 3.65, 5.45, 'front', 'box',  'left:40px;top:1556px;font-size:110px;line-height:1;padding:22px 34px 30px', 'Black'],
 ];
 
@@ -175,10 +218,12 @@ function drawTitle(t, step) {
 // Sujeto
 const img = document.getElementById('sujeto');
 async function drawSubject(seg, lt) {
-  const s = segById[seg];
+  let s = segById[seg], f;
+  if (seg === 'vo' && lt < 0.6) { s = segById.p1; f = s.n; }                       // fundido de entrada
+  else if (seg === 'vo' && lt > segById.vo.dur - 0.55) { s = segById.fin; f = 1; } // fundido de salida
   if (!s.frames) { img.style.display = 'none'; return; }
   img.style.display = '';
-  const f = Math.min(s.n, Math.floor(lt * FPS) + 1);
+  if (!f) f = Math.min(s.n, Math.floor(lt * FPS) + 1);
   const src = s.frames + 'f' + String(f).padStart(5, '0') + '.png';
   if (img.getAttribute('src') !== src) { img.src = src; try { await img.decode(); } catch (e) {} }
 }
@@ -191,7 +236,179 @@ function grain(step) {
   gx.putImageData(gimg, 0, 0);
 }
 
+/* ===================== TRAMO DEL ARTEFACTO (voz en off) =====================
+   Tiempos locales del tramo (0 = arranque de la voz en off recortada). Voz:
+   0,24 "son 15 puntos" · 1,49 "en 5 etapas" · 2,59 "que las vas a hacer en menos de 2 minutos"
+   4,68 "el destino" · 5,86 "la medición" · 7,21 "la oferta" · 8,44 "la respuesta" · 9,95 "y el presupuesto"
+   11,61 "marcás lo que ya resolviste" · 13,38 "lo que queda en blanco es tu tarea pendiente para esta semana"
+   17,76 "y al final te dice si estás listo" · 20,13 "o todavía no"                                         */
+const PRE = 4000;   // ms de reloj del artefacto antes del tramo (su fondo ya pasó el arranque)
+const TAPS = [[11.70, 's0i0'], [12.25, 's0i1'], [12.80, 's0i2'], [14.35, 's1i0']];
+const go = i => w => w.eval(`goTo(${i})`);   // goTo es una constante del script del artefacto
+const EV = [
+  [5.80, go(1)], [7.15, go(2)], [8.38, go(3)], [9.88, go(4)],
+  [10.80, go(0)],
+  ...TAPS.map(([t, id]) => [t, (w, d) => d.querySelector(`[data-id="${id}"]`).click()]),
+  // al completar la etapa 01 el artefacto pasa solo a la 02 (0,9 s después)
+  [17.15, go(5)],
+];
+/* Cámara: [entra, duración del movimiento, foco, zoom]. Foco = selector + ancla (0..1) o {x,y} en px del artefacto */
+const CAM = [
+  [0.00, 0.01, { x: 195, y: 346 }, 1.00],                    // la página completa
+  [0.45, 1.00, { x: 132, y: 390 }, 1.55],                    // "15 puntos": el contador
+  [1.45, 0.90, { x: 195, y: 512 }, 1.30],                    // "5 etapas": la tira de etapas
+  [2.50, 1.10, { x: 195, y: 420 }, 1.00],                    // "menos de 2 minutos"
+  [4.30, 1.00, { x: 195, y: 700 }, 1.10],                    // las 5 etapas
+  [5.30, 5.30, { x: 195, y: 720 }, 1.18],                    // empuje lento mientras cambian
+  [10.70, 0.90, { x: 195, y: 1000 }, 1.30],                  // checks de la 01
+  [12.95, 0.70, { x: 195, y: 820 }, 1.05],                   // etapa completa: READY
+  [13.85, 0.80, { x: 195, y: 1040 }, 1.30],                  // 02: lo que queda en blanco
+  [17.10, 0.90, { x: 195, y: 820 }, 1.10],                   // resultado
+  [19.85, 0.80, { sel: '#verdict', ax: .5, ay: .5 }, 1.45],  // "o todavía no"
+];
+const WIN = { x: 0, y: 0, w: 1080, h: 1920 }, AW = 390, AH = 1400, S0 = WIN.w / AW;
+const winEl = document.getElementById('win'), art = document.getElementById('art'), frameEl = document.getElementById('frame');
+const touchEl = document.getElementById('touch'), rippleEl = document.getElementById('ripple');
+let A = null;   // estado del artefacto: { w, d, lt, ev, starts }
+
+function loadArt() {
+  return new Promise(res => {
+    art.onload = () => {
+      const w = art.contentWindow, d = art.contentDocument;
+      (d.fonts ? d.fonts.ready : Promise.resolve()).then(() => {
+        A = { w, d, lt: -1, ev: 0, starts: new Map() };
+        w.__vt.hook = vt => syncAnims(vt);
+        w.__vt.advanceTo(PRE); syncAnims(PRE);
+        res();
+      });
+    };
+    art.srcdoc = window.ARTEFACTO_HTML;
+  });
+}
+// Las transiciones CSS del artefacto se pausan y se ubican en el tiempo exacto de cada cuadro
+function syncAnims(vt) {
+  A.d.body.offsetHeight;
+  for (const an of A.d.getAnimations()) {
+    if (!A.starts.has(an)) { A.starts.set(an, vt); an.pause(); }
+    const ct = vt - A.starts.get(an), end = an.effect.getComputedTiming().endTime;
+    if (ct >= end) an.finish(); else an.currentTime = Math.max(0, ct);
+  }
+}
+async function artTo(lt) {
+  if (!A || lt < A.lt) await loadArt();          // ir hacia atrás: se recarga y se repite desde cero
+  while (A.ev < EV.length && EV[A.ev][0] <= lt) {
+    const [te, fn] = EV[A.ev++];
+    A.w.__vt.advanceTo(PRE + te * 1000); syncAnims(PRE + te * 1000);
+    fn(A.w, A.d); syncAnims(PRE + te * 1000);
+  }
+  A.w.__vt.advanceTo(PRE + lt * 1000); syncAnims(PRE + lt * 1000);
+  A.lt = lt;
+}
+function focusOf(f) {
+  if (!f.sel) return { x: f.x, y: f.y };
+  const r = A.d.querySelector(f.sel).getBoundingClientRect();
+  return { x: r.left + r.width * f.ax, y: r.top + r.height * f.ay };
+}
+function camAt(lt) {
+  let c = { ...focusOf(CAM[0][2]), z: CAM[0][3] };
+  for (const [t, dur, f, z] of CAM) {
+    if (lt < t) break;
+    const tg = focusOf(f), io = 0.5 - 0.5 * Math.cos(Math.PI * clamp((lt - t) / dur));   // seno entrada/salida
+    c = { x: c.x + (tg.x - c.x) * io, y: c.y + (tg.y - c.y) * io, z: c.z + (z - c.z) * io };
+  }
+  c.z *= 1 + 0.008 * Math.sin(lt * 0.7);      // respiración leve de cámara
+  const S = S0 * c.z, hw = WIN.w / 2 / S, hh = WIN.h / 2 / S;
+  c.x = clamp(c.x, hw, AW - hw); c.y = clamp(c.y, hh, AH - hh);
+  return { S, tx: WIN.w / 2 - c.x * S, ty: WIN.h / 2 - c.y * S };
+}
+const toReel = (cam, x, y) => ({ x: WIN.x + cam.tx + x * cam.S, y: WIN.y + cam.ty + y * cam.S });
+
+async function drawArt(seg, lt) {
+  const on = seg === 'vo';
+  winEl.style.visibility = on ? 'visible' : 'hidden'; frameEl.style.display = 'none';
+  touchEl.style.display = rippleEl.style.display = 'none';
+  ['mk1', 'mk2'].forEach(id => document.getElementById(id).style.display = 'none');
+  if (!on) return;
+  await artTo(lt);
+  const cam = camAt(lt);
+  art.style.transform = `translate(${cam.tx}px,${cam.ty}px) scale(${cam.S})`;
+
+  // Entrada y salida: fundido suave desde/hacia el sujeto, con una leve escala y desenfoque
+  const dur = segById.vo.dur;
+  const fin = ease(lt / 0.6), fout = ease((dur - lt) / 0.55), f = Math.min(fin, fout);
+  winEl.style.opacity = f;
+  winEl.style.transform = `scale(${1 + 0.05 * (1 - f)})`;
+  winEl.style.filter = f < 1 ? `blur(${(1 - f) * 10}px)` : 'none';
+  frameEl.style.display = 'none';
+
+  // Toques: el círculo llega, presiona y deja una onda
+  for (const [tt, id] of TAPS) {
+    if (lt < tt - 0.32 || lt > tt + 0.4) continue;
+    const r = A.d.querySelector(`[data-id="${id}"] .sw`).getBoundingClientRect();
+    const p = toReel(cam, r.left + r.width / 2, r.top + r.height / 2);
+    const k = (lt - tt);
+    touchEl.style.display = 'block';
+    Object.assign(touchEl.style, { left: p.x + 'px', top: p.y + 'px',
+      opacity: k < 0 ? ease((k + 0.32) / 0.15) : 1 - ease((k - 0.15) / 0.25),
+      transform: `scale(${k < -0.08 ? 1.15 - 0.15 * ease((k + 0.32) / 0.24) : k < 0.08 ? 0.82 : 0.82 + 0.18 * ease((k - 0.08) / 0.15)})` });
+    if (k > 0) { rippleEl.style.display = 'block'; Object.assign(rippleEl.style, { left: p.x + 'px', top: p.y + 'px', opacity: 1 - ease(k / 0.4), transform: `scale(${1 + 1.4 * ease(k / 0.4)})` }); }
+  }
+  // "Lo que queda en blanco": esquinas que marcan los checks pendientes de la 02
+  if (lt > 14.9 && lt < 17.05) {
+    ['s1i1', 's1i2'].forEach((id, i) => {
+      const tin = 14.9 + i * 0.25; if (lt < tin) return;
+      const r = A.d.querySelector(`[data-id="${id}"]`).getBoundingClientRect();
+      const a = toReel(cam, r.left, r.top), b = toReel(cam, r.right, r.bottom), m = document.getElementById('mk' + (i + 1));
+      const pin = ease((lt - tin) / 0.35), blink = 1;
+      Object.assign(m.style, { display: 'block', left: a.x - 6 + 'px', top: a.y - 6 + 'px', width: b.x - a.x + 12 + 'px', height: b.y - a.y + 12 + 'px',
+        opacity: pin * (lt > 16.85 ? 1 - ease((lt - 16.85) / 0.2) : blink), transform: `scale(${1.12 - 0.12 * pin})` });
+    });
+  }
+}
+
+/* ===================== CIERRE: el isotipo se arma con las celdas de la grilla ===================== */
+const outroEl = document.getElementById('outro'), dimEl = document.getElementById('dim'), rc = document.getElementById('rc'), rx = rc.getContext('2d');
+const imagoR = document.getElementById('imagoR'), imagoW = document.getElementById('imagoW'), outTagTxt = document.getElementById('outTagTxt');
+/* Geometría del imagotipo (viewBox 444,59 × 200,05) a 860 px: la R ocupa x 187,3–257,1 y 0–84 */
+const IMG = { x: 110, y: 750, k: 860 / 444.59 };
+const RBOX = { x: IMG.x + 187.3 * IMG.k, y: IMG.y, w: 69.8 * IMG.k };
+const RC_CELL = 15;
+const RCELLS = (() => {
+  const P = new Path2D(document.querySelector('#isoPath path').getAttribute('d')), k = RBOX.w / 119.52, out = [];
+  const m = document.createElement('canvas').getContext('2d');
+  for (let j = -1; j * RC_CELL < 144.65 * k + RC_CELL; j++) for (let i = -1; i * RC_CELL < RBOX.w + RC_CELL; i++) {
+    const cx = (i + .5) * RC_CELL, cy = (j + .5) * RC_CELL;
+    if (m.isPointInPath(P, cx / k, cy / k)) out.push({ x: RBOX.x + i * RC_CELL, y: RBOX.y + j * RC_CELL, at: 0.3 + hash(i * 7 + 1, j * 13 + 5) * 0.8 });
+  }
+  return out;
+})();
+function plus(x, y, s, col) { const t = Math.max(2, s * 0.14), L = s * 0.5; rx.fillStyle = col; rx.fillRect(x + s / 2 - L / 2, y + s / 2 - t / 2, L, t); rx.fillRect(x + s / 2 - t / 2, y + s / 2 - L / 2, t, L); }
+function drawOutro(seg, lt, step) {
+  const on = seg === 'out';
+  outroEl.style.display = on ? 'block' : 'none';
+  if (!on) return;
+  dimEl.style.opacity = 0.86 * ease(lt / 0.6);
+  rx.clearRect(0, 0, 1080, 1920);
+  const solid = ease((lt - 1.25) / 0.4);
+  for (const c of RCELLS) {
+    if (lt < c.at) continue;
+    const flick = lt - c.at < 0.14 && hash(c.x * 3 + c.y, step) < 0.5;
+    rx.globalAlpha = (flick ? 0.35 : 1) * (1 - solid);
+    rx.fillStyle = '#0057FF'; rx.fillRect(c.x, c.y, RC_CELL, RC_CELL);
+    plus(c.x, c.y, RC_CELL, '#FFFCF1');
+  }
+  rx.globalAlpha = 1;
+  imagoR.style.opacity = solid;
+  const pw = ease((lt - 1.55) / 0.5);
+  imagoW.style.clipPath = `inset(52% ${(1 - pw) * 100}% 0 0)`;
+  imagoW.style.opacity = pw > 0 ? 1 : 0;
+  outTagTxt.textContent = lt > 2.05 ? scramble('@rumor.agencia', clamp((lt - 2.05) / 0.6), 77, step) : '';
+  outTagTxt.parentElement.style.opacity = lt > 2.05 ? 1 : 0;
+}
+
+window.READY = loadArt();
 window.seek = async (tl) => {
+  await window.READY;
   const t = T0 + tl;
   const seg = SEGS.find(s => t >= s.start && t < s.start + s.dur) || SEGS[SEGS.length - 1];
   const lt = t - seg.start;
@@ -200,14 +417,18 @@ window.seek = async (tl) => {
   grain(Math.floor(t * FPS));
   drawLabels(seg.id, lt, step);
   drawSub(seg.id, lt);
-  drawTitle(t, step);
+  const showTitle = seg.id === 'p1' || seg.id === 'fin';
+  titleEl.style.display = showTitle ? '' : 'none';
+  if (showTitle) drawTitle(lt, step);
+  await drawArt(seg.id, lt);
+  drawOutro(seg.id, lt, step);
   await drawSubject(seg.id, lt);
 };
 
 if (!Q.has('capture')) {
   const t0 = performance.now();
   (async function loop() { await window.seek(((performance.now() - t0) / 1000) % window.DURATION); requestAnimationFrame(loop); })();
-} else window.seek(0);
+}
 </script>
 </body>
 </html>
