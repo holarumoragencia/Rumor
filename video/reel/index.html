@@ -39,7 +39,7 @@
 
   /* ---------- Tramo del artefacto ---------- */
   #win{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:hidden;background:var(--black);visibility:hidden}
-  #art{position:absolute;left:0;top:0;width:390px;height:1400px;border:0;transform-origin:0 0;background:var(--black)}
+  #art{position:absolute;left:0;top:0;width:390px;height:1700px;border:0;transform-origin:0 0;background:var(--black)}
   #frame{position:absolute;pointer-events:none;border:2px solid rgba(255,252,241,.6);display:none}
   #frame i{position:absolute;width:14px;height:14px;background:var(--paper)}
   #frame i:nth-child(1){left:-8px;top:-8px}#frame i:nth-child(2){right:-8px;top:-8px}
@@ -253,20 +253,21 @@ const EV = [
   [17.15, go(5)],
 ];
 /* Cámara: [entra, duración del movimiento, foco, zoom]. Foco = selector + ancla (0..1) o {x,y} en px del artefacto */
+/* Zoom máximo 1,08: la card (350 px + sombra) siempre entra completa a lo ancho.
+   Con zoom < 1 el artefacto se achica y su fondo plano sigue hasta los bordes. */
 const CAM = [
   [0.00, 0.01, { x: 195, y: 346 }, 1.00],                    // la página completa
-  [0.45, 1.00, { x: 132, y: 390 }, 1.55],                    // "15 puntos": el contador
-  [1.45, 0.90, { x: 195, y: 512 }, 1.30],                    // "5 etapas": la tira de etapas
-  [2.50, 1.10, { x: 195, y: 420 }, 1.00],                    // "menos de 2 minutos"
-  [4.30, 1.00, { x: 195, y: 700 }, 1.10],                    // las 5 etapas
-  [5.30, 5.30, { x: 195, y: 720 }, 1.18],                    // empuje lento mientras cambian
-  [10.70, 0.90, { x: 195, y: 1000 }, 1.30],                  // checks de la 01
-  [12.95, 0.70, { x: 195, y: 820 }, 1.05],                   // etapa completa: READY
-  [13.85, 0.80, { x: 195, y: 1040 }, 1.30],                  // 02: lo que queda en blanco
-  [17.10, 0.90, { x: 195, y: 820 }, 1.10],                   // resultado
-  [19.85, 0.80, { sel: '#verdict', ax: .5, ay: .5 }, 1.45],  // "o todavía no"
+  [0.45, 1.00, { x: 195, y: 380 }, 1.06],                    // "15 puntos": el contador
+  [1.45, 0.90, { x: 195, y: 470 }, 1.02],                    // "5 etapas": la tira de etapas
+  [2.50, 1.10, { x: 195, y: 560 }, 0.92],                    // "menos de 2 minutos": se ve todo
+  [4.30, 1.00, { x: 195, y: 926 }, 0.86],                    // las 5 etapas: card completa con aire
+  [5.30, 5.30, { x: 195, y: 926 }, 0.91],                    // empuje lento mientras cambian
+  [12.95, 0.70, { x: 195, y: 926 }, 0.88],                   // etapa completa: READY
+  [13.85, 0.80, { x: 195, y: 926 }, 0.92],                   // 02: lo que queda en blanco
+  [17.10, 0.90, { sel: '#resultado', ax: .5, ay: .5 }, 0.66],// resultado completo (card alta: 942 px)
+  [19.85, 0.80, { sel: '#resultado', ax: .5, ay: .5 }, 0.69],// "o todavía no"
 ];
-const WIN = { x: 0, y: 0, w: 1080, h: 1920 }, AW = 390, AH = 1400, S0 = WIN.w / AW;
+const WIN = { x: 0, y: 0, w: 1080, h: 1920 }, AW = 390, AH = 1700, S0 = WIN.w / AW;
 const winEl = document.getElementById('win'), art = document.getElementById('art'), frameEl = document.getElementById('frame');
 const touchEl = document.getElementById('touch'), rippleEl = document.getElementById('ripple');
 let A = null;   // estado del artefacto: { w, d, lt, ev, starts }
@@ -318,7 +319,8 @@ function camAt(lt) {
   }
   c.z *= 1 + 0.008 * Math.sin(lt * 0.7);      // respiración leve de cámara
   const S = S0 * c.z, hw = WIN.w / 2 / S, hh = WIN.h / 2 / S;
-  c.x = clamp(c.x, hw, AW - hw); c.y = clamp(c.y, hh, AH - hh);
+  c.x = hw * 2 >= AW ? AW / 2 : clamp(c.x, hw, AW - hw);      // si entra todo el ancho, centrado
+  c.y = Math.max(c.y, hh);                                     // arriba no se pasa del inicio de la página
   return { S, tx: WIN.w / 2 - c.x * S, ty: WIN.h / 2 - c.y * S };
 }
 const toReel = (cam, x, y) => ({ x: WIN.x + cam.tx + x * cam.S, y: WIN.y + cam.ty + y * cam.S });
