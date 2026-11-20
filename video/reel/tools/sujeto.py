@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Prepara la capa del sujeto para el reel: RGBA (recorte) -> escala, color, luz de borde, enfoque, fundido.
-Uso: python3 sujeto.py entrada_rgba.png salida.png [--scale 1.6]"""
+Uso: python3 sujeto.py entrada_rgba.png salida.png [--scale 1.6] [--fade 0|1] [--extend PX] [--rim 0..1]
+  --fade 0     sin fundido inferior (cuando el cuerpo lo corta un marco o el borde del cuadro)
+  --extend PX  prolonga el torso (remera negra) PX píxeles hacia abajo"""
 import sys, numpy as np
 from PIL import Image, ImageFilter
 
-SCALE = float(sys.argv[sys.argv.index('--scale') + 1]) if '--scale' in sys.argv else 1.6
+arg = lambda k, d: type(d)(sys.argv[sys.argv.index(k) + 1]) if k in sys.argv else d
+SCALE = arg('--scale', 1.6); FADE = arg('--fade', 1); EXTEND = arg('--extend', 0); RIM = arg('--rim', 0.0)
 BLUE2 = np.array([0x00, 0x57, 0xFF], np.float32) / 255
 
 def procesar(img):
@@ -31,8 +34,8 @@ def procesar(img):
     am = Image.fromarray((a * 255).astype(np.uint8))
     er = np.asarray(am.filter(ImageFilter.MinFilter(9)).filter(ImageFilter.GaussianBlur(5)), np.float32) / 255
     rim = np.clip(a - er, 0, 1)[..., None]
-    x = 1 - (1 - x) * (1 - rim * BLUE2 * 0.9)       # screen azul en el borde
-    x = x + rim * 0.06
+    x = 1 - (1 - x) * (1 - rim * BLUE2 * 0.9 * RIM)  # screen azul en el borde (apagado por defecto)
+    x = x + rim * 0.06 * RIM
 
     # --- fundido: torso hacia abajo y costados (remera negra -> fondo oscuro)
     ys = np.linspace(0, 1, H, dtype=np.float32)[:, None]
@@ -41,7 +44,10 @@ def procesar(img):
     fx = fx * np.clip((ys - 0.72) / 0.1, 0, 1) + (1 - np.clip((ys - 0.72) / 0.1, 0, 1))  # costados solo en el torso
     fade = fy * np.maximum(fx, 0)
     fade = fade * fade * (3 - 2 * fade)
-    a = a * fade
+    if FADE: a = a * fade
+    if EXTEND:
+        x = np.concatenate([x, np.repeat(x[-1:], EXTEND, 0) * np.linspace(1, .6, EXTEND, dtype=np.float32)[:, None, None]], 0)
+        a = np.concatenate([a, np.repeat(a[-1:], EXTEND, 0)], 0)
 
     out = np.dstack([np.clip(x, 0, 1) * 255, a * 255]).astype(np.uint8)
     return Image.fromarray(out, 'RGBA')

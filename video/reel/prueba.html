@@ -28,7 +28,16 @@
   .seg i.on{background:var(--blue2);color:#fff}
 
   /* Sujeto */
-  #sujeto{position:absolute;left:156px;top:44px;width:768px;filter:drop-shadow(0 0 34px rgba(0,87,255,.55)) drop-shadow(0 0 2px rgba(0,87,255,.6))}
+  /* Marco del sujeto: corta el torso; la cabeza sale por arriba del marco */
+  .panel{position:absolute;left:156px;top:700px;width:768px;height:540px;background:var(--black);
+    background-image:radial-gradient(circle,rgba(255,252,241,.13) 1.4px,transparent 1.8px);background-size:24.5px 24.5px}
+  .frame{position:absolute;left:156px;top:700px;width:768px;height:540px;pointer-events:none;
+    border:2px solid rgba(255,252,241,.55);border-top-color:transparent}
+  .panel::before{content:"";position:absolute;left:0;right:0;top:0;border-top:2px solid rgba(255,252,241,.55)}
+  .frame i{position:absolute;width:12px;height:12px;background:var(--paper)}
+  .frame i:nth-child(1){left:-7px;top:-7px}.frame i:nth-child(2){right:-7px;top:-7px}
+  .frame i:nth-child(3){left:-7px;bottom:-7px}.frame i:nth-child(4){right:-7px;bottom:-7px}
+  #sujeto{position:absolute;left:156px;top:44px;width:768px;clip-path:inset(0 0 186px 0)}
 
   /* Subtítulo: una palabra, posición fija */
   .sub{position:absolute;left:0;right:0;top:1112px;text-align:center;font-family:"Archivo Black","Arial Black",Arial,sans-serif;font-size:96px;line-height:1;
@@ -53,7 +62,9 @@
   <div class="seg" style="left:770px;top:540px"><i>+/−</i><i class="on">27/11</i></div>
   <div class="tag k" style="left:770px;top:604px">7 días</div>
 
-  <img id="sujeto" src="prueba/sujeto.png" alt="">
+  <div class="panel"></div>
+  <img id="sujeto" src="prueba/sujeto-marco.png" alt="">
+  <div class="frame"><i></i><i></i><i></i><i></i></div>
 
   <!-- delante del sujeto (sobre el torso) -->
   <div class="tag" style="left:66px;top:948px">¿Listo para pautar?</div>
