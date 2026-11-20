@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fondo portada BF · Rumor</title>
+<style>
+  /* ====== SOLO DEMO (no copiar) ====== */
+  html,body{margin:0;background:#0e0e0e;color:#FFFCF1;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .demo-wrap{padding:24px 16px 48px;max-width:1960px;margin:0 auto;display:grid;gap:28px}
+  .demo-label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.55;margin:0 0 8px}
+  .demo-row{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start}
+  .hero{position:relative;overflow:hidden;background:#191919;border-radius:4px}
+  .hero--desk{width:100%;height:420px}
+  .hero--mob{width:390px;max-width:100%;height:480px}
+  .mock{position:absolute;inset:0;z-index:1;pointer-events:none;display:flex;padding:32px}
+  .hero--desk .mock{align-items:center;justify-content:space-between}
+  .hero--mob .mock{flex-direction:column;padding:24px}
+  .mock h1{margin:0;font-size:clamp(26px,3vw,46px);line-height:1.05;font-weight:800;max-width:560px}
+  .mock h1 span{color:#0057FF}
+  .mock p{margin:12px 0 0;opacity:.8;max-width:460px;font-size:15px}
+  .ring{width:220px;height:220px;border-radius:50%;border:3px solid #FFFCF1;display:grid;place-items:center;font-size:40px;font-weight:800;margin-right:8%;background:rgba(25,25,25,.35)}
+  .toggle{font:inherit;font-size:13px;background:#FFFCF1;color:#191919;border:0;border-radius:3px;padding:8px 12px;cursor:pointer;justify-self:start}
+  .hide-mock .mock{display:none}
+  /* ====== FIN DEMO ====== */
+</style>
+
+<!-- ================================================================
+     BLOQUE A COPIAR · 1/3 · CSS
+     El contenedor padre (la portada) tiene que tener position:relative.
+     ================================================================ -->
+<style>
+  .rbf-bg{position:absolute;inset:0;z-index:0;overflow:hidden;background:#191919;pointer-events:none}
+  .rbf-bg canvas{display:block;width:100%;height:100%}
+</style>
+</head>
+<body>
+
+<div class="demo-wrap" id="demo">
+  <button class="toggle" onclick="document.getElementById('demo').classList.toggle('hide-mock')">Mostrar / ocultar texto de prueba</button>
+
+  <div>
+    <p class="demo-label">Compu · 100% × 420 px</p>
+    <section class="hero hero--desk">
+      <!-- ================================================================
+           BLOQUE A COPIAR · 2/3 · HTML (va como primer hijo de la portada)
+           ================================================================ -->
+      <div class="rbf-bg" aria-hidden="true"><canvas></canvas></div>
+      <!-- ============================================================== -->
+      <div class="mock">
+        <div><h1>Checklist <span>Black Friday</span></h1><p>Texto de prueba para chequear contraste sobre el fondo.</p></div>
+        <div class="ring">12:04</div>
+      </div>
+    </section>
+  </div>
+
+  <div class="demo-row">
+    <div>
+      <p class="demo-label">Celular · 390 × 480 px</p>
+      <section class="hero hero--mob">
+        <div class="rbf-bg" aria-hidden="true"><canvas></canvas></div>
+        <div class="mock"><h1>Checklist <span>Black Friday</span></h1><p>Texto de prueba para chequear contraste.</p></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     BLOQUE A COPIAR · 3/3 · SCRIPT
+     Inicializa todos los .rbf-bg de la página. Sin dependencias.
+     ================================================================ -->
+<script>
+(function () {
+  'use strict';
+
+  /* --- Paleta Rumor --- */
+  var C = {
+    black: '#191919',
+    blue:  '#003AFE',
+    blue2: '#0057FF',
+    white: '#FFFCF1',
+    red:   '#E3262B'
+  };
+
+  var CYCLE = 10000;   // ms · duración del bucle (perfecto: todo es función de step % STEPS)
+  var STEPS = 240;     // 24 cuadros/s · solo se redibuja cuando cambia el paso
+  var FLIP  = 3;       // cada 3 pasos los signos "voltean" (8 flips/s)
+  var STATIC_STEP = 134; // cuadro usado con prefers-reduced-motion
+
+  var GLYPHS = ['+', '-', '%', '50'];
+
+  function hash(a, b, c) {
+    var h = (Math.imul(a, 374761393) + Math.imul(b, 668265263) + Math.imul(c, 1274126177)) | 0;
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    h ^= h >>> 16;
+    return (h >>> 0) / 4294967296;
+  }
+  function smooth(e0, e1, x) { x = Math.min(1, Math.max(0, (x - e0) / (e1 - e0))); return x * x * (3 - 2 * x); }
+
+  /* Dibuja un signo centrado en (0,0) de tamaño s */
+  function drawGlyph(g, ctx, s, color) {
+    ctx.fillStyle = color; ctx.strokeStyle = color;
+    var t = Math.max(1, s * 0.13), L = s * 0.52;
+    if (g === '+') {
+      ctx.fillRect(-L / 2, -t / 2, L, t);
+      ctx.fillRect(-t / 2, -L / 2, t, L);
+    } else if (g === '-') {
+      ctx.fillRect(-L / 2, -t / 2, L, t);
+    } else if (g === '%') {
+      var r = s * 0.11, o = s * 0.17;
+      ctx.lineWidth = t * 0.8;
+      ctx.beginPath(); ctx.arc(-o, -o, r, 0, 6.2832); ctx.stroke();
+      ctx.beginPath(); ctx.arc(o, o, r, 0, 6.2832); ctx.stroke();
+      ctx.lineWidth = t * 0.85; ctx.lineCap = 'butt';
+      ctx.beginPath(); ctx.moveTo(L * 0.5, -L * 0.5); ctx.lineTo(-L * 0.5, L * 0.5); ctx.stroke();
+    } else {
+      ctx.font = '800 ' + Math.round(s * 0.54) + 'px ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(g, 0, s * 0.03);
+    }
+  }
+
+  /* Estilos de celda: [fondo, color signo] */
+  var STYLES = {
+    w:  [null,    C.white],  // signo blanco roto sobre negro
+    b:  [null,    C.blue2],  // signo azul sobre negro
+    fb: [C.blue,  C.white],  // bloque azul + signo blanco
+    fr: [C.red,   C.white],  // bloque rojo + signo blanco (Black Friday)
+    fw: [C.white, C.black]   // bloque blanco + signo negro (muy raro)
+  };
+
+  function buildSprites(cellPx) {
+    var sp = {};
+    var gap = Math.max(1, Math.round(cellPx * 0.07));
+    for (var k in STYLES) {
+      sp[k] = [];
+      for (var g = 0; g < GLYPHS.length; g++) {
+        var c = document.createElement('canvas');
+        c.width = c.height = cellPx;
+        var x = c.getContext('2d');
+        if (STYLES[k][0]) { x.fillStyle = STYLES[k][0]; x.fillRect(gap, gap, cellPx - gap * 2, cellPx - gap * 2); }
+        x.translate(cellPx / 2, cellPx / 2);
+        drawGlyph(GLYPHS[g], x, cellPx, STYLES[k][1]);
+        sp[k].push(c);
+      }
+    }
+    return sp;
+  }
+
+  function pickGlyph(h) { return h < 0.42 ? 0 : h < 0.84 ? 1 : h < 0.94 ? 2 : 3; }
+
+  function init(root) {
+    var canvas = root.querySelector('canvas');
+    if (!canvas) { canvas = document.createElement('canvas'); root.appendChild(canvas); }
+    var ctx = canvas.getContext('2d', { alpha: false });
+
+    var W = 0, H = 0, dpr = 1, cell = 20, cols = 0, rows = 0, ox = 0, oy = 0;
+    var U, WT, DST, sprites, cellPx;
+    var lastStep = -1, raf = 0, inView = true;
+    var t0 = performance.now();
+    var rm = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+
+    function layout() {
+      var r = root.getBoundingClientRect();
+      W = Math.max(1, Math.round(r.width)); H = Math.max(1, Math.round(r.height));
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+
+      cell = Math.max(16, Math.min(26, Math.min(W, H) / 22));
+      cols = Math.ceil(W / cell) + 1; rows = Math.ceil(H / cell) + 1;
+      ox = (W - (cols - 1) * cell) / 2; oy = (H - (rows - 1) * cell) / 2;
+      cellPx = Math.round(cell * dpr);
+      sprites = buildSprites(cellPx);
+
+      // Mezcla celu (vertical) ↔ compu (apaisado)
+      var a = smooth(0.85, 1.7, W / H);
+      var n = cols * rows;
+      U = new Float32Array(n); WT = new Float32Array(n); DST = new Float32Array(n);
+      for (var j = 0; j < rows; j++) for (var i = 0; i < cols; i++) {
+        var k = j * cols + i;
+        var xn = (ox + i * cell) / W, yn = (oy + j * cell) / H;
+        // Dirección del barrido: diagonal en celu, izquierda→derecha en compu
+        U[k] = (xn * 0.4 + yn * 0.6) * (1 - a) + (xn * 0.85 + yn * 0.15) * a;
+        // Dónde tiene presencia el movimiento
+        var wm = 0.1 + 0.9 * smooth(0.42, 0.88, yn) * (0.5 + 0.5 * xn);   // celu: tercio inferior-derecho
+        var wd = 0.1 + 0.9 * smooth(0.3, 0.72, xn) * (1 - 0.35 * Math.abs(yn - 0.5) * 2); // compu: franja centro-derecha
+        WT[k] = wm * (1 - a) + wd * a;
+        var dx = xn - (0.75 * a + 0.7 * (1 - a)), dy = yn - (0.5 * a + 0.8 * (1 - a));
+        DST[k] = Math.sqrt(dx * dx * (W / H) + dy * dy);
+      }
+      lastStep = -1;
+    }
+
+    function band(d) {
+      d = d - Math.floor(d);       // 0..1
+      if (d > 0.5) d -= 1;          // -0.5..0.5
+      return d >= 0 ? Math.exp(-(d / 0.03) * (d / 0.03)) : Math.exp(-(d / 0.15) * (d / 0.15));
+    }
+
+    function draw(step) {
+      var tq = step / STEPS;
+      var gt = Math.floor(step / FLIP);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = C.black; ctx.fillRect(0, 0, W, H);
+
+      var sprW = [], sprB = [], sprF = [];
+      ctx.beginPath();
+      var n = cols * rows;
+      for (var k = 0; k < n; k++) {
+        var i = k % cols, j = (k / cols) | 0;
+        var cx = ox + i * cell, cy = oy + j * cell;
+        var w = WT[k];
+        var I = band(U[k] * 0.8 - tq) * w;
+        var h = hash(i, j, gt);
+        var s = hash(i + 7919, j, gt);
+        var style = null, alpha = 1;
+
+        if (I > 0.7 && h < 0.6) style = h < 0.04 ? 'fr' : 'fb';
+        else if (I > 0.35 && h < 0.75) { style = 'w'; alpha = 0.35 + 0.5 * I; }
+        else if (I > 0.12 && h < 0.6) { style = 'b'; alpha = 0.45 + 0.5 * I; }
+        else if (s < 0.005 * w) style = 'fr';
+        else if (s < 0.0075 * w) style = 'fw';
+        else if (s < 0.03 * w) { style = 'b'; alpha = 0.7; }
+
+        if (style) {
+          var g = pickGlyph(hash(i, j + 104729, gt));
+          var item = [cx, cy, style, g, alpha];
+          (style === 'w' ? sprW : style === 'b' ? sprB : sprF).push(item);
+        } else {
+          // Halftone que respira (2 respiraciones por ciclo → bucle exacto)
+          var br = 0.5 + 0.5 * Math.sin(6.2832 * (tq * 2 - DST[k] * 1.6));
+          var r = cell * (0.05 + 0.11 * br * (0.25 + 0.75 * w));
+          ctx.moveTo(cx + r, cy); ctx.arc(cx, cy, r, 0, 6.2832);
+        }
+      }
+      ctx.fillStyle = C.white; ctx.globalAlpha = 0.16; ctx.fill();
+
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      var half = cellPx / 2;
+      function blit(list) {
+        for (var q = 0; q < list.length; q++) {
+          var it = list[q];
+          ctx.globalAlpha = it[4];
+          ctx.drawImage(sprites[it[2]][it[3]], Math.round(it[0] * dpr - half), Math.round(it[1] * dpr - half));
+        }
+      }
+      blit(sprB); blit(sprW); blit(sprF);
+      ctx.globalAlpha = 1;
+    }
+
+    function frame(now) {
+      raf = 0;
+      if (!running()) return;
+      var step = Math.floor(((now - t0) % CYCLE) / CYCLE * STEPS);
+      if (step !== lastStep) { lastStep = step; draw(step); }
+      raf = requestAnimationFrame(frame);
+    }
+    function running() { return inView && !document.hidden && !rm.matches; }
+    function update() {
+      if (rm.matches) { if (raf) cancelAnimationFrame(raf); raf = 0; draw(STATIC_STEP); lastStep = STATIC_STEP; return; }
+      if (running() && !raf) raf = requestAnimationFrame(frame);
+    }
+
+    layout(); draw(rm.matches ? STATIC_STEP : 0);
+
+    if ('ResizeObserver' in window) {
+      var pend = 0;
+      new ResizeObserver(function () {
+        if (pend) return;
+        pend = requestAnimationFrame(function () {
+          pend = 0; layout();
+          draw(rm.matches ? STATIC_STEP : Math.floor(((performance.now() - t0) % CYCLE) / CYCLE * STEPS));
+        });
+      }).observe(root);
+    } else {
+      window.addEventListener('resize', function () { layout(); draw(rm.matches ? STATIC_STEP : 0); });
+    }
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (e) { inView = e[0].isIntersecting; update(); }).observe(root);
+    }
+    document.addEventListener('visibilitychange', update);
+    if (rm.addEventListener) rm.addEventListener('change', update);
+    update();
+  }
+
+  function start() { document.querySelectorAll('.rbf-bg').forEach(init); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+</script>
+<!-- ============================ FIN BLOQUE ============================ -->
+</body>
+</html>
