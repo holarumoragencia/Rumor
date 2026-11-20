@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Reel Black Friday · Rumor</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Archivo+Black&family=IBM+Plex+Mono:wght@500;600&display=block" rel="stylesheet">
+<style>
+  :root{--black:#191919;--paper:#FFFCF1;--blue:#003AFE;--blue2:#0057FF;--red:#E3262B}
+  html,body{margin:0;background:#111}
+  body{display:grid;place-items:center;min-height:100vh}
+  #stage{width:1080px;height:1920px;position:relative;background:var(--black);overflow:hidden;font-family:Archivo,Arial,sans-serif;color:var(--paper)}
+  body:not(.capture) #stage{transform:scale(calc(100vh / 1920px))}
+  #bg{position:absolute;inset:0;display:block;width:100%;height:100%}
+  .seg{position:absolute;inset:0}
+
+  /* Recuadros (estilo Boolean Sequence) */
+  .lb{position:absolute;white-space:pre-line;will-change:clip-path}
+  .box{background:var(--black);color:var(--paper);font-weight:500;line-height:1.08;padding:24px 28px 28px;letter-spacing:-.005em}
+  .tag{background:var(--blue);color:var(--paper);font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:22px;letter-spacing:.02em;padding:11px 16px;line-height:1}
+  .tag.k{background:var(--black)}
+  .sg{display:flex;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:30px;letter-spacing:.04em}
+  .sg i{font-style:normal;display:block;padding:.55em .75em;border:2px solid var(--blue2);margin-left:-2px;background:var(--black);color:var(--paper);white-space:nowrap}
+  .sg i.on{background:var(--blue2);color:#fff}
+
+  #sujeto{position:absolute;left:0;top:-89px;width:1080px}
+
+  /* Título fijo (como el footer del artefacto) */
+  .title{position:absolute;left:66px;top:206px;display:flex;flex-direction:column;align-items:flex-start;gap:22px}
+  .title b{font-weight:900;font-stretch:125%;font-variation-settings:"wdth" 125;font-size:72px;line-height:1;letter-spacing:-.02em;color:var(--paper);
+    background:var(--black);padding:8px 16px 12px;margin-left:-16px;white-space:pre}
+  .title em{font-style:normal;color:var(--blue2)}
+  .title svg{width:52px;height:auto;display:block;background:var(--black);padding:10px 12px;margin-left:-12px;box-sizing:content-box}
+
+  /* Subtítulo: una palabra, posición fija entre barbilla y cuello. 55 px = tamaño 55 de Premiere */
+  .sub{position:absolute;left:0;right:0;top:1372px;text-align:center;font-family:"Archivo Black","Arial Black",Arial,sans-serif;font-size:55px;line-height:1;
+    color:#fff;-webkit-text-stroke:8px var(--black);paint-order:stroke fill;text-shadow:0 4px 0 var(--black);transform-origin:50% 60%}
+
+  #grain{position:absolute;inset:0;width:100%;height:100%;mix-blend-mode:soft-light;opacity:.22;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="bg" width="1080" height="1920"></canvas>
+  <div class="seg" id="back"></div>
+  <img id="sujeto" alt="">
+  <div class="seg" id="front"></div>
+  <div class="title" id="title"><b id="titleTxt"></b>
+    <svg viewBox="0 0 119.52 144.65" aria-label="Rumor"><path fill="#FFFCF1" d="M119.2,141.6l-26.12-41.65c-.36-.56-.99-.9-1.66-.9h-31.2c-1.85,0-2.68-2.31-1.26-3.49l48.05-35.88c7.73-6.4,12.21-15.92,12.21-25.96h0C119.22,15.09,104.13,0,85.52,0H1.97C.88,0,0,.88,0,1.97v32.68c0,1.09.88,1.97,1.97,1.97h59.09c10.4,0,12.25,5.3,4.13,11.79l-30.31,24.18c-15.84,12.64-30.7,24.49-34.13,27.23-.47.37-.74.94-.74,1.54v41.16c0,1.67,1.95,2.58,3.23,1.52l45.93-40.1c.94-.78,2.35-.53,2.96.52l22.91,39.2c.35.61,1,.98,1.7.98h40.81c1.56,0,2.51-1.73,1.66-3.04Z"/></svg></div>
+  <div class="sub" id="sub"></div>
+  <canvas id="grain" width="1080" height="1920"></canvas>
+</div>
+<script src="../bf-fondo/grid.js"></script>
+<script src="subs.js"></script>
+<script>
+/* ===================== LÍNEA DE TIEMPO =====================
+   Tiempos globales del reel (s). El fondo corre continuo de punta a punta.
+   p1  : sujeto, primera_parte.mp4 completo
+   vo  : voz en off (audio 0,90 → 21,75 s) + artefacto  [pendiente]
+   fin : sujeto, final.mp4 completo
+   out : cierre con logo                               [pendiente]            */
+const FPS = 30;
+const SEGS = [
+  { id: 'p1',  start: 0,     dur: 10.85, frames: 'media/p1/',  n: 323 },
+  { id: 'vo',  start: 10.85, dur: 20.85, audioIn: 0.90 },
+  { id: 'fin', start: 31.70, dur: 5.45,  frames: 'media/fin/', n: 163 },
+  { id: 'out', start: 37.15, dur: 3.5 },
+];
+
+/* Recuadros: [segmento, entra, sale, capa, tipo, posición, texto]
+   tipo: tag | tag k | box | sg (segmentado: celdas separadas por "|", la que empieza con * va prendida) */
+const L = [
+  // p1 · "Solo 7 días para el comienzo de Black Friday"
+  ['p1', 0.30, 3.20, 'back',  'box',   'left:850px;top:700px;width:260px;font-size:40px', 'Solo\n7 días.'],
+  ['p1', 0.55, 3.20, 'front', 'sg',    'right:-4px;top:1650px', '+/−|*07 días|27/11'],
+  ['p1', 0.80, 3.20, 'front', 'tag k', 'right:40px;top:1730px', 'Black Friday · viernes 27'],
+  // p1 · "Y en Rumor preparamos un checklist especial"
+  ['p1', 3.30, 6.30, 'back',  'tag',   'left:-6px;top:640px', 'by Rumor'],
+  ['p1', 3.45, 6.30, 'front', 'tag',   'left:40px;top:1508px', 'Checklist especial'],
+  ['p1', 3.60, 6.30, 'front', 'box',   'left:40px;top:1556px;width:600px;font-size:48px', 'Hecho por Rumor\npara este\nBlack Friday.'],
+  // p1 · "para que puedas saber si ya estás listo para comenzar la campaña. Vení que te muestro."
+  ['p1', 6.40, 10.85, 'front', 'tag',  'left:40px;top:1508px', '¿Listo para pautar?'],
+  ['p1', 6.55, 10.85, 'front', 'box',  'left:40px;top:1556px;width:600px;font-size:48px', 'Sabelo antes\nde lanzar\nla campaña.'],
+  ['p1', 7.20, 10.85, 'front', 'sg',   'right:-4px;top:1650px', '*+ listo|− pendiente'],
+  ['p1', 9.55, 10.85, 'back',  'box',  'left:850px;top:700px;width:260px;font-size:40px', 'Vení,\nte muestro.'],
+  // fin · "Si querés usar esta herramienta gratuita..."
+  ['fin', 0.55, 3.45, 'back',  'box',  'left:850px;top:700px;width:260px;font-size:40px', 'Gratis.'],
+  ['fin', 0.70, 3.45, 'front', 'tag',  'left:40px;top:1508px', 'Herramienta gratuita'],
+  ['fin', 0.85, 3.45, 'front', 'box',  'left:40px;top:1556px;width:600px;font-size:48px', '15 checks para\nsalir a pautar\ntranquilo.'],
+  // fin · "...comentá Black y te la enviamos por privado"
+  ['fin', 2.70, 5.45, 'front', 'sg',   'right:-4px;top:1650px', 'comentá|*Black'],
+  ['fin', 3.55, 5.45, 'front', 'tag',  'left:40px;top:1508px', 'Te la enviamos por DM'],
+  ['fin', 3.65, 5.45, 'front', 'box',  'left:40px;top:1556px;font-size:110px;line-height:1;padding:22px 34px 30px', 'Black'],
+];
+
+/* ===================== MOTOR ===================== */
+const Q = new URLSearchParams(location.search);
+if (Q.has('capture')) document.body.classList.add('capture');
+const G = RumorGrid(document.getElementById('bg'), { modo: 'pleno' });
+const segById = Object.fromEntries(SEGS.map(s => [s.id, s]));
+const ONLY = Q.get('seg');                       // ?seg=p1 renderiza solo ese tramo
+const T0 = ONLY ? segById[ONLY].start : 0;
+window.DURATION = ONLY ? segById[ONLY].dur : SEGS.reduce((a, s) => Math.max(a, s.start + s.dur), 0);
+
+function hash(a, b) { let h = Math.imul(a ^ 0x9e3779b9, 0x85ebca6b) ^ Math.imul(b, 0xc2b2ae35); h ^= h >>> 13; h = Math.imul(h, 0x27d4eb2f); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const ease = x => 1 - Math.pow(1 - clamp(x), 3);
+const GLYPHS = '+−%/01<>';
+
+// Texto que se "decodifica": cada letra aparece tras unos signos al azar
+function scramble(txt, p, seed, step) {
+  let out = '';
+  for (let i = 0; i < txt.length; i++) {
+    const c = txt[i];
+    if (c === ' ' || c === '\n') { out += c; continue; }
+    const at = (i / Math.max(1, txt.length)) * 0.75;
+    out += p >= at + 0.25 ? c : p >= at ? GLYPHS[Math.floor(hash(seed * 131 + i, step) * GLYPHS.length)] : ' ';
+  }
+  return out;
+}
+
+// Construir recuadros
+const labels = L.map(([seg, tin, tout, layer, kind, pos, text], k) => {
+  const el = document.createElement('div');
+  el.className = 'lb ' + (kind === 'sg' ? 'sg' : kind);
+  el.style.cssText += pos;
+  let cells = null;
+  if (kind === 'sg') {
+    cells = text.split('|').map(c => { const i = document.createElement('i'); const on = c.startsWith('*'); if (on) i.className = 'on'; i.dataset.t = on ? c.slice(1) : c; el.appendChild(i); return i; });
+  }
+  document.getElementById(layer).appendChild(el);
+  return { seg, tin, tout, el, text, cells, k };
+});
+
+const IN = 0.32, OUT = 0.2;
+function drawLabels(seg, lt, step) {
+  for (const b of labels) {
+    const vis = b.seg === seg && lt >= b.tin && lt < b.tout;
+    b.el.style.display = vis ? '' : 'none';
+    if (!vis) continue;
+    const pin = ease((lt - b.tin) / IN), pout = clamp((b.tout - lt) / OUT);
+    // entra barriendo de izquierda a derecha; sale barriendo hacia la izquierda
+    const w = pin < 1 ? (1 - pin) * 100 : (1 - pout) * 100;
+    b.el.style.clipPath = pin < 1 ? `inset(0 ${w}% 0 0)` : pout < 1 ? `inset(0 0 0 ${w}%)` : 'none';
+    const ps = clamp((lt - b.tin) / 0.7);
+    if (b.cells) b.cells.forEach((c, i) => c.textContent = scramble(c.dataset.t, clamp(ps * 1.2 - i * 0.12), b.k * 7 + i, step));
+    else b.el.textContent = scramble(b.text, ps, b.k, step);
+  }
+}
+
+// Subtítulos
+const subEl = document.getElementById('sub');
+function drawSub(seg, lt) {
+  const s = segById[seg];
+  const list = (window.SUBS[seg] || []).map(([a, b, w]) => seg === 'vo' ? [a - s.audioIn, b - s.audioIn, w] : [a, b, w]);
+  let cur = null;
+  for (let i = 0; i < list.length; i++) {
+    const [a, b, w] = list[i], next = list[i + 1];
+    const until = next && next[0] - b < 0.35 ? next[0] : b + 0.18;   // sostiene hasta la próxima si la pausa es corta
+    if (lt >= a && lt < until) { cur = [a, w]; break; }
+  }
+  subEl.textContent = cur ? cur[1] : '';
+  const k = cur ? clamp((lt - cur[0]) / 0.09) : 1;
+  subEl.style.transform = `scale(${1.08 - 0.08 * ease(k)})`;
+}
+
+// Título
+const titleTxt = document.getElementById('titleTxt'), titleEl = document.getElementById('title');
+function drawTitle(t, step) {
+  const p = clamp((t - 0.05) / 0.6);
+  const s = scramble('Black Friday 2026', p, 99, step);
+  titleTxt.innerHTML = s.slice(0, 13) + '<em>' + s.slice(13) + '</em>';
+  titleEl.style.clipPath = `inset(0 ${(1 - ease(t / 0.3)) * 100}% 0 0)`;
+}
+
+// Sujeto
+const img = document.getElementById('sujeto');
+async function drawSubject(seg, lt) {
+  const s = segById[seg];
+  if (!s.frames) { img.style.display = 'none'; return; }
+  img.style.display = '';
+  const f = Math.min(s.n, Math.floor(lt * FPS) + 1);
+  const src = s.frames + 'f' + String(f).padStart(5, '0') + '.png';
+  if (img.getAttribute('src') !== src) { img.src = src; try { await img.decode(); } catch (e) {} }
+}
+
+// Grano
+const gc = document.getElementById('grain'), gx = gc.getContext('2d'), gimg = gx.createImageData(1080, 1920);
+function grain(step) {
+  let s = (step * 2654435761) >>> 0 || 1; const d = gimg.data;
+  for (let i = 0; i < d.length; i += 4) { s ^= s << 13; s >>>= 0; s ^= s >>> 17; s ^= s << 5; s >>>= 0; d[i] = d[i + 1] = d[i + 2] = 128 + ((s & 255) - 128) * 0.55; d[i + 3] = 255; }
+  gx.putImageData(gimg, 0, 0);
+}
+
+window.seek = async (tl) => {
+  const t = T0 + tl;
+  const seg = SEGS.find(s => t >= s.start && t < s.start + s.dur) || SEGS[SEGS.length - 1];
+  const lt = t - seg.start;
+  const step = Math.floor(t * 12);                         // el fondo y los signos cambian 12 veces por segundo
+  G.draw(Math.floor(((t % G.CYCLE) / G.CYCLE) * G.STEPS) / G.STEPS, -1);
+  grain(Math.floor(t * FPS));
+  drawLabels(seg.id, lt, step);
+  drawSub(seg.id, lt);
+  drawTitle(t, step);
+  await drawSubject(seg.id, lt);
+};
+
+if (!Q.has('capture')) {
+  const t0 = performance.now();
+  (async function loop() { await window.seek(((performance.now() - t0) / 1000) % window.DURATION); requestAnimationFrame(loop); })();
+} else window.seek(0);
+</script>
+</body>
+</html>
