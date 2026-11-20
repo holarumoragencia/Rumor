@@ -147,6 +147,7 @@
   .swipe{text-align:center;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding-bottom:10px}
   @media (min-width:900px){.swipe{display:none}}
 
+  footer{position:relative;overflow:hidden}
   footer .wrap{padding:26px 22px 40px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted)}
   footer a{color:var(--paper)}
   .claim{font-family:"Archivo",Arial,Helvetica,sans-serif;font-weight:800;color:var(--paper);font-size:15px}
@@ -195,9 +196,9 @@
   </div>
 </main>
 
-<footer><div class="wrap">
-  <span class="claim">Ordenamos primero. Después escalamos.</span>
-  <span><a href="https://rumoragencia.com" target="_blank" rel="noopener">rumoragencia.com</a> · <a href="https://instagram.com/rumor.agencia" target="_blank" rel="noopener">@rumor.agencia</a></span>
+<footer><div class="rbf-bg" aria-hidden="true"><canvas></canvas></div><div class="wrap">
+  <span class="claim" data-rbf-avoid="text">Ordenamos primero. Después escalamos.</span>
+  <span data-rbf-avoid="text"><a href="https://rumoragencia.com" target="_blank" rel="noopener">rumoragencia.com</a> · <a href="https://instagram.com/rumor.agencia" target="_blank" rel="noopener">@rumor.agencia</a></span>
 </div></footer>
 
 <div class="toast" id="toast"></div>
