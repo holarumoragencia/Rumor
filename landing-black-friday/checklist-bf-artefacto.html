@@ -9,7 +9,7 @@
 <style>
   :root{--black:#191919;--paper:#FFFCF1;--blue:#003AFE;--blue2:#0057FF;--muted:#77756c;--line:#ddd8c6}
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{background:var(--paper)}
+  html,body{background:var(--black)}
   body{color:var(--black);font-family:Arial,Helvetica,sans-serif;line-height:1.4;-webkit-font-smoothing:antialiased;overflow-x:hidden}
   .h{font-family:"Archivo",Arial,sans-serif}
   button{font:inherit;color:inherit}
@@ -40,17 +40,17 @@
   @media (max-width:560px){.hero-grid{grid-template-columns:1fr}.ring{justify-self:start;width:120px}}
 
   /* ---------- STAGE STRIP ---------- */
-  .strip{position:sticky;top:0;z-index:10;background:rgba(255,252,241,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .strip{position:sticky;top:0;z-index:10;background:rgba(25,25,25,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,252,241,.12)}
   .strip .wrap{display:flex;gap:8px;padding:12px 16px;overflow-x:auto;scrollbar-width:none}
   .strip .wrap::-webkit-scrollbar{display:none}
-  .pill{flex:1 0 auto;display:flex;align-items:center;gap:8px;padding:8px 12px;border:2px solid var(--black);border-radius:99px;background:transparent;cursor:pointer;transition:background .2s,color .2s,transform .12s;white-space:nowrap}
+  .pill{flex:1 0 auto;display:flex;align-items:center;gap:8px;padding:8px 12px;border:2px solid var(--blue2);color:var(--paper);border-radius:99px;background:transparent;cursor:pointer;transition:background .2s,color .2s,transform .12s;white-space:nowrap}
   .pill:active{transform:scale(.95)}
   .pill .pn{font-family:"Archivo",Arial,Helvetica,sans-serif;font-weight:900;font-size:14px}
   .pill .dots{display:flex;gap:3px}
   .pill .dots i{width:7px;height:7px;border-radius:50%;border:1.5px solid currentColor;transition:background .2s}
   .pill .dots i.on{background:currentColor}
-  .pill.active{background:var(--black);color:var(--paper)}
-  .pill.full{background:var(--blue);border-color:var(--blue);color:#fff}
+  .pill.full{background:var(--paper);border-color:var(--paper);color:var(--blue)}
+  .pill.active{background:var(--blue);border-color:var(--blue);color:#fff}
   .pill.res{border-style:dashed}
 
   /* ---------- DECK ---------- */
@@ -59,7 +59,7 @@
   .deck{display:flex;align-items:flex-start;gap:28px;transition:transform .5s cubic-bezier(.3,1,.4,1);will-change:transform}
   .card{flex:0 0 100%;position:relative;overflow:hidden;
     background:#fff;border:2px solid var(--black);border-radius:24px;padding:24px 22px 20px;
-    box-shadow:7px 7px 0 var(--black);display:flex;flex-direction:column;
+    box-shadow:7px 7px 0 var(--blue);display:flex;flex-direction:column;
     transition:background .35s,color .35s,box-shadow .2s}
   .card .halftone{color:#fff;opacity:0;transition:opacity .4s;-webkit-mask-image:linear-gradient(200deg,#000,transparent 55%);mask-image:linear-gradient(200deg,#000,transparent 55%)}
   .card-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1}
@@ -103,7 +103,7 @@
     transition:transform .45s cubic-bezier(.3,1.8,.5,1),opacity .2s}
 
   /* complete stage */
-  .card.done{background:var(--blue);color:#fff}
+  .card.done{background:var(--blue);color:#fff;box-shadow:7px 7px 0 var(--paper)}
   .card.done .halftone{opacity:.22}
   .card.done .big{color:#fff;-webkit-text-stroke-color:#fff}
   .card.done .en,.card.done .why{color:rgba(255,255,255,.75)}
@@ -112,7 +112,7 @@
   .card.done .next{background:#fff;color:var(--black)}
 
   /* result card */
-  .card.result{background:var(--black);color:var(--paper)}
+  .card.result{background:var(--black);color:var(--paper);border-color:rgba(255,252,241,.25);box-shadow:7px 7px 0 var(--blue)}
   .card.result .halftone{color:var(--paper);opacity:.14}
   .card.result .en{color:rgba(255,252,241,.55)}
   .gauge{position:relative;width:100%;max-width:340px;margin:10px auto 0;z-index:1}
@@ -136,22 +136,22 @@
   .reset{background:none;border:0;color:rgba(255,252,241,.5);text-decoration:underline;font-size:12px;cursor:pointer;margin:8px auto 0;display:block;position:relative;z-index:1}
 
   .pager{display:flex;align-items:center;justify-content:center;gap:16px;padding:18px 0 8px}
-  .pager button.ar{width:44px;height:44px;border-radius:50%;border:2px solid var(--black);background:var(--paper);cursor:pointer;display:grid;place-items:center;transition:transform .12s,opacity .2s}
+  .pager button.ar{width:44px;height:44px;border-radius:50%;border:2px solid var(--blue2);background:transparent;color:var(--paper);cursor:pointer;display:grid;place-items:center;transition:transform .12s,opacity .2s}
   .pager button.ar:active{transform:scale(.92)}
   .pager button.ar:disabled{opacity:.25;cursor:default}
   .pager svg{width:18px}
   .pdots{display:flex;gap:6px}
-  .pdots i{width:8px;height:8px;border-radius:99px;background:var(--line);transition:width .3s,background .3s}
-  .pdots i.on{width:24px;background:var(--black)}
-  .pdots i.full{background:var(--blue)}
+  .pdots i{width:8px;height:8px;border-radius:99px;background:rgba(255,252,241,.25);transition:width .3s,background .3s}
+  .pdots i.on{width:24px;background:var(--blue2)}
+  .pdots i.full{background:var(--paper)}
   .swipe{text-align:center;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding-bottom:10px}
   @media (min-width:900px){.swipe{display:none}}
 
   footer .wrap{padding:26px 22px 40px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted)}
-  footer a{color:var(--black)}
-  .claim{font-family:"Archivo",Arial,Helvetica,sans-serif;font-weight:800;color:var(--black);font-size:15px}
+  footer a{color:var(--paper)}
+  .claim{font-family:"Archivo",Arial,Helvetica,sans-serif;font-weight:800;color:var(--paper);font-size:15px}
 
-  .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,120px);background:var(--black);color:var(--paper);padding:12px 18px;border-radius:99px;font-size:14px;font-weight:700;z-index:50;opacity:0;visibility:hidden;transition:transform .35s cubic-bezier(.3,1.5,.5,1),opacity .2s,visibility .2s}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,120px);background:var(--blue);color:var(--paper);padding:12px 18px;border-radius:99px;font-size:14px;font-weight:700;z-index:50;opacity:0;visibility:hidden;transition:transform .35s cubic-bezier(.3,1.5,.5,1),opacity .2s,visibility .2s}
   .toast.show{transform:translate(-50%,0);opacity:1;visibility:visible}
 
   /* ---------- Fondo animado del hero (grilla booleana Rumor) ---------- */
