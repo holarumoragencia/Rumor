@@ -37,11 +37,11 @@
   .frame i{position:absolute;width:12px;height:12px;background:var(--paper)}
   .frame i:nth-child(1){left:-7px;top:-7px}.frame i:nth-child(2){right:-7px;top:-7px}
   .frame i:nth-child(3){left:-7px;bottom:-7px}.frame i:nth-child(4){right:-7px;bottom:-7px}
-  #sujeto{position:absolute;left:156px;top:44px;width:768px;clip-path:inset(0 0 186px 0)}
+  #sujeto{position:absolute;left:0;bottom:0;width:1080px}
 
   /* Subtítulo: una palabra, posición fija */
   /* Subtítulo: una palabra, posición fija. 55 px = tamaño 55 de Premiere en secuencia 1080×1920 */
-  .sub{position:absolute;left:0;right:0;top:1140px;text-align:center;font-family:"Archivo Black","Arial Black",Arial,sans-serif;font-size:55px;line-height:1;
+  .sub{position:absolute;left:0;right:0;top:395px;text-align:center;font-family:"Archivo Black","Arial Black",Arial,sans-serif;font-size:55px;line-height:1;
     color:#fff;-webkit-text-stroke:8px var(--black);paint-order:stroke fill;text-shadow:0 4px 0 var(--black)}
 
   #grain{position:absolute;inset:0;width:100%;height:100%;mix-blend-mode:soft-light;opacity:.22;pointer-events:none}
@@ -57,19 +57,16 @@
 <div id="stage">
   <canvas id="bg" class="layer" width="1080" height="1920"></canvas>
 
-  <!-- detrás del sujeto (asoman por los costados) -->
-  <div class="tag" style="left:66px;top:478px">Checklist · Rumor</div>
-  <div class="box" style="left:66px;top:520px;width:250px;font-size:28px">Solo 7 días para estar listo.</div>
-  <div class="seg" style="left:770px;top:540px"><i>+/−</i><i class="on">27/11</i></div>
-  <div class="tag k" style="left:770px;top:604px">7 días</div>
+  <!-- detrás del sujeto (asoman a los costados de la cabeza) -->
+  <div class="tag" style="left:66px;top:560px">Checklist · Rumor</div>
+  <div class="box" style="left:66px;top:602px;width:220px;font-size:26px">Solo 7 días para estar listo.</div>
+  <div class="seg" style="left:800px;top:640px"><i>+/−</i><i class="on">27/11</i></div>
 
-  <div class="panel"></div>
-  <img id="sujeto" src="prueba/sujeto-marco.png" alt="">
-  <div class="frame"><i></i><i></i><i></i><i></i></div>
+  <img id="sujeto" src="prueba/sujeto-completo.png" alt="">
 
-  <!-- delante del sujeto (sobre el torso) -->
-  <div class="tag" style="left:66px;top:948px">¿Listo para pautar?</div>
-  <div class="box" style="left:66px;top:988px;width:330px;font-size:26px">15 checks. 5 etapas.<br>Menos de 2 minutos.</div>
+  <!-- delante del sujeto (al costado de la cara, sin taparla) -->
+  <div class="tag" style="left:40px;top:1110px">¿Listo?</div>
+  <div class="box" style="left:40px;top:1150px;width:215px;font-size:24px">15 checks.<br>5 etapas.<br>2 minutos.</div>
 
   <div class="title"><span>Black Friday <em>2026</em></span></div>
   <div class="sub" id="sub">campaña</div>
