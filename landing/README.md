@@ -19,7 +19,7 @@ Landing estática (HTML + CSS + JS, sin build). Abrir `landing/index.html` servi
 ## Editar
 - Mensajes del hero: `HERO_MESSAGES` en `script.js`.
 - Colores: variables en `:root` de `styles.css`.
-- Tipografías: **Myriad Pro** para títulos y claims (Condensed Black en el bloque "de ruido a estructura") (Black; acentos en SemiExtended Light Italic; números y servicios en SemiExtended) y **Arial** para párrafos.
+- Tipografías: **Myriad Pro** para títulos y claims (Black; acentos en SemiExtended Light Italic; números y servicios en SemiExtended; Condensed Black en el bloque "de ruido a estructura") y **Arial** para párrafos.
   - Para que la vean todos los visitantes: en fonts.adobe.com crear un *Web Project* con Myriad Pro (Light, Regular, Semibold, Bold, Black y sus SemiExtended) y pegar el `<link>` del kit en `index.html` donde indica el comentario. Agregar el dominio al proyecto.
   - Alternativa: subir los `.woff2` (con licencia web) a `assets/fonts/` con los nombres de `fonts.css` (ej. `MyriadPro-Black.woff2`).
   - Si Myriad Pro está instalada en la compu, el navegador ya la usa localmente.
