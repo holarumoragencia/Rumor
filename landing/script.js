@@ -229,7 +229,7 @@ requestAnimationFrame(() => $$('.hero .rv').forEach((el, i) => setTimeout(() => 
 
 /* ================= Scroll: nav, nosotros, reel, packs ================= */
 const nav = $('#nav');
-const about = $('.about'), glass = $$('.glass'), aboutPhoto = $('.about-photo');
+const about = $('.about'), glass = $$('.glass');
 const reelFrame = $('#reelFrame');
 const packs = $$('.pack');
 
@@ -244,7 +244,6 @@ function onScroll() {
   const p = clamp01(-r.top / (r.height - vh));
   // las tres cards aparecen juntas con el primer scroll
   glass.forEach(g => g.classList.toggle('on', p > .12));
-  aboutPhoto.style.setProperty('--zoom', 1 + p * .06);
 
   // Reel: el marco se expande al entrar en pantalla
   const rr = reelFrame.getBoundingClientRect();
@@ -281,6 +280,7 @@ onScroll();
 
 /* ================= Flujo "cómo trabajamos" ================= */
 (function flow() {
+  if (!$('#flow')) return; // el bloque vive en bloques/como-trabajamos.html hasta que tenga su página
   const steps = $$('#flow .flow-steps li'), res = $('#flowResult'), st = $('#flowStatus');
   if (reduce) { steps.forEach(s => s.classList.add('done')); res.classList.add('on'); st.textContent = 'Completado'; st.classList.add('done'); return; }
   let i = -1, timer = 0, running = false;
@@ -319,6 +319,47 @@ onScroll();
     goal.classList.toggle('hit', k > .995);
     ms.forEach(m => m.classList.toggle('on', k >= +m.dataset.at));
   });
+})();
+
+/* ================= Cómo trabajamos: de ruido a estructura =================
+   Las palabras llegan dispersas (data-x = desplazamiento en vw) y se alinean con el scroll.
+   0–36%: se ordena el set A sobre la mujer · 46–56%: fundido al hombre · 56–86%: se ordena el set B · 88%+: cierre. */
+(function words() {
+  const sec = $('.words');
+  if (!sec) return;
+  const setA = $('.set-a'), setB = $('.set-b'), A = $$('.w', setA), Bw = $$('.w', setB);
+  const phA = $('.ph-a'), phB = $('.ph-b'), end = $('.words-end'), step = $('#wordsStep');
+  const place = (ws, k) => ws.forEach(w => { w.style.transform = `translate3d(${+w.dataset.x * (1 - k)}vw,0,0)`; });
+  let last = -1;
+  const update = () => {
+    const r = sec.getBoundingClientRect();
+    const p = reduce ? 1 : clamp01(-r.top / (r.height - innerHeight));
+    if (p === last) return;
+    last = p;
+    const kA = ease(clamp01(p / .36)), out = clamp01((p - .46) / .1), kB = ease(clamp01((p - .56) / .3));
+    place(A, kA); place(Bw, kB);
+    setA.style.opacity = 1 - out; setA.style.transform = `translateY(${-out * 6}vh)`;
+    setB.style.opacity = out; setB.style.transform = `translateY(${(1 - out) * 6}vh)`;
+    phB.style.opacity = out;
+    phA.style.setProperty('--zoom', 1.06 - kA * .06);
+    phB.style.setProperty('--zoom', 1.06 - kB * .06);
+    end.classList.toggle('on', p > .88);
+    const second = out > .5;
+    if (step.dataset.s !== String(second)) {
+      step.dataset.s = second;
+      step.innerHTML = second ? '<b>02</b> Construir' : '<b>01</b> Entender';
+    }
+  };
+  // Que la palabra más larga entre en el ancho (por si la tipografía de respaldo es más ancha que la Myriad Condensed)
+  const fit = () => [setA, setB].forEach(set => {
+    set.style.fontSize = '';
+    const max = Math.max(...$$('.w', set).map(w => w.offsetWidth)), room = innerWidth * .92;
+    if (max > room) set.style.fontSize = parseFloat(getComputedStyle(set).fontSize) * room / max + 'px';
+  });
+  addEventListener('scroll', () => requestAnimationFrame(update), { passive: true });
+  addEventListener('resize', () => { fit(); last = -1; update(); });
+  document.fonts?.ready.then(fit);
+  fit(); update();
 })();
 
 /* ================= Acordeón de servicios ================= */

@@ -131,7 +131,7 @@
 <!-- ================= NOSOTROS (scroll secuencial) ================= -->
 <section class="about" id="nosotros">
   <div class="about-sticky">
-    <div class="about-photo" aria-hidden="true"></div>
+    <div class="blobs" aria-hidden="true"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div>
     <div class="about-inner wrap">
       <h2 class="about-title">No somos una agencia<br>de marketing <em>convencional.</em></h2>
 
@@ -178,42 +178,34 @@
   </div>
 </section>
 
-<!-- ================= CÓMO TRABAJAMOS ================= -->
-<section class="how light" id="como">
-  <div class="wrap how-grid">
-    <div class="how-copy">
-      <p class="eyebrow rv">Cómo trabajamos con vos</p>
-      <h2 class="h2 rv">Del ruido<br>a la <em>estructura.</em></h2>
-      <p class="lead rv">No arrancamos por los anuncios. Arrancamos por entender tu negocio: qué vendés, a quién, con qué margen y qué está frenando el crecimiento.</p>
-      <p class="rv">Con ese diagnóstico diseñamos un sistema donde marca, web, contenido, pauta, CRM y automatizaciones trabajan bajo un mismo criterio. Después ejecutamos, medimos y ajustamos. Cada mes, con números sobre la mesa.</p>
-      <ul class="how-points rv">
-        <li><b>Un solo equipo.</b> Estrategia y ejecución en el mismo lugar.</li>
-        <li><b>Un solo tablero.</b> Métricas reales, no de vanidad.</li>
-        <li><b>Un solo objetivo.</b> El tuyo.</li>
-      </ul>
+<!-- ================= CÓMO TRABAJAMOS: de ruido a estructura ================= -->
+<!-- Sección fija: las palabras llegan dispersas y se ordenan con el scroll. Fotos: assets/nosotros.webp y assets/servicios.webp -->
+<section class="words" id="como">
+  <div class="words-sticky">
+    <div class="words-photo ph-a" aria-hidden="true"></div>
+    <div class="words-photo ph-b" aria-hidden="true"></div>
+    <div class="words-veil" aria-hidden="true"></div>
+
+    <div class="words-top wrap">
+      <p class="eyebrow">Cómo trabajamos con vos</p>
+      <p class="words-step" id="wordsStep"><b>01</b> Entender</p>
     </div>
 
-    <!-- Animación de pasos hasta el resultado -->
-    <div class="flow rv" id="flow" aria-label="Proceso de trabajo de Rumor">
-      <div class="flow-top">
-        <span class="flow-dot"></span><span class="flow-dot"></span><span class="flow-dot"></span>
-        <span class="flow-title">rumor · sistema</span>
-        <span class="flow-status" id="flowStatus">En curso</span>
-      </div>
-      <ol class="flow-steps">
-        <li data-i="0"><span class="st-ico"></span><div><b>Diagnóstico</b><small>Marca, web, pauta, ventas y procesos</small></div><em>Semana 1</em></li>
-        <li data-i="1"><span class="st-ico"></span><div><b>Estrategia</b><small>Objetivo, público, oferta y canales</small></div><em>Semana 2</em></li>
-        <li data-i="2"><span class="st-ico"></span><div><b>Sistema</b><small>Marca + web + CRM + automatizaciones</small></div><em>Mes 1</em></li>
-        <li data-i="3"><span class="st-ico"></span><div><b>Ejecución</b><small>Contenido y paid media conectados</small></div><em>Mes 2</em></li>
-        <li data-i="4"><span class="st-ico"></span><div><b>Medición</b><small>Dashboard, aprendizajes, ajustes</small></div><em>Mensual</em></li>
-      </ol>
-      <div class="flow-result" id="flowResult">
-        <div>
-          <small>Resultado</small>
-          <b>Objetivo comercial cumplido</b>
-        </div>
-        <div class="bars"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-      </div>
+    <h2 class="words-set set-a" aria-label="Diagnóstico, estrategia, datos">
+      <span class="w" data-x="-30">Diagnóstico</span>
+      <span class="w dot" data-x="26">Estrategia</span>
+      <span class="w" data-x="-18">Datos</span>
+    </h2>
+    <h2 class="words-set set-b" aria-label="Marca, web, pauta, CRM">
+      <span class="w" data-x="28">Marca</span>
+      <span class="w" data-x="-26">Web</span>
+      <span class="w dot" data-x="20">Pauta</span>
+      <span class="w" data-x="-32">CRM</span>
+    </h2>
+
+    <div class="words-end wrap">
+      <p>De ruido <em>a estructura.</em></p>
+      <a href="#contacto" class="btn btn-glass lg"><span>Agendá un diagnóstico gratuito</span><span class="arr">→</span></a>
     </div>
   </div>
 </section>
@@ -221,7 +213,7 @@
 <!-- ================= PACKS ================= -->
 <section class="packs light" id="packs">
   <!-- Fondo gaussiano en claro, fijo mientras se apilan las cards -->
-  <div class="packs-bg" aria-hidden="true"><div class="packs-bg-in"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div></div>
+  <div class="packs-bg" aria-hidden="true"><div class="packs-bg-in blobs"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div></div>
   <div class="wrap packs-head">
     <div>
       <p class="eyebrow rv">Nuestros packs</p>
@@ -309,10 +301,7 @@
       <p class="eyebrow rv">Servicios</p>
       <h2 class="h2 rv">No trabajamos servicios sueltos.<br><em>Trabajamos sistemas.</em></h2>
       <p class="lead rv">Cada pieza tiene un lugar.</p>
-      <figure class="svc-photo rv">
-        <img src="assets/servicios.webp" alt="Retrato con luz suave" loading="lazy" width="1400" height="781">
-        <a href="#contacto" class="btn btn-glass lg"><span>Agendá un diagnóstico gratuito</span><span class="arr">→</span></a>
-      </figure>
+      <a href="#contacto" class="btn btn-blue rv">Agendá un diagnóstico gratuito <span class="arr">→</span></a>
     </div>
     <div class="acc" id="acc">
       <div class="acc-item open"><button><span class="n">01</span>Branding<span class="pm"></span></button><div class="acc-body"><div><p>Identidad visual, naming y un sistema de marca coherente en cada punto de contacto. La base sobre la que se apoya todo lo demás.</p></div></div></div>

@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /bloques/
 
 Sitemap: https://rumoragencia.com/sitemap.xml

@@ -42,3 +42,9 @@
   src: local("Myriad Pro Black SemiExtended"), local("MyriadPro-BlackSemiExt"), url(assets/fonts/MyriadPro-BlackSemiExt.woff2) format("woff2"); }
 @font-face { font-family: "Rumor Myriad SemiExt"; font-weight: 900; font-style: italic; font-display: swap;
   src: local("Myriad Pro Black SemiExtended Italic"), local("MyriadPro-BlackSemiExtIt"), url(assets/fonts/MyriadPro-BlackSemiExtIt.woff2) format("woff2"); }
+
+/* Myriad Pro Condensed (bloque "de ruido a estructura") */
+@font-face { font-family: "Rumor Myriad Cond"; font-weight: 700; font-style: normal; font-display: swap;
+  src: local("Myriad Pro Bold Condensed"), local("MyriadPro-BoldCond"), url(assets/fonts/MyriadPro-BoldCond.woff2) format("woff2"); }
+@font-face { font-family: "Rumor Myriad Cond"; font-weight: 900; font-style: normal; font-display: swap;
+  src: local("Myriad Pro Black Condensed"), local("MyriadPro-BlackCond"), url(assets/fonts/MyriadPro-BlackCond.woff2) format("woff2"); }
