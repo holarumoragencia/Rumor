@@ -328,7 +328,7 @@ onScroll();
   const sec = $('.words');
   if (!sec) return;
   const setA = $('.set-a'), setB = $('.set-b'), A = $$('.w', setA), Bw = $$('.w', setB);
-  const phA = $('.ph-a'), phB = $('.ph-b'), end = $('.words-end'), step = $('#wordsStep');
+  const phA = $('.ph-a'), phB = $('.ph-b'), end = $('.words-end');
   const place = (ws, k) => ws.forEach(w => { w.style.transform = `translate3d(${+w.dataset.x * (1 - k)}vw,0,0)`; });
   let last = -1;
   const update = () => {
@@ -344,11 +344,6 @@ onScroll();
     phA.style.setProperty('--zoom', 1.06 - kA * .06);
     phB.style.setProperty('--zoom', 1.06 - kB * .06);
     end.classList.toggle('on', p > .88);
-    const second = out > .5;
-    if (step.dataset.s !== String(second)) {
-      step.dataset.s = second;
-      step.innerHTML = second ? '<b>02</b> Construir' : '<b>01</b> Entender';
-    }
   };
   // Que la palabra más larga entre en el ancho (por si la tipografía de respaldo es más ancha que la Myriad Condensed)
   const fit = () => [setA, setB].forEach(set => {
