@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Fondo Black Friday · Reel 1080×1920</title>
+<title>Fondo Black Friday</title>
 <style>
   html,body{margin:0;background:#111}
   body{display:grid;place-items:center;min-height:100vh}
@@ -28,6 +28,10 @@
   var Q = new URLSearchParams(location.search);
   if (Q.has('capture')) document.body.classList.add('capture');
   var MODO = Q.get('modo') || 'pleno';
+  // ?w=1920&h=1080 para la versión horizontal (por defecto 1080×1920)
+  var SW = +(Q.get('w') || 1080), SH = +(Q.get('h') || 1920), stage = document.getElementById('stage'), cv = stage.querySelector('canvas');
+  stage.style.width = SW + 'px'; stage.style.height = SH + 'px'; cv.width = SW; cv.height = SH;
+  if (!Q.has('capture')) stage.style.transform = 'scale(' + Math.min(innerWidth / SW, innerHeight / SH) + ')';
   var WITH_INTRO = Q.get('intro') === '1';
   var G = RumorGrid(document.querySelector('#stage canvas'), { modo: MODO });
   var draw = G.draw, CYCLE = G.CYCLE, INTRO = G.INTRO, STEPS = G.STEPS;

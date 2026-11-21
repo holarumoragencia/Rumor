@@ -46,9 +46,10 @@ window.RumorGrid = function (canvas, opts) {
   }
 
   var ctx = canvas.getContext('2d', { alpha: false });
-  var W = 1080, H = 1920;
+  var W = canvas.width, H = canvas.height, LAND = W > H;   // vertical (reel) u horizontal (16:9)
   // Misma densidad que en el celular: ~22 celdas de ancho
-  var cell = Math.round(W / 22);
+  // vertical: densidad del celular (~22 celdas de ancho) · horizontal: densidad de la portada en compu (~60)
+  var cell = opts.cell || Math.round(LAND ? W / 60 : W / 22);
   var cols = Math.ceil(W / cell), rows = Math.ceil(H / cell);
   var ox = (W - cols * cell) / 2, oy = (H - rows * cell) / 2;
   var sprites = THEMES.map(function (T) {
@@ -59,7 +60,7 @@ window.RumorGrid = function (canvas, opts) {
   for (var j = 0; j < rows; j++) for (var i = 0; i < cols; i++) {
     var k = j * cols + i;
     var xn = (ox + (i + 0.5) * cell) / W, yn = (oy + (j + 0.5) * cell) / H;
-    U[k] = xn * 0.45 + yn * 0.55;                      // barrido diagonal (versión vertical)
+    U[k] = LAND ? xn * 0.85 + yn * 0.15 : xn * 0.45 + yn * 0.55;   // barrido entre temas (como en el artefacto)
     var w = 1;
     if (MODO === 'centro') {
       // óvalo central oscuro donde va el sujeto o el artefacto
