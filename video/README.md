@@ -58,3 +58,10 @@ node video/render.cjs --page rumor-talking/index.html --query ondas=1 --out out/
 node video/render.cjs --page rumor-talking/index.html --query "bg=cream&ondas=1" --out out/rumor-talking-ondas-crema.mp4
 ```
 
+
+**Formato horizontal 1920×1080** (`--size 1920x1080`; en la variante con remolinos, uno a cada costado):
+
+```bash
+node video/render.cjs --page rumor-talking/index.html --size 1920x1080 --out out/horizontal/rumor-talking-negro-1920x1080.mp4
+node video/render.cjs --page rumor-talking/index.html --size 1920x1080 --query bg=cream --out out/horizontal/rumor-talking-crema-1920x1080.mp4
+```
