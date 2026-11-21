@@ -53,14 +53,13 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<!-- Filtros SVG del efecto "liquid glass" (deformación del fondo) -->
+<!-- Filtros SVG del efecto "liquid glass".
+     #lg-lens: lente tipo Apple (el fondo se curva en los bordes). El mapa lo genera script.js.
+     #lg-distort-soft: ondulación suave para la barra y las cards grandes. -->
 <svg class="lg-defs" width="0" height="0" aria-hidden="true" focusable="false">
-  <filter id="lg-distort" x="0" y="0" width="100%" height="100%">
-    <feTurbulence type="fractalNoise" baseFrequency="0.009 0.013" numOctaves="2" seed="7" result="noise">
-      <animate attributeName="baseFrequency" dur="14s" values="0.009 0.013;0.012 0.009;0.009 0.013" repeatCount="indefinite"/>
-    </feTurbulence>
-    <feGaussianBlur in="noise" stdDeviation="2" result="soft"/>
-    <feDisplacementMap in="SourceGraphic" in2="soft" scale="55" xChannelSelector="R" yChannelSelector="G"/>
+  <filter id="lg-lens" x="0" y="0" width="1" height="1" primitiveUnits="objectBoundingBox" color-interpolation-filters="sRGB">
+    <feImage id="lgLensMap" x="0" y="0" width="1" height="1" preserveAspectRatio="none" result="map"/>
+    <feDisplacementMap in="SourceGraphic" in2="map" scale="-.16" xChannelSelector="R" yChannelSelector="G"/>
   </filter>
   <filter id="lg-distort-soft" x="0" y="0" width="100%" height="100%">
     <feTurbulence type="fractalNoise" baseFrequency="0.006 0.009" numOctaves="2" seed="3" result="noise"/>
@@ -72,7 +71,7 @@
 <!-- ================= NAV ================= -->
 <header class="nav lg" id="nav">
   <a href="#top" class="nav-logo" aria-label="Rumor agencia"><img src="assets/logotipo-blanco.svg" alt="rumor" class="nav-logo-img"></a>
-  <nav class="nav-links">
+  <nav class="nav-links" aria-label="Secciones">
     <a href="#nosotros">Nosotros</a>
     <a href="#como">Cómo trabajamos</a>
     <a href="#packs">Packs</a>
@@ -130,8 +129,9 @@
 </section>
 
 <!-- ================= NOSOTROS (scroll secuencial) ================= -->
-<section class="about dark" id="nosotros">
+<section class="about" id="nosotros">
   <div class="about-sticky">
+    <div class="about-photo" aria-hidden="true"></div>
     <div class="about-inner wrap">
       <h2 class="about-title">No somos una agencia<br>de marketing <em>convencional.</em></h2>
 
@@ -309,7 +309,10 @@
       <p class="eyebrow rv">Servicios</p>
       <h2 class="h2 rv">No trabajamos servicios sueltos.<br><em>Trabajamos sistemas.</em></h2>
       <p class="lead rv">Cada pieza tiene un lugar.</p>
-      <a href="#contacto" class="btn btn-blue rv">Agendá un diagnóstico gratuito <span class="arr">→</span></a>
+      <figure class="svc-photo rv">
+        <img src="assets/servicios.webp" alt="Retrato con luz suave" loading="lazy" width="1400" height="781">
+        <a href="#contacto" class="btn btn-glass lg"><span>Agendá un diagnóstico gratuito</span><span class="arr">→</span></a>
+      </figure>
     </div>
     <div class="acc" id="acc">
       <div class="acc-item open"><button><span class="n">01</span>Branding<span class="pm"></span></button><div class="acc-body"><div><p>Identidad visual, naming y un sistema de marca coherente en cada punto de contacto. La base sobre la que se apoya todo lo demás.</p></div></div></div>

@@ -162,6 +162,36 @@ function fxRibbon(canvas) {
    el resto de los navegadores muestra el vidrio esmerilado sin deformar. */
 if (/Chrome\//.test(navigator.userAgent) && !/CriOS|EdgiOS|FxiOS/.test(navigator.userAgent)) document.documentElement.classList.add('lg-on');
 
+/* Mapa de la lente: el centro queda quieto y los bordes curvan el fondo, como el vidrio de Apple.
+   Se genera una vez (canal R = desplazamiento X, G = desplazamiento Y). */
+(function lensMap() {
+  const fe = document.getElementById('lgLensMap');
+  if (!fe) return;
+  const N = 128, band = .3, c = document.createElement('canvas');
+  c.width = c.height = N;
+  const ctx = c.getContext('2d'), img = ctx.createImageData(N, N);
+  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+    const u = (i + .5) / N * 2 - 1, v = (j + .5) / N * 2 - 1;
+    const ex = Math.max(0, Math.abs(u) - (1 - band)) / band, ey = Math.max(0, Math.abs(v) - (1 - band)) / band;
+    const e = Math.min(1, Math.hypot(ex, ey)), m = e * e * (3 - 2 * e), len = Math.hypot(ex, ey) || 1;
+    const o = (j * N + i) * 4;
+    img.data[o] = 128 + Math.sign(u) * ex / len * m * 127;
+    img.data[o + 1] = 128 + Math.sign(v) * ey / len * m * 127;
+    img.data[o + 2] = 128; img.data[o + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  fe.setAttribute('href', c.toDataURL());
+})();
+
+/* Brillo del vidrio que sigue al mouse (solo actualiza dos variables CSS) */
+addEventListener('pointermove', e => {
+  const el = e.target.closest?.('.lg');
+  if (!el || el.classList.contains('nav')) return;
+  const r = el.getBoundingClientRect();
+  el.style.setProperty('--mx', (e.clientX - r.left) / r.width * 100 + '%');
+  el.style.setProperty('--my', (e.clientY - r.top) / r.height * 100 + '%');
+}, { passive: true });
+
 $$('.fx-bg').forEach(fxBg);
 $$('.fx-ribbon').forEach(fxRibbon);
 
@@ -199,7 +229,7 @@ requestAnimationFrame(() => $$('.hero .rv').forEach((el, i) => setTimeout(() => 
 
 /* ================= Scroll: nav, nosotros, reel, packs ================= */
 const nav = $('#nav');
-const about = $('.about'), glass = $$('.glass');
+const about = $('.about'), glass = $$('.glass'), aboutPhoto = $('.about-photo');
 const reelFrame = $('#reelFrame');
 const packs = $$('.pack');
 
@@ -214,6 +244,7 @@ function onScroll() {
   const p = clamp01(-r.top / (r.height - vh));
   // las tres cards aparecen juntas con el primer scroll
   glass.forEach(g => g.classList.toggle('on', p > .12));
+  aboutPhoto.style.setProperty('--zoom', 1 + p * .06);
 
   // Reel: el marco se expande al entrar en pantalla
   const rr = reelFrame.getBoundingClientRect();

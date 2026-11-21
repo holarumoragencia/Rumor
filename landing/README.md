@@ -6,11 +6,11 @@ Landing estática (HTML + CSS + JS, sin build). Abrir `landing/index.html` servi
 ## Estructura
 1. **Hero** – modo claro: fondo vivo en WebGL (niebla azul sobre crema + cinta de luz) con mensajes flotantes de logros en liquid glass.
 2. **Marcas** – "Trabajamos con" + marquee de clientes.
-3. **Nosotros** – foto de fondo (`assets/nosotros.webp`); al scrollear aparecen juntas las 3 cards en liquid glass (+3 años, +60 clientes, 82%).
+3. **Nosotros** – foto de fondo (`assets/nosotros.webp`) con zoom suave al scrollear; aparecen juntas las 3 cards de vidrio (+3 años, +60 clientes, 82%).
 4. **Reel** – marco que se expande al scrollear, con el claim "Lo que hacemos, en movimiento." encima. Poner el video en `assets/reel.mp4` (16:9, 20–40 s, <8 MB). Sin video muestra un placeholder animado.
 5. **Cómo trabajamos** – claim + texto y animación de pasos (Diagnóstico → … → Resultado).
 6. **Packs** – 3 cards en liquid glass que se apilan sobre un fondo gaussiano claro (Fundacional / Estrategia 360 / Acelerador, con la curva de lanzamiento animada).
-7. **Servicios** – acordeón de 9 servicios; a la izquierda el botón "Agendá un diagnóstico gratuito".
+7. **Servicios** – acordeón de 9 servicios; a la izquierda claim + foto (`assets/servicios.webp`) con el botón de vidrio "Agendá un diagnóstico gratuito".
 8. **Casos** – Finteem con contadores.
 9. **Testimonios** – cards de video; completar `data-video="assets/testimonios/x.mp4"` en cada `.t-card`.
 10. **Hablemos** – bloque CTA con botón a WhatsApp (+54 9 3541 54-9822).
@@ -31,5 +31,7 @@ Landing estática (HTML + CSS + JS, sin build). Abrir `landing/index.html` servi
 - **Dominio:** todo apunta a `https://rumoragencia.com/`. Si el dominio es otro, reemplazarlo en `index.html`, `robots.txt` y `sitemap.xml`.
 
 ## Liquid glass
-Clase `.lg` en `styles.css`: desenfoque + tinte + brillos de borde. En Chrome/Edge se suma la deformación del fondo
-(filtros SVG `#lg-distort` y `#lg-distort-soft` al comienzo de `index.html`). Cada elemento ajusta `--lg-tint`, `--lg-blur` y `--lg-filter`.
+Clase `.lg` en `styles.css`: desenfoque + tinte + brillo que sigue al mouse + bordes de luz. En Chrome/Edge se suma
+la curvatura del fondo: `#lg-lens` (lente tipo Apple, el mapa lo genera `script.js`) en cards y botones, y `#lg-distort-soft`
+en la barra y los packs. Cada elemento ajusta `--lg-tint`, `--lg-blur`, `--lg-filter` y `--lg-inset`.
+El texto dentro de un `.lg` tiene que ir dentro de una etiqueta (ej. `<span>`) para quedar por encima del vidrio.
