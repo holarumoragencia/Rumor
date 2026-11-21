@@ -4,12 +4,12 @@ Landing estática (HTML + CSS + JS, sin build). Abrir `landing/index.html` servi
 (ej. `npx serve landing`) o subir la carpeta tal cual a cualquier hosting.
 
 ## Estructura
-1. **Hero** – fondo vivo en WebGL (la misma niebla + cinta de luz del video de servicios, en horizontal y sin textos) con mensajes flotantes de logros.
+1. **Hero** – modo claro: fondo vivo en WebGL (niebla azul sobre crema + cinta de luz) con mensajes flotantes de logros en liquid glass.
 2. **Marcas** – "Trabajamos con" + marquee de clientes.
-3. **Nosotros** – sección fija con scroll: con el primer scroll aparecen juntas las 3 cards glass (+3 años, +60 clientes, 82%) y con el siguiente el cierre "Por eso, antes de ejecutar, diagnosticamos…".
+3. **Nosotros** – foto de fondo (`assets/nosotros.webp`); al scrollear aparecen juntas las 3 cards en liquid glass (+3 años, +60 clientes, 82%).
 4. **Reel** – marco que se expande al scrollear, con el claim "Lo que hacemos, en movimiento." encima. Poner el video en `assets/reel.mp4` (16:9, 20–40 s, <8 MB). Sin video muestra un placeholder animado.
 5. **Cómo trabajamos** – claim + texto y animación de pasos (Diagnóstico → … → Resultado).
-6. **Packs** – 3 cards de pantalla completa que se apilan (Fundacional / Estrategia 360 / Acelerador).
+6. **Packs** – 3 cards en liquid glass que se apilan sobre un fondo gaussiano claro (Fundacional / Estrategia 360 / Acelerador, con la curva de lanzamiento animada).
 7. **Servicios** – acordeón de 9 servicios; a la izquierda el botón "Agendá un diagnóstico gratuito".
 8. **Casos** – Finteem con contadores.
 9. **Testimonios** – cards de video; completar `data-video="assets/testimonios/x.mp4"` en cada `.t-card`.
@@ -29,3 +29,7 @@ Landing estática (HTML + CSS + JS, sin build). Abrir `landing/index.html` servi
 - `.htaccess`: fuerza HTTPS y dominio sin `www`, cabeceras de seguridad, compresión y caché. Incluye una CSP comentada para activar cuando estén definidos los scripts externos (Pixel, GA…).
 - `404.html`: página de error con la marca.
 - **Dominio:** todo apunta a `https://rumoragencia.com/`. Si el dominio es otro, reemplazarlo en `index.html`, `robots.txt` y `sitemap.xml`.
+
+## Liquid glass
+Clase `.lg` en `styles.css`: desenfoque + tinte + brillos de borde. En Chrome/Edge se suma la deformación del fondo
+(filtros SVG `#lg-distort` y `#lg-distort-soft` al comienzo de `index.html`). Cada elemento ajusta `--lg-tint`, `--lg-blur` y `--lg-filter`.

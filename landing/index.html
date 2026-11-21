@@ -53,9 +53,24 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<!-- Filtros SVG del efecto "liquid glass" (deformación del fondo) -->
+<svg class="lg-defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <filter id="lg-distort" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.009 0.013" numOctaves="2" seed="7" result="noise">
+      <animate attributeName="baseFrequency" dur="14s" values="0.009 0.013;0.012 0.009;0.009 0.013" repeatCount="indefinite"/>
+    </feTurbulence>
+    <feGaussianBlur in="noise" stdDeviation="2" result="soft"/>
+    <feDisplacementMap in="SourceGraphic" in2="soft" scale="55" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="lg-distort-soft" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.006 0.009" numOctaves="2" seed="3" result="noise"/>
+    <feGaussianBlur in="noise" stdDeviation="3" result="soft"/>
+    <feDisplacementMap in="SourceGraphic" in2="soft" scale="32" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
 
 <!-- ================= NAV ================= -->
-<header class="nav" id="nav">
+<header class="nav lg" id="nav">
   <a href="#top" class="nav-logo" aria-label="Rumor agencia"><img src="assets/logotipo-blanco.svg" alt="rumor" class="nav-logo-img"></a>
   <nav class="nav-links">
     <a href="#nosotros">Nosotros</a>
@@ -64,7 +79,7 @@
     <a href="#servicios">Servicios</a>
     <a href="#casos">Casos</a>
   </nav>
-  <a href="#contacto" class="btn btn-sm btn-cream">Hablemos</a>
+  <a href="#contacto" class="btn btn-sm btn-blue">Hablemos</a>
 </header>
 
 <main id="top">
@@ -92,7 +107,7 @@
     </h1>
     <p class="hero-sub rv">Combinamos creatividad, performance y automatización para transformar cada acción en resultados para tu negocio.</p>
     <div class="hero-cta rv">
-      <a href="#contacto" class="btn btn-cream">Agendar una reunión <span class="arr">→</span></a>
+      <a href="#contacto" class="btn btn-blue">Agendar una reunión <span class="arr">→</span></a>
       <a href="#como" class="btn btn-ghost">Cómo trabajamos</a>
     </div>
   </div>
@@ -115,33 +130,30 @@
 </section>
 
 <!-- ================= NOSOTROS (scroll secuencial) ================= -->
-<section class="about" id="nosotros">
+<section class="about dark" id="nosotros">
   <div class="about-sticky">
-    <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
     <div class="about-inner wrap">
       <h2 class="about-title">No somos una agencia<br>de marketing <em>convencional.</em></h2>
 
       <div class="glass-row">
-        <div class="glass" data-step="0">
+        <div class="glass lg" data-step="0">
           <span class="glass-num">+3</span>
           <span class="glass-label">años en el mercado</span>
           <span class="glass-tag">Trayectoria</span>
         </div>
-        <div class="glass" data-step="1">
+        <div class="glass lg" data-step="1">
           <span class="glass-num">+60</span>
           <span class="glass-label">clientes en Argentina y el exterior</span>
           <span class="glass-tag">Alcance</span>
         </div>
-        <div class="glass" data-step="2">
+        <div class="glass lg" data-step="2">
           <span class="glass-num">82%</span>
           <span class="glass-label">de nuestros nuevos clientes llegan por recomendación</span>
           <span class="glass-tag">Confianza</span>
         </div>
       </div>
 
-      <p class="about-final">Por eso, antes de ejecutar, <b>diagnosticamos.</b> Antes de invertir en anuncios, nos aseguramos de que haya <b>un sistema sólido para recibirlos.</b></p>
     </div>
-    <div class="about-progress"><i></i><i></i></div>
   </div>
 </section>
 
@@ -208,6 +220,8 @@
 
 <!-- ================= PACKS ================= -->
 <section class="packs light" id="packs">
+  <!-- Fondo gaussiano en claro, fijo mientras se apilan las cards -->
+  <div class="packs-bg" aria-hidden="true"><div class="packs-bg-in"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div></div>
   <div class="wrap packs-head">
     <div>
       <p class="eyebrow rv">Nuestros packs</p>
@@ -217,7 +231,7 @@
   </div>
 
   <div class="stack">
-    <article class="pack p-cream">
+    <article class="pack lg p-cream">
       <div class="pack-copy">
         <span class="pack-num">01</span>
         <h3>Fundacional</h3>
@@ -236,7 +250,7 @@
       </div>
     </article>
 
-    <article class="pack p-blue">
+    <article class="pack lg p-blue">
       <div class="pack-copy">
         <span class="pack-num">02</span>
         <h3>Estrategia 360</h3>
@@ -255,7 +269,7 @@
       </div>
     </article>
 
-    <article class="pack p-black">
+    <article class="pack lg p-black">
       <div class="pack-copy">
         <span class="pack-num">03</span>
         <h3>Acelerador</h3>
@@ -265,14 +279,23 @@
           <div><small>Formato</small><p>Un objetivo comercial claro, un deadline y todo enfocado ahí.</p></div>
         </div>
       </div>
-      <div class="pack-visual v-launch" aria-hidden="true">
+      <div class="pack-visual v-launch" id="launch" aria-hidden="true">
+        <div class="v-grid"></div>
         <svg viewBox="0 0 400 260" preserveAspectRatio="none">
-          <defs><linearGradient id="lg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#0057ff" stop-opacity=".55"/><stop offset="1" stop-color="#0057ff" stop-opacity="0"/></linearGradient></defs>
-          <path class="area" d="M0,240 C60,235 100,228 150,215 C200,200 230,170 270,130 C310,90 350,50 400,20 L400,260 L0,260Z" fill="url(#lg)"/>
-          <path class="line" d="M0,240 C60,235 100,228 150,215 C200,200 230,170 270,130 C310,90 350,50 400,20" fill="none" stroke="#fffcf1" stroke-width="2.5"/>
+          <defs>
+            <linearGradient id="launchFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#0057ff" stop-opacity=".6"/><stop offset="1" stop-color="#0057ff" stop-opacity="0"/></linearGradient>
+            <clipPath id="launchClip"><rect id="launchClipRect" x="0" y="0" width="0" height="260"/></clipPath>
+          </defs>
+          <path clip-path="url(#launchClip)" d="M0,240 C60,235 100,228 150,215 C200,200 230,170 270,130 C310,90 350,50 400,20 L400,260 L0,260Z" fill="url(#launchFill)"/>
+          <path id="launchLine" d="M0,240 C60,235 100,228 150,215 C200,200 230,170 270,130 C310,90 350,50 400,20" fill="none" stroke="#fffcf1" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
         </svg>
-        <div class="deadline"><small>Deadline</small><b>D-30</b></div>
-        <div class="goal"><small>Objetivo</small><b>Lanzamiento</b></div>
+        <span class="ms" data-at=".3">Landing</span>
+        <span class="ms" data-at=".55">Contenido</span>
+        <span class="ms" data-at=".78">Pauta</span>
+        <span class="l-dot" id="launchDot"></span>
+        <div class="deadline"><small>Deadline</small><b id="launchDays">D-30</b></div>
+        <div class="goal" id="launchGoal"><small>Objetivo</small><b>Lanzamiento</b></div>
+        <div class="l-prog"><b id="launchPct">0%</b> del objetivo</div>
       </div>
     </article>
   </div>
@@ -280,7 +303,7 @@
 </section>
 
 <!-- ================= SERVICIOS ================= -->
-<section class="services" id="servicios">
+<section class="services light" id="servicios">
   <div class="wrap services-grid">
     <div class="services-head">
       <p class="eyebrow rv">Servicios</p>
@@ -340,7 +363,7 @@
 </section>
 
 <!-- ================= TESTIMONIOS ================= -->
-<section class="testis" id="testimonios">
+<section class="testis light" id="testimonios">
   <div class="wrap">
     <p class="eyebrow rv">Testimonios</p>
     <h2 class="h2 rv">Lo que dicen los que<br><em>trabajan con nosotros.</em></h2>
@@ -356,7 +379,7 @@
 </section>
 
 <!-- ================= HABLEMOS ================= -->
-<section class="talk" id="contacto">
+<section class="talk dark" id="contacto">
   <canvas class="fx-bg" data-variant="talk"></canvas>
   <div class="talk-inner wrap">
     <p class="eyebrow center rv">Contacto</p>

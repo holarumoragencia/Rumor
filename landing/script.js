@@ -45,7 +45,21 @@ void main(){
   vec3 c;
 
   if (mode < .5) {
-    // hero / reel: azul abajo-derecha, humo negro al centro, niebla arriba
+    // hero (modo claro): crema dominante, niebla azul que fluye desde abajo a la derecha
+    float y = uv.y*.75 + (1.-uv.x)*.45 + (w-.5)*.6 + .04*sin(t*.3+uv.x*3.);
+    c = cream;
+    c = mix(c, hex(226.,232.,255.), smoothstep(.98,.62,y));
+    c = mix(c, hex(150.,175.,255.), smoothstep(.72,.42,y)*.85);
+    c = mix(c, blue2, smoothstep(.52,.22,y));
+    c = mix(c, blue,  smoothstep(.30,.02,y));
+    float g = smoothstep(.5,.0,length((uv-vec2(.82+.08*sin(t*.3),.78+.06*cos(t*.25)))*vec2(1.,1.4)));
+    c = mix(c, hex(205.,216.,255.), g*.55);
+    c += (r.x-.5)*.05;
+    c += (h(gl_FragCoord.xy + fract(t*24.)*91.7) - .5)*.035;
+    gl_FragColor = vec4(clamp(c,0.,1.),1.);
+    return;
+  } else if (mode > 1.5) {
+    // reel (oscuro): azul abajo-derecha, humo negro al centro, niebla arriba
     float y = uv.y*.85 + (1.-uv.x)*.25 + (w-.5)*.5 + .05*sin(t*.3+uv.x*3.);
     c = blue2;
     c = mix(c, deep,  smoothstep(.05,.30,y));
@@ -80,7 +94,7 @@ function fxBg(canvas) {
   const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc);
   gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   const uRes = gl.getUniformLocation(prog, 'res'), uT = gl.getUniformLocation(prog, 't');
-  gl.uniform1f(gl.getUniformLocation(prog, 'mode'), canvas.dataset.variant === 'talk' ? 1 : 0);
+  gl.uniform1f(gl.getUniformLocation(prog, 'mode'), { hero: 0, talk: 1, reel: 2 }[canvas.dataset.variant] ?? 0);
 
   // Render a media resolución: es niebla, no necesita nitidez y ahorra GPU
   const resize = () => {
@@ -136,13 +150,17 @@ function fxRibbon(canvas) {
     const p = pts(t), d = reduce ? 1 : ease(clamp01(t / 3));
     ctx.lineCap = ctx.lineJoin = 'round';
     const g = ctx.createLinearGradient(0, 0, W, H);
-    g.addColorStop(0, 'rgba(0,87,255,1)'); g.addColorStop(.5, 'rgba(255,252,241,1)'); g.addColorStop(1, 'rgba(0,87,255,1)');
+    g.addColorStop(0, 'rgba(0,58,254,1)'); g.addColorStop(.5, 'rgba(125,155,255,1)'); g.addColorStop(1, 'rgba(0,87,255,1)');
     ctx.strokeStyle = g;
-    ctx.globalAlpha = .45; ctx.lineWidth = 16; ctx.filter = 'blur(12px)'; stroke(p, d);
+    ctx.globalAlpha = .35; ctx.lineWidth = 16; ctx.filter = 'blur(12px)'; stroke(p, d);
     ctx.globalAlpha = .5; ctx.lineWidth = 4; ctx.filter = 'blur(2.5px)'; stroke(p, d);
     ctx.globalAlpha = .45; ctx.lineWidth = 1; ctx.filter = 'none'; stroke(p, d);
   });
 }
+
+/* Liquid glass: la deformación con filtro SVG sobre el fondo solo es estable en Chrome/Edge;
+   el resto de los navegadores muestra el vidrio esmerilado sin deformar. */
+if (/Chrome\//.test(navigator.userAgent) && !/CriOS|EdgiOS|FxiOS/.test(navigator.userAgent)) document.documentElement.classList.add('lg-on');
 
 $$('.fx-bg').forEach(fxBg);
 $$('.fx-ribbon').forEach(fxRibbon);
@@ -153,7 +171,7 @@ $$('.fx-ribbon').forEach(fxRibbon);
   let next = 0;
   const make = m => {
     const el = document.createElement('div');
-    el.className = 'chip';
+    el.className = 'chip lg';
     el.innerHTML = `<span class="chip-ico"><img src="assets/isotipo-blanco.svg" alt=""></span>
       <div><small>${m.label}</small><b>${m.text}</b><span class="sub">${m.sub}</span></div>`;
     return el;
@@ -181,24 +199,21 @@ requestAnimationFrame(() => $$('.hero .rv').forEach((el, i) => setTimeout(() => 
 
 /* ================= Scroll: nav, nosotros, reel, packs ================= */
 const nav = $('#nav');
-const about = $('.about'), glass = $$('.glass'), final = $('.about-final'), bars = $$('.about-progress i');
+const about = $('.about'), glass = $$('.glass');
 const reelFrame = $('#reelFrame');
 const packs = $$('.pack');
 
 function onScroll() {
   const vh = innerHeight;
   nav.classList.toggle('scrolled', scrollY > 40);
-  const under = document.elementFromPoint(6, 48);
-  nav.classList.toggle('on-light', !!under?.closest('.light'));
+  const under = document.elementsFromPoint(innerWidth / 2, nav.offsetHeight / 2).find(el => !nav.contains(el));
+  nav.classList.toggle('on-dark', !!under?.closest('.dark'));
 
-  // Nosotros: las tres cards aparecen de a una y al final el cierre
+  // Nosotros: tarjetas sobre la foto
   const r = about.getBoundingClientRect();
   const p = clamp01(-r.top / (r.height - vh));
-  // primer scroll: las tres cards juntas · segundo scroll: el párrafo de cierre
-  const cardsOn = p > .12, finalOn = p > .55;
-  glass.forEach(g => g.classList.toggle('on', cardsOn));
-  final.classList.toggle('on', finalOn);
-  bars[0].classList.toggle('on', cardsOn); bars[1].classList.toggle('on', finalOn);
+  // las tres cards aparecen juntas con el primer scroll
+  glass.forEach(g => g.classList.toggle('on', p > .12));
 
   // Reel: el marco se expande al entrar en pantalla
   const rr = reelFrame.getBoundingClientRect();
@@ -210,11 +225,10 @@ function onScroll() {
   packs.forEach((pk, i) => {
     const nx = packs[i + 1];
     const cs = getComputedStyle(pk);
-    if (!nx || cs.position !== 'sticky') { pk.style.transform = pk.style.filter = ''; return; }
+    if (!nx || cs.position !== 'sticky') { pk.style.transform = ''; return; }
     const top = parseFloat(cs.top);
     const d = clamp01(1 - (nx.getBoundingClientRect().top - top) / vh);
     pk.style.transform = `scale(${1 - d * .06})`;
-    pk.style.filter = `brightness(${1 - d * .25})`;
   });
 }
 addEventListener('scroll', () => requestAnimationFrame(onScroll), { passive: true });
@@ -250,6 +264,30 @@ onScroll();
     if (e.isIntersecting && !running) { running = true; reset(); timer = setTimeout(step, 400); }
     else if (!e.isIntersecting && running) { running = false; clearTimeout(timer); }
   }, { threshold: .35 }).observe($('#flow'));
+})();
+
+/* ================= Acelerador: curva de lanzamiento animada ================= */
+(function launch() {
+  const box = $('#launch');
+  if (!box) return;
+  const line = $('#launchLine'), clip = $('#launchClipRect'), dot = $('#launchDot');
+  const days = $('#launchDays'), pct = $('#launchPct'), goal = $('#launchGoal'), ms = $$('.ms', box);
+  const L = line.getTotalLength(), CYCLE = 8, RUN = 5.5;
+  const at = k => { const pt = line.getPointAtLength(L * k); return [pt.x / 4, pt.y / 2.6, pt.x]; }; // % del viewBox 400×260
+  line.style.strokeDasharray = L;
+  ms.forEach(m => { const [x, y] = at(+m.dataset.at); m.style.left = x + '%'; m.style.top = y + '%'; });
+  const inOut = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  loopWhenVisible(box, t => {
+    const k = reduce ? 1 : inOut(clamp01((t % CYCLE) / RUN));
+    const [x, y, vx] = at(k);
+    line.style.strokeDashoffset = L * (1 - k);
+    clip.setAttribute('width', vx);
+    dot.style.left = x + '%'; dot.style.top = y + '%';
+    days.textContent = 'D-' + Math.round(30 * (1 - k));
+    pct.textContent = Math.round(k * 100) + '%';
+    goal.classList.toggle('hit', k > .995);
+    ms.forEach(m => m.classList.toggle('on', k >= +m.dataset.at));
+  });
 })();
 
 /* ================= Acordeón de servicios ================= */
