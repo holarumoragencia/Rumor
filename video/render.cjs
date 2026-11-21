@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Renderiza video/index.html cuadro a cuadro y arma un MP4 vertical 1080x1920.
 // Uso: node video/render.cjs [--fps 30] [--out video/out/rumor-servicios.mp4] [--still 7]
-//      [--page rumor-talking/index.html] [--query bg=cream]
+//      [--page rumor-talking/index.html] [--query bg=cream] [--size 1920x1080]
 const path = require('path');
 const fs = require('fs');
 const { spawnSync } = require('child_process');
@@ -15,14 +15,15 @@ const args = Object.fromEntries(process.argv.slice(2).reduce((acc, a, i, arr) =>
 const FPS = Number(args.fps || 30);
 const OUT = path.resolve(args.out || path.join(__dirname, 'out', 'rumor-servicios.mp4'));
 const PAGE = path.join(__dirname, args.page || 'index.html');
-const QUERY = args.query ? '&' + args.query : '';
+const QUERY = (args.query ? '&' + args.query : '') + (args.size ? `&w=${args.size.split('x')[0]}&h=${args.size.split('x')[1]}` : '');
 const FRAMES_DIR = path.join(__dirname, 'out', 'frames-' + path.basename(OUT, '.mp4'));
 
 (async () => {
   const browser = await chromium.launch({
     args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
   });
-  const page = await browser.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
+  const [VW, VH] = (args.size || '1080x1920').split('x').map(Number);
+  const page = await browser.newPage({ viewport: { width: VW, height: VH }, deviceScaleFactor: 1 });
   page.on('pageerror', e => { console.error('page error:', e); process.exit(1); });
   await page.goto('file://' + PAGE + '?capture' + QUERY);
   await page.evaluate(() => document.fonts.ready);

@@ -50,11 +50,15 @@ const THEME = MODE === 'cream'
   ? { bg: PAL.cream, inkA: PAL.blue, inkB: PAL.black, accent: PAL.crimson, light: 0 }
   : { bg: PAL.black, inkA: PAL.blue2, inkB: mixc(PAL.blue2, PAL.cream, 0.4), accent: PAL.crimson, light: 1 };
 
+// Tamaño: vertical 1080×1920 por defecto; horizontal con ?w=1920&h=1080
+const SW = Number(params.get('w') || 1080), SH = Number(params.get('h') || 1920);
+{ const st = document.getElementById('stage'), c = document.getElementById('gl');
+  st.style.width = SW + 'px'; st.style.height = SH + 'px'; c.width = SW; c.height = SH; }
 if (params.has('capture')) document.body.classList.add('capture');
 else {
-  const fit = () => { const s = Math.min(innerWidth / 1080, innerHeight / 1920);
+  const fit = () => { const s = Math.min(innerWidth / SW, innerHeight / SH);
     document.getElementById('stage').style.transform = `scale(${s})`;
-    document.getElementById('stage').style.marginBottom = `${1920 * (s - 1)}px`; };
+    document.getElementById('stage').style.marginBottom = `${SH * (s - 1)}px`; };
   fit(); addEventListener('resize', fit);
 }
 
@@ -160,6 +164,10 @@ vec2 warp(vec2 p, float a, out float depth){
     float wl = 0.5 + 0.5 * cos(a * 3.), wr = 1. - wl;
     vec2 cl = vec2(-300. + 50. * sin(a * 2.), -380. + 260. * sin(a));
     vec2 cr = vec2(300. + 50. * cos(a * 2.), 420. + 240. * cos(a));
+    if (res.x > res.y) {           // horizontal: un remolino a cada costado
+      cl = vec2(-520. + 60. * sin(a * 2.), -110. + 140. * sin(a));
+      cr = vec2(520. + 60. * cos(a * 2.), 120. + 130. * cos(a));
+    }
     q = swirl(q, cl, 300., wl * wl, a);
     q = swirl(q, cr, 300., -wr * wr, a);
   }
