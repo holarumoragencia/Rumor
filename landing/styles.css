@@ -161,8 +161,8 @@ em { font-style: italic; font-weight: 300; }
 .marquee-track span { font-family: var(--wide); font-size: 26px; font-weight: 700; letter-spacing: -.01em; color: rgba(25, 25, 25, .42); white-space: nowrap; }
 
 /* ---------- Nosotros (secuencia con scroll) ---------- */
-.about { position: relative; height: 200vh; background: var(--cream); color: var(--black); }
-.about-sticky { position: sticky; top: 0; height: 100svh; overflow: hidden; display: grid; }
+.about { position: relative; background: var(--cream); color: var(--black); }
+.about-sticky { position: relative; min-height: 100svh; overflow: hidden; display: grid; }
 .about .blobs { position: absolute; inset: 0; }
 .about-inner { position: relative; z-index: 2; display: flex; flex-direction: column; justify-content: space-between; padding: 130px 0 56px; }
 .about-title { margin-top: 0; font-family: var(--display); font-weight: 900; font-size: clamp(32px, 5vw, 76px); line-height: 1.02; letter-spacing: -.02em; }
@@ -184,7 +184,6 @@ em { font-style: italic; font-weight: 300; }
 .glass-label { font-size: 17px; line-height: 1.35; color: rgba(25, 25, 25, .78); }
 .glass-tag { align-self: flex-start; font-size: 12px; padding: 5px 10px; border-radius: var(--r-tag); color: var(--blue); background: rgba(255, 255, 255, .45); border: 1px solid rgba(0, 58, 254, .25); }
 @media (max-width: 760px) {
-  .about { height: 180vh; }
   .glass-row { grid-template-columns: 1fr; gap: 10px; margin-top: 28px; }
   .glass { min-height: 0; padding: 16px 20px; flex-direction: row; align-items: center; gap: 16px; }
   .glass-num { font-size: 36px; flex: none; min-width: 84px; }
@@ -269,13 +268,13 @@ em { font-style: italic; font-weight: 300; }
 @media (max-width: 520px) { .flow-steps li em { display: none; } .flow-steps li { grid-template-columns: 46px 1fr; } }
 
 /* ---------- Cómo trabajamos: de ruido a estructura ---------- */
-.words { position: relative; height: 460vh; background: var(--cream); }
+.words { position: relative; height: 230vh; background: var(--cream); }
 .words-sticky { position: sticky; top: 0; height: 100svh; overflow: hidden; display: grid; place-items: center; }
-.words-photo { position: absolute; inset: 0; background: #eef1f8 center 30% / cover no-repeat; transform: scale(var(--zoom, 1.06)); }
+.words-photo { position: absolute; inset: 0; background: #eef1f8 center 30% / cover no-repeat; transform: scale(var(--zoom, 1.06)); will-change: transform, opacity; }
 .ph-a { background-image: url(assets/nosotros.webp); }
 .ph-b { background-image: url(assets/servicios.webp); background-position: 70% 25%; opacity: 0; }
 .words-veil { position: absolute; inset: 0; background: rgba(255, 252, 241, .38); }
-.words-set { position: absolute; z-index: 2; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;
+.words-set { will-change: transform, opacity; position: absolute; z-index: 2; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;
   font-family: var(--cond); font-weight: 900; text-transform: uppercase; color: var(--black);
   line-height: .86; letter-spacing: -.01em; pointer-events: none; }
 .set-a { font-size: min(13vw, 21vh); }
@@ -289,7 +288,7 @@ em { font-style: italic; font-weight: 300; }
 .words-end p { font-family: var(--display); font-weight: 900; font-size: clamp(24px, 2.6vw, 40px); letter-spacing: -.01em; }
 .words-end em { font-family: var(--wide); font-weight: 300; color: var(--blue); }
 @media (max-width: 760px) {
-  .words { height: 400vh; }
+  .words { height: 210vh; }
   .set-a { font-size: min(15vw, 15vh); } .set-b { font-size: min(17vw, 13vh); }
   .ph-a { background-position: 62% center; } .ph-b { background-position: 68% center; }
   .words-end { bottom: 24px; }

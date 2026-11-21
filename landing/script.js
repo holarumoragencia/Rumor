@@ -239,11 +239,9 @@ function onScroll() {
   const under = document.elementsFromPoint(innerWidth / 2, nav.offsetHeight / 2).find(el => !nav.contains(el));
   nav.classList.toggle('on-dark', !!under?.closest('.dark'));
 
-  // Nosotros: tarjetas sobre la foto
-  const r = about.getBoundingClientRect();
-  const p = clamp01(-r.top / (r.height - vh));
-  // las tres cards aparecen juntas con el primer scroll
-  glass.forEach(g => g.classList.toggle('on', p > .12));
+  // Nosotros: las tres cards aparecen juntas cuando la sección entra en pantalla
+  const on = about.getBoundingClientRect().top < vh * .45;
+  glass.forEach(g => g.classList.toggle('on', on));
 
   // Reel: el marco se expande al entrar en pantalla
   const rr = reelFrame.getBoundingClientRect();
@@ -323,27 +321,35 @@ onScroll();
 
 /* ================= Cómo trabajamos: de ruido a estructura =================
    Las palabras llegan dispersas (data-x = desplazamiento en vw) y se alinean con el scroll.
-   0–36%: se ordena el set A sobre la mujer · 46–56%: fundido al hombre · 56–86%: se ordena el set B · 88%+: cierre. */
+   0–34%: se ordena el set A sobre la mujer · 40–52%: fundido al hombre · 50–82%: se ordena el set B · 84%+: cierre.
+   El avance sigue al scroll con un suavizado (lerp), así el movimiento no salta con cada giro de la rueda. */
 (function words() {
   const sec = $('.words');
   if (!sec) return;
   const setA = $('.set-a'), setB = $('.set-b'), A = $$('.w', setA), Bw = $$('.w', setB);
   const phA = $('.ph-a'), phB = $('.ph-b'), end = $('.words-end');
   const place = (ws, k) => ws.forEach(w => { w.style.transform = `translate3d(${+w.dataset.x * (1 - k)}vw,0,0)`; });
-  let last = -1;
-  const update = () => {
-    const r = sec.getBoundingClientRect();
-    const p = reduce ? 1 : clamp01(-r.top / (r.height - innerHeight));
-    if (p === last) return;
-    last = p;
-    const kA = ease(clamp01(p / .36)), out = clamp01((p - .46) / .1), kB = ease(clamp01((p - .56) / .3));
+  const render = p => {
+    const kA = ease(clamp01(p / .34)), out = clamp01((p - .4) / .12), kB = ease(clamp01((p - .5) / .32));
     place(A, kA); place(Bw, kB);
     setA.style.opacity = 1 - out; setA.style.transform = `translateY(${-out * 6}vh)`;
     setB.style.opacity = out; setB.style.transform = `translateY(${(1 - out) * 6}vh)`;
     phB.style.opacity = out;
     phA.style.setProperty('--zoom', 1.06 - kA * .06);
     phB.style.setProperty('--zoom', 1.06 - kB * .06);
-    end.classList.toggle('on', p > .88);
+    end.classList.toggle('on', p > .84);
+  };
+  let target = 0, cur = -1, raf = 0;
+  const tick = () => {
+    cur = cur < 0 ? target : cur + (target - cur) * .14;
+    if (Math.abs(target - cur) < .0005) cur = target;
+    render(cur);
+    raf = cur !== target ? requestAnimationFrame(tick) : 0;
+  };
+  const update = () => {
+    const r = sec.getBoundingClientRect();
+    target = reduce ? 1 : clamp01(-r.top / (r.height - innerHeight));
+    if (!raf) raf = requestAnimationFrame(tick);
   };
   // Que la palabra más larga entre en el ancho (por si la tipografía de respaldo es más ancha que la Myriad Condensed)
   const fit = () => [setA, setB].forEach(set => {
@@ -351,8 +357,8 @@ onScroll();
     const max = Math.max(...$$('.w', set).map(w => w.offsetWidth)), room = innerWidth * .92;
     if (max > room) set.style.fontSize = parseFloat(getComputedStyle(set).fontSize) * room / max + 'px';
   });
-  addEventListener('scroll', () => requestAnimationFrame(update), { passive: true });
-  addEventListener('resize', () => { fit(); last = -1; update(); });
+  addEventListener('scroll', update, { passive: true });
+  addEventListener('resize', () => { fit(); update(); });
   document.fonts?.ready.then(fit);
   fit(); update();
 })();
