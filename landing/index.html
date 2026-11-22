@@ -319,30 +319,99 @@
     <p class="lead rv">Trabajos reales, con números reales. Sin promesas, sin métricas de vanidad.</p>
   </div>
 
-  <div class="wrap">
-    <article class="case rv">
-      <div class="case-copy">
-        <small class="case-cat">Fintech · Finance partner</small>
-        <h3>Neo-Structure:<br><em>escalado 4x en 12 meses.</em></h3>
-        <p>Finteem es un equipo de dirección financiera externa que acompaña a startups y negocios digitales en la toma de decisiones estratégicas. Desde control de burn rate hasta planificación de crecimiento, integra datos, proyección y criterio financiero en un solo sistema.</p>
-        <div class="case-stats">
-          <div><b data-count="40" data-prefix="+">+40</b><small>negocios acompañados</small></div>
-          <div><b data-count="15" data-prefix="+" data-suffix="M€">+15M€</b><small>en flujo financiero analizado</small></div>
-          <div><b data-count="100" data-suffix="%">100%</b><small>de proyectos con dashboard activo</small></div>
+  <!-- Carrusel de casos. Los datos pendientes están marcados con class="falta" (buscar "falta" para completarlos). -->
+  <div class="wrap cases-wrap rv">
+    <div class="case-tabs" role="tablist" aria-label="Casos">
+      <button class="on" data-i="0" role="tab">Finteem</button>
+      <button data-i="1" role="tab">Tourkess Travel</button>
+      <button data-i="2" role="tab">Ebert Prop</button>
+      <span class="case-nav"><button class="case-prev" aria-label="Caso anterior">←</button><button class="case-next" aria-label="Caso siguiente">→</button></span>
+    </div>
+
+    <div class="case-track" id="caseTrack">
+      <!-- ===== Caso 1 · Finteem ===== -->
+      <article class="case">
+        <div class="case-copy">
+          <small class="case-cat">Fintech · Finance partner</small>
+          <h3>Neo-Structure:<br><em>escalado 4x en 12 meses.</em></h3>
+          <p>Finteem es un equipo de dirección financiera externa que acompaña a startups y negocios digitales en la toma de decisiones estratégicas. Desde control de burn rate hasta planificación de crecimiento, integra datos, proyección y criterio financiero en un solo sistema.</p>
+          <div class="case-stats">
+            <div><b data-count="40" data-prefix="+">+40</b><small>negocios acompañados</small></div>
+            <div><b data-count="15" data-prefix="+" data-suffix="M€">+15M€</b><small>en flujo financiero analizado</small></div>
+            <div><b data-count="100" data-suffix="%">100%</b><small>de proyectos con dashboard activo</small></div>
+          </div>
+          <div class="case-tags"><span class="falta">Servicios que hizo Rumor (ej.: Web · Contenido · Paid media)</span></div>
+          <a href="#contacto" class="link">Ver caso en detalle <span class="arr">→</span></a>
         </div>
-        <a href="#contacto" class="link">Ver caso en detalle <span class="arr">→</span></a>
-      </div>
-      <div class="case-visual">
-        <div class="browser">
-          <div class="browser-bar"><i></i><i></i><i></i><span>finteem.com</span></div>
-          <div class="browser-body">
-            <span class="fin-logo">⟋ finteem</span>
-            <p class="fin-h">ENFOCATE EN CRECER<br><span>NOSOTROS EN TU FINANCE</span></p>
-            <span class="fin-btn">Agendá una llamada</span>
+        <div class="case-visual">
+          <div class="browser">
+            <div class="browser-bar"><i></i><i></i><i></i><span>finteem.com</span></div>
+            <div class="browser-body">
+              <span class="fin-logo">⟋ finteem</span>
+              <p class="fin-h">ENFOCATE EN CRECER<br><span>NOSOTROS EN TU FINANCE</span></p>
+              <span class="fin-btn">Agendá una llamada</span>
+            </div>
           </div>
         </div>
-      </div>
-    </article>
+      </article>
+
+      <!-- ===== Caso 2 · Tourkess Travel ===== -->
+      <article class="case">
+        <div class="case-copy">
+          <small class="case-cat">Turismo · IA y automatización</small>
+          <h3>De la reunión de café<br><em>al cotizador con IA.</em></h3>
+          <p>Tourkess Travel es una agencia de turismo que vendía como siempre: por referidos y en reuniones cara a cara. La estamos llevando al mundo digital con IA: un cotizador que arma presupuestos de forma automática y procesos que antes se hacían a mano, hoy automatizados.</p>
+          <div class="case-stats">
+            <div><b><span class="falta">X → Y min</span></b><small>para armar una cotización, antes y ahora</small></div>
+            <div><b><span class="falta">+N</span></b><small>cotizaciones generadas con IA</small></div>
+            <div><b><span class="falta">N h</span></b><small>de trabajo manual ahorradas por semana</small></div>
+          </div>
+          <div class="case-tags"><span>IA</span><span>Automatizaciones</span><span>Cotizador</span><span>Meta Ads</span></div>
+          <a href="#contacto" class="link">Ver caso en detalle <span class="arr">→</span></a>
+        </div>
+        <div class="case-visual cv-tour">
+          <div class="quote-ui">
+            <div class="q-head"><span class="q-ai">IA</span><b>Cotizador</b><small>Tourkess Travel</small></div>
+            <div class="q-field"><small>Destino</small><span>Brasil · Florianópolis</span></div>
+            <div class="q-row">
+              <div class="q-field"><small>Fechas</small><span>10 noches</span></div>
+              <div class="q-field"><small>Pasajeros</small><span>2 adultos</span></div>
+            </div>
+            <div class="q-result"><small>Cotización lista en</small><b><span class="falta">N seg</span></b><span class="q-btn">Enviar por WhatsApp</span></div>
+          </div>
+          <span class="falta falta-visual">Falta: captura real del cotizador</span>
+        </div>
+      </article>
+
+      <!-- ===== Caso 3 · Ebert Prop ===== -->
+      <article class="case">
+        <div class="case-copy">
+          <small class="case-cat">Inmobiliaria · Villa Carlos Paz</small>
+          <h3>Un mes para vender.<br><em>Vendido en ese mes.</em></h3>
+          <p>Ebert Prop es una inmobiliaria de Villa Carlos Paz que acompañamos desde cero: branding, web e Instagram. Cuando nos dieron un ultimátum para vender un departamento en un mes, lo vendimos dentro del plazo. Hoy cada casa de lujo tiene su propia landing y una estrategia en Meta pensada para venderla.</p>
+          <div class="case-stats">
+            <div><b><span class="falta">+N</span></b><small>alquileres concretados</small></div>
+            <div><b><span class="falta">+N</span></b><small>propiedades captadas para alquilar o vender</small></div>
+            <div><b>30 días</b><small>plazo para vender un departamento: cumplido</small></div>
+          </div>
+          <div class="case-tags"><span>Branding</span><span>Web</span><span>Instagram</span><span>Landings</span><span>Meta Ads</span></div>
+          <a href="#contacto" class="link">Ver caso en detalle <span class="arr">→</span></a>
+        </div>
+        <div class="case-visual cv-ebert">
+          <div class="browser">
+            <div class="browser-bar"><i></i><i></i><i></i><span>ebertprop.com.ar/casa-de-categoria-villa-del-lago</span></div>
+            <div class="eb-body">
+              <div class="eb-img"></div>
+              <div class="eb-copy"><small>Villa del Lago · Carlos Paz</small><b>Casa de categoría</b><span class="eb-btn">Consultar por WhatsApp</span></div>
+            </div>
+          </div>
+          <div class="eb-ad"><span class="eb-meta">Meta</span>Anuncio → landing de la casa</div>
+          <span class="falta falta-visual">Falta: captura real de la web y la landing</span>
+        </div>
+      </article>
+    </div>
+
+    <div class="case-dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
   </div>
 </section>
 

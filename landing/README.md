@@ -13,7 +13,7 @@ Orden pensado para conversión: primero quién somos y qué hacemos, después c�
    - El bloque anterior (claim + animación de pasos) quedó guardado en `bloques/como-trabajamos.html` para la futura página "Cómo trabajamos / Nosotros".
 6. **Packs** – 3 cards en liquid glass que se apilan sobre un fondo gaussiano claro (Fundacional / Estrategia 360 / Acelerador, con la curva de lanzamiento animada).
 7. **Servicios** – acordeón de 9 servicios; a la izquierda claim + botón "Agendá un diagnóstico gratuito".
-8. **Casos** – Finteem con contadores.
+8. **Casos** – carrusel con 3 casos (Finteem, Tourkess Travel, Ebert Prop): pestañas, flechas, puntos y deslizar con el dedo. Los datos pendientes están marcados en amarillo con `class="falta"`: buscar "falta" en `index.html` para completarlos.
 9. **Testimonios** – cards de video; completar `data-video="assets/testimonios/x.mp4"` en cada `.t-card`.
 10. **Hablemos** – bloque CTA con botón a WhatsApp (+54 9 3541 54-9822).
 

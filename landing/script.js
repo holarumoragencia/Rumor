@@ -392,6 +392,30 @@ onScroll();
   size(); fit(); update();
 })();
 
+/* ================= Carrusel de casos =================
+   Desliza con el dedo (scroll-snap) o con pestañas, flechas y puntos. */
+(function cases() {
+  const track = $('#caseTrack');
+  if (!track) return;
+  const slides = $$('.case', track), tabs = $$('.case-tabs > button'), dots = $$('.case-dots i');
+  let cur = 0;
+  const go = i => {
+    i = (i + slides.length) % slides.length;
+    track.scrollTo({ left: slides[i].offsetLeft - slides[0].offsetLeft, behavior: reduce ? 'auto' : 'smooth' });
+  };
+  const mark = () => {
+    const i = Math.round(track.scrollLeft / (slides[1].offsetLeft - slides[0].offsetLeft));
+    if (i === cur) return;
+    cur = i;
+    tabs.forEach((t, j) => { t.classList.toggle('on', j === i); t.setAttribute('aria-selected', j === i); });
+    dots.forEach((d, j) => d.classList.toggle('on', j === i));
+  };
+  tabs.forEach(t => t.addEventListener('click', () => go(+t.dataset.i)));
+  $('.case-prev').addEventListener('click', () => go(cur - 1));
+  $('.case-next').addEventListener('click', () => go(cur + 1));
+  track.addEventListener('scroll', () => requestAnimationFrame(mark), { passive: true });
+})();
+
 /* ================= Acordeón de servicios ================= */
 $$('#acc .acc-item').forEach(item => item.querySelector('button').addEventListener('click', () => {
   const open = item.classList.contains('open');
