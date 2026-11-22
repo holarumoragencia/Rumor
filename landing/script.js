@@ -295,6 +295,23 @@ onScroll();
   }, { threshold: .35 }).observe($('#flow'));
 })();
 
+/* ================= Fundacional: del boceto a la web lista =================
+   Ciclo de 10 s: boceto → marca (s1) → web (s2) → canales (s3) → tráfico entrando (s4) → vuelve a empezar. */
+(function found() {
+  const box = $('#found');
+  if (!box) return;
+  const checks = $$('.f-checks span', box), STEPS = [.8, 2.2, 3.8, 5.2], CYCLE = 10;
+  let stage = -1;
+  loopWhenVisible(box, t => {
+    const c = reduce ? 9 : t % CYCLE;
+    const n = STEPS.filter(s => c >= s).length;
+    if (n === stage) return;
+    stage = n;
+    for (let i = 1; i <= 4; i++) box.classList.toggle('s' + i, n >= i);
+    checks.forEach(ch => ch.classList.toggle('on', n >= +ch.dataset.s));
+  });
+})();
+
 /* ================= Acelerador: curva de lanzamiento animada ================= */
 (function launch() {
   const box = $('#launch');
