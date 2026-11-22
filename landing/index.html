@@ -349,9 +349,9 @@
 <!-- ================= REEL ================= -->
 <section class="reel">
   <div class="reel-frame" id="reelFrame">
-    <!-- Reemplazar assets/reel.mp4 por la recopilación de trabajos (ideal: 20–40 s, 1920×1080, <8 MB) -->
-    <video id="reelVideo" muted loop playsinline preload="metadata" poster="">
-      <source src="assets/reel.mp4" type="video/mp4">
+    <!-- Reel de trabajos: 1920×1080, 24,6 s en loop, sin audio, ~7 MB (H.264 con faststart) -->
+    <video id="reelVideo" autoplay muted loop playsinline preload="metadata" poster="assets/reel-trabajos-poster.jpg">
+      <source src="assets/reel-trabajos.mp4" type="video/mp4">
     </video>
     <div class="reel-placeholder" id="reelPh">
       <canvas class="fx-bg" data-variant="reel"></canvas>
@@ -363,7 +363,6 @@
     <div class="reel-head">
       <h2 class="h2 rv">Lo que hacemos,<br><em>en movimiento.</em></h2>
     </div>
-    <button class="reel-sound" id="reelSound" aria-label="Activar sonido">Sonido off</button>
   </div>
 </section>
 

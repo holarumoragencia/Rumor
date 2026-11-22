@@ -265,15 +265,14 @@ onScroll();
 
 /* ================= Reel ================= */
 (function reel() {
-  const v = $('#reelVideo'), ph = $('#reelPh'), btn = $('#reelSound');
-  btn.hidden = true;
-  v.addEventListener('loadeddata', () => { ph.classList.add('hide'); btn.hidden = false; });
+  const v = $('#reelVideo'), ph = $('#reelPh');
+  // el placeholder animado queda solo por si el video no carga
+  v.addEventListener('loadeddata', () => ph.classList.add('hide'));
   new IntersectionObserver(([e]) => {
     if (!v.readyState) return;
     e.isIntersecting ? v.play().catch(() => {}) : v.pause();
   }, { threshold: .3 }).observe(v);
   v.addEventListener('canplay', () => v.play().catch(() => {}), { once: true });
-  btn.addEventListener('click', () => { v.muted = !v.muted; btn.textContent = v.muted ? 'Sonido off' : 'Sonido on'; });
 })();
 
 /* ================= Flujo "cómo trabajamos" ================= */

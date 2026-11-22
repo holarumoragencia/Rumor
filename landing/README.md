@@ -8,7 +8,7 @@ Orden pensado para conversión: primero quién somos y qué hacemos, después c�
 1. **Hero** – modo claro: fondo vivo en WebGL (niebla azul sobre crema + cinta de luz) con mensajes flotantes de logros en liquid glass.
 2. **Marcas** – "Trabajamos con" + marquee de clientes.
 3. **Nosotros** – fondo gaussiano claro en movimiento; las 3 cards de vidrio (+3 años, +60 clientes, 82%) aparecen juntas al entrar la sección.
-4. **Reel** – marco que se expande al scrollear, con el claim "Lo que hacemos, en movimiento." encima. Poner el video en `assets/reel.mp4` (16:9, 20–40 s, <8 MB). Sin video muestra un placeholder animado.
+4. **Reel** – marco que se expande al scrollear, con el claim "Lo que hacemos, en movimiento." encima. Video: `assets/reel-trabajos.mp4` (1920×1080, 24,6 s en loop, sin audio, ~7 MB) con portada `assets/reel-trabajos-poster.jpg`. Si el video no carga, se ve un placeholder animado.
 5. **Cómo trabajamos (de ruido a estructura)** – sección fija: sobre la mujer se ordenan DIAGNÓSTICO · ESTRATEGIA · DATOS, funde al hombre y se ordenan MARCA · WEB · PAUTA · CRM; cierra con "De ruido a estructura." + botón de vidrio. Las palabras se editan en el HTML (`data-x` = cuánto arrancan desplazadas, en vw).
    - El bloque anterior (claim + animación de pasos) quedó guardado en `bloques/como-trabajamos.html` para la futura página "Cómo trabajamos / Nosotros".
 6. **Packs** – 3 cards en liquid glass que se apilan sobre un fondo gaussiano claro (Fundacional / Estrategia 360 / Acelerador, con la curva de lanzamiento animada).
