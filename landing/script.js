@@ -294,12 +294,12 @@ onScroll();
   }, { threshold: .35 }).observe($('#flow'));
 })();
 
-/* ================= Fundacional: del boceto a la web lista =================
-   Ciclo de 10 s: boceto → marca (s1) → web (s2) → canales (s3) → tráfico entrando (s4) → vuelve a empezar. */
+/* ================= Fundacional: del boceto a la web lista (caso Ebert Prop) =================
+   Ciclo de 11 s: boceto → marca (s1) → web (s2) → canales (s3) → landing recibiendo tráfico (s4) → vuelve a empezar. */
 (function found() {
   const box = $('#found');
   if (!box) return;
-  const checks = $$('.f-checks span', box), STEPS = [.8, 2.2, 3.8, 5.2], CYCLE = 10;
+  const checks = $$('.f-checks span', box), url = $('#fUrl'), STEPS = [.8, 2.6, 4.4, 6], CYCLE = 11;
   let stage = -1;
   loopWhenVisible(box, t => {
     const c = reduce ? 9 : t % CYCLE;
@@ -308,6 +308,7 @@ onScroll();
     stage = n;
     for (let i = 1; i <= 4; i++) box.classList.toggle('s' + i, n >= i);
     checks.forEach(ch => ch.classList.toggle('on', n >= +ch.dataset.s));
+    url.textContent = n >= 4 ? 'ebertprop.com.ar/casa-de-categoria-villa-del-lago' : 'ebertprop.com.ar';
   });
 })();
 

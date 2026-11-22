@@ -225,7 +225,6 @@
   <div class="stack">
     <article class="pack lg p-cream">
       <div class="pack-copy">
-        <span class="pack-num">01</span>
         <h3>Fundacional</h3>
         <p class="pack-lead">Para negocios que necesitan construir base antes de escalar.</p>
         <p>Marca, web y presencia digital ordenadas, listas para recibir tráfico. Un punto de partida sólido en lugar de acciones sueltas.</p>
@@ -237,17 +236,24 @@
         </div>
       </div>
       <div class="pack-visual v-found" id="found" aria-hidden="true">
-        <!-- Del boceto a la web lista: marca → web → canales → tráfico (lo anima script.js) -->
-        <div class="f-checks"><span data-s="1">Marca</span><span data-s="2">Web</span><span data-s="3">Canales</span></div>
+        <!-- Caso real Ebert Prop: boceto → marca → web → canales → landing recibiendo tráfico (lo anima script.js).
+             Imágenes en assets/casos/ (recortadas, sin barras del navegador). -->
+        <div class="f-checks"><span data-s="1">Marca</span><span data-s="2">Web</span><span data-s="3">Canales</span><span data-s="4">Landing</span></div>
         <div class="f-browser">
-          <div class="f-bar"><i></i><i></i><i></i><span>tumarca.com</span></div>
+          <div class="f-bar"><i></i><i></i><i></i><span id="fUrl">ebertprop.com.ar</span></div>
           <div class="f-page">
             <div class="f-nav"><span class="f-logo"><b></b><i></i></span><span class="f-links"><i></i><i></i><i></i></span></div>
             <div class="f-hero">
               <div class="f-copy"><i class="f-h1"></i><i class="f-h1 short"></i><i class="f-p"></i><i class="f-p short"></i><span class="f-btn">Consultar</span></div>
               <div class="f-img"></div>
             </div>
-            <div class="f-palette"><i></i><i></i><i></i></div>
+            <div class="f-brand">
+              <img src="assets/casos/ebert-logo-verde.png" alt="" loading="lazy">
+              <div class="f-sw"><i style="--c:#045034"></i><i style="--c:#b77649"></i><i style="--c:#f5e5d6"></i><i style="--c:#262523"></i></div>
+              <small>Manual de marca · Work Sans</small>
+            </div>
+            <img class="f-shot f-home" src="assets/casos/ebert-home.webp" alt="" loading="lazy">
+            <img class="f-shot f-land" src="assets/casos/ebert-landing.webp" alt="" loading="lazy">
           </div>
         </div>
         <div class="f-channels">
@@ -261,7 +267,6 @@
 
     <article class="pack lg p-blue">
       <div class="pack-copy">
-        <span class="pack-num">02</span>
         <h3>Estrategia 360</h3>
         <p class="pack-lead">El sistema completo, sostenido en el tiempo.</p>
         <p>Branding, web, contenido, paid media, CRM e IA trabajando bajo un mismo criterio. Para negocios que ya tienen base y quieren crecer con orden.</p>
@@ -280,7 +285,6 @@
 
     <article class="pack lg p-black">
       <div class="pack-copy">
-        <span class="pack-num">03</span>
         <h3>Acelerador</h3>
         <p class="pack-lead">Para campañas con objetivo y plazo definidos.</p>
         <p>Un lanzamiento, una venta estacional, un evento. Contenido, pauta y landing page de destino trabajando juntos para convertir en el tiempo que tenés.</p>
@@ -402,13 +406,9 @@
         <div class="case-visual cv-ebert">
           <div class="browser">
             <div class="browser-bar"><i></i><i></i><i></i><span>ebertprop.com.ar/casa-de-categoria-villa-del-lago</span></div>
-            <div class="eb-body">
-              <div class="eb-img"></div>
-              <div class="eb-copy"><small>Villa del Lago · Carlos Paz</small><b>Casa de categoría</b><span class="eb-btn">Consultar por WhatsApp</span></div>
-            </div>
+            <img class="eb-shot" src="assets/casos/ebert-landing-portada.webp" alt="Landing de la casa de categoría en Villa del Lago" loading="lazy">
           </div>
           <div class="eb-ad"><span class="eb-meta">Meta</span>Anuncio → landing de la casa</div>
-          <span class="falta falta-visual">Falta: captura real de la web y la landing</span>
         </div>
       </article>
     </div>
