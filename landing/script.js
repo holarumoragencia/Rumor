@@ -321,35 +321,43 @@ onScroll();
 
 /* ================= Cómo trabajamos: de ruido a estructura =================
    Las palabras llegan dispersas (data-x = desplazamiento en vw) y se alinean con el scroll.
-   0–34%: se ordena el set A sobre la mujer · 40–52%: fundido al hombre · 50–82%: se ordena el set B · 84%+: cierre.
-   El avance sigue al scroll con un suavizado (lerp), así el movimiento no salta con cada giro de la rueda. */
+   El recorrido se mide en "pasos" de scroll fijos (U ≈ 2 giros de rueda), no en % de la sección:
+   0–1U se ordena el set A · 1.05–1.5U fundido al hombre · 1.1–2.1U se ordena el set B · 2.2U cierre.
+   El avance sigue al scroll con un suavizado por tiempo, así no salta con cada giro de la rueda. */
 (function words() {
   const sec = $('.words');
   if (!sec) return;
   const setA = $('.set-a'), setB = $('.set-b'), A = $$('.w', setA), Bw = $$('.w', setB);
   const phA = $('.ph-a'), phB = $('.ph-b'), end = $('.words-end');
+  const STEPS = 2.6;            // largo total del bloque fijo, en U
+  let U = 240;                  // px de scroll por set (se ajusta al alto de pantalla)
   const place = (ws, k) => ws.forEach(w => { w.style.transform = `translate3d(${+w.dataset.x * (1 - k)}vw,0,0)`; });
-  const render = p => {
-    const kA = ease(clamp01(p / .34)), out = clamp01((p - .4) / .12), kB = ease(clamp01((p - .5) / .32));
+  const render = s => {
+    const kA = ease(clamp01(s)), out = clamp01((s - 1.05) / .45), kB = ease(clamp01(s - 1.1));
     place(A, kA); place(Bw, kB);
     setA.style.opacity = 1 - out; setA.style.transform = `translateY(${-out * 6}vh)`;
     setB.style.opacity = out; setB.style.transform = `translateY(${(1 - out) * 6}vh)`;
     phB.style.opacity = out;
     phA.style.setProperty('--zoom', 1.06 - kA * .06);
     phB.style.setProperty('--zoom', 1.06 - kB * .06);
-    end.classList.toggle('on', p > .84);
+    end.classList.toggle('on', s > 2.2);
   };
-  let target = 0, cur = -1, raf = 0;
-  const tick = () => {
-    cur = cur < 0 ? target : cur + (target - cur) * .14;
-    if (Math.abs(target - cur) < .0005) cur = target;
+  let target = 0, cur = -1, raf = 0, prev = 0;
+  const tick = now => {
+    const dt = Math.min(.05, (now - (prev || now)) / 1000);
+    prev = now;
+    cur = cur < 0 ? target : cur + (target - cur) * (1 - Math.exp(-dt / .14));
+    if (Math.abs(target - cur) < .002) cur = target;
     render(cur);
-    raf = cur !== target ? requestAnimationFrame(tick) : 0;
+    raf = cur !== target ? requestAnimationFrame(tick) : (prev = 0, 0);
   };
   const update = () => {
-    const r = sec.getBoundingClientRect();
-    target = reduce ? 1 : clamp01(-r.top / (r.height - innerHeight));
+    target = reduce ? STEPS : Math.max(0, Math.min(STEPS, -sec.getBoundingClientRect().top / U));
     if (!raf) raf = requestAnimationFrame(tick);
+  };
+  const size = () => {
+    U = Math.round(Math.min(320, Math.max(200, innerHeight * .28)));
+    sec.style.height = innerHeight + STEPS * U + 'px';
   };
   // Que la palabra más larga entre en el ancho (por si la tipografía de respaldo es más ancha que la Myriad Condensed)
   const fit = () => [setA, setB].forEach(set => {
@@ -358,9 +366,9 @@ onScroll();
     if (max > room) set.style.fontSize = parseFloat(getComputedStyle(set).fontSize) * room / max + 'px';
   });
   addEventListener('scroll', update, { passive: true });
-  addEventListener('resize', () => { fit(); update(); });
+  addEventListener('resize', () => { size(); fit(); update(); });
   document.fonts?.ready.then(fit);
-  fit(); update();
+  size(); fit(); update();
 })();
 
 /* ================= Acordeón de servicios ================= */
