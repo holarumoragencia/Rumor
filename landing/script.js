@@ -110,14 +110,14 @@ function fxBg(canvas) {
   loopWhenVisible(canvas, t => draw(t + 4));
 }
 
-/* Corre un loop rAF solo mientras el elemento está en pantalla */
+/* Corre un loop rAF solo mientras el elemento está en pantalla.
+   t = segundos desde que el elemento entró en pantalla (cada vez que vuelve a verse, arranca de cero). */
 function loopWhenVisible(el, fn) {
   if (reduce) { fn(4); return; }
-  let raf = 0, on = false;
-  const t0 = performance.now();
+  let raf = 0, on = false, t0 = 0;
   const tick = () => { fn((performance.now() - t0) / 1000); raf = requestAnimationFrame(tick); };
   new IntersectionObserver(([e]) => {
-    if (e.isIntersecting && !on) { on = true; tick(); }
+    if (e.isIntersecting && !on) { on = true; t0 = performance.now(); tick(); }
     else if (!e.isIntersecting && on) { on = false; cancelAnimationFrame(raf); }
   }).observe(el);
 }
@@ -303,19 +303,24 @@ onScroll();
   const days = $('#launchDays'), pct = $('#launchPct'), goal = $('#launchGoal'), ms = $$('.ms', box);
   const L = line.getTotalLength(), CYCLE = 8, RUN = 5.5;
   const at = k => { const pt = line.getPointAtLength(L * k); return [pt.x / 4, pt.y / 2.6, pt.x]; }; // % del viewBox 400×260
-  line.style.strokeDasharray = L;
   ms.forEach(m => { const [x, y] = at(+m.dataset.at); m.style.left = x + '%'; m.style.top = y + '%'; });
   const inOut = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  // La línea y el área se revelan juntas con el mismo recorte; el punto marca la punta.
+  // Cada vez que la card vuelve a verse, el ciclo arranca de cero (D-30, 0%).
+  let lastPct = -1;
   loopWhenVisible(box, t => {
     const k = reduce ? 1 : inOut(clamp01((t % CYCLE) / RUN));
     const [x, y, vx] = at(k);
-    line.style.strokeDashoffset = L * (1 - k);
     clip.setAttribute('width', vx);
     dot.style.left = x + '%'; dot.style.top = y + '%';
-    days.textContent = 'D-' + Math.round(30 * (1 - k));
-    pct.textContent = Math.round(k * 100) + '%';
-    goal.classList.toggle('hit', k > .995);
-    ms.forEach(m => m.classList.toggle('on', k >= +m.dataset.at));
+    const pc = Math.round(k * 100);
+    if (pc !== lastPct) {
+      lastPct = pc;
+      pct.textContent = pc + '%';
+      days.textContent = 'D-' + Math.round(30 * (1 - k));
+      goal.classList.toggle('hit', pc === 100);
+      ms.forEach(m => m.classList.toggle('on', k >= +m.dataset.at));
+    }
   });
 })();
 
